@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 import { completion, duration, cn } from "@/lib/utils";
 import { useWorkspace } from "@/stores/workspace";
+import { SceneArtwork } from "@/components/three/scene-provider";
 import { Progress } from "@/components/ui/progress";
 import type { Course } from "@/types";
 export function CourseArtwork({
@@ -50,27 +51,9 @@ export function CourseArtwork({
         />
       ) : (
         <>
-          <div className="art-grid" />
-          <span className="art-topline">
-            {category.toUpperCase()} <span>✳</span>
-          </span>
-          <div className="art-symbol">
-            {slug.includes("design") ? (
-              <div className="design-shapes">
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-            ) : slug.includes("data") || slug.includes("python") ? (
-              <span className="python-symbol">
-                Py<span>↗</span>
-              </span>
-            ) : (
-              <span className="code-symbol">{"</>"}</span>
-            )}
-          </div>
-          <span className="art-bottomline">A new perspective awaits.</span>
+          <SceneArtwork kind={slug.includes('design') ? 'design' : slug.includes('data') || slug.includes('python') ? 'data' : 'code'} label={`A sculptural study in ${category.toLowerCase()}`} />
+          <span className="art-topline">{category.toUpperCase()}<span>↗</span></span>
+          <span className="art-bottomline">KEEP MAKING.</span>
         </>
       )}
     </div>
