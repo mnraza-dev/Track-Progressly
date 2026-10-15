@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="470" viewBox="0 0 1440 470" role="img" aria-label="LearnTrack. Turn your next tutorial into your next skill.">
+  <defs><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c8ecdf" stop-opacity=".92"/><stop offset="1" stop-color="#c1b7e4" stop-opacity=".83"/></linearGradient><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#fff" stroke-opacity=".05"/></pattern></defs>
+  <rect width="1440" height="470" rx="24" fill="#163d49"/><rect width="1440" height="470" rx="24" fill="url(#grid)"/>
+  <g transform="translate(66 55)" fill="#a4e6d0"><rect x="0" y="18" width="8" height="14" rx="2"/><rect x="13" y="10" width="8" height="22" rx="2"/><rect x="26" y="0" width="8" height="32" rx="2"/></g>
+  <text x="115" y="84" fill="#f8f1df" font-family="Arial, sans-serif" font-size="32" font-weight="600" letter-spacing="-1.5">learntrack.</text>
+  <text x="68" y="153" fill="#a2c8cc" font-family="monospace" font-size="11" letter-spacing="3">YOUR YOUTUBE LEARNING STUDIO</text>
+  <text x="62" y="229" fill="#fff9ed" font-family="Arial, sans-serif" font-size="63" letter-spacing="-3">Your next tutorial.</text>
+  <text x="62" y="304" fill="#b9f4d5" font-family="Georgia, serif" font-size="74" font-style="italic" letter-spacing="-3">Your next skill.</text>
+  <text x="68" y="369" fill="#bed9d7" font-family="Arial, sans-serif" font-size="17">A little structure. A place to practice. A reason to come back.</text>
+  <path d="M68 413H765" stroke="#4b7680"/>
+  <text x="68" y="438" fill="#a6cad0" font-family="monospace" font-size="10" letter-spacing="2">WATCH</text><text x="245" y="438" fill="#a6cad0" font-family="monospace" font-size="10" letter-spacing="2">PRACTICE</text><text x="451" y="438" fill="#a6cad0" font-family="monospace" font-size="10" letter-spacing="2">REMEMBER</text>
+  <rect x="897" y="34" width="509" height="402" rx="18" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".65"/>
+  <text x="924" y="67" fill="#496e7b" font-family="monospace" font-size="9" letter-spacing="2">A NEW PERSPECTIVE</text><text x="1359" y="67" fill="#496e7b" font-family="monospace" font-size="12">↗</text>
+  <ellipse cx="1150" cy="235" rx="165" ry="97" fill="none" stroke="#93b7bd" stroke-width="1" transform="rotate(-26 1150 235)"/>
+  <ellipse cx="1150" cy="230" rx="102" ry="135" fill="none" stroke="#9782bd" stroke-width="26" transform="rotate(29 1150 230)"/>
+  <g transform="translate(1021 148) rotate(-8 125 84)"><rect width="260" height="164" rx="12" fill="#487082"/><rect x="7" y="7" width="246" height="150" rx="7" fill="#f7f1e3"/><path d="M7 30H253" stroke="#d7cddd"/><circle cx="22" cy="18" r="3" fill="#b9a4d0"/><circle cx="34" cy="18" r="3" fill="#b1cace"/><circle cx="46" cy="18" r="3" fill="#cbdcd9"/><rect x="101" y="57" width="58" height="58" rx="15" fill="#9782bd"/><path d="M124 71L144 86L124 101Z" fill="#f7f1e3"/><rect x="32" y="133" width="196" height="3" rx="1.5" fill="#e0d8d5"/><rect x="32" y="133" width="78" height="3" rx="1.5" fill="#84b7b8"/></g>
+  <g transform="translate(1044 334) rotate(9)"><rect width="205" height="24" rx="4" fill="#a0ae6a"/><rect x="7" y="2" width="196" height="17" rx="2" fill="#b9f4d5"/></g>
+  <circle cx="1307" cy="126" r="18" fill="#b9f4d5"/><circle cx="980" cy="303" r="12" fill="#f1aa87"/>
+  <text x="1150" y="409" text-anchor="middle" fill="#496e7b" font-family="monospace" font-size="9" letter-spacing="2">CURIOSITY, WITH A LITTLE STRUCTURE.</text>
+</svg>

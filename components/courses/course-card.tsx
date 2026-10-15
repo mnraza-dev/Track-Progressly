@@ -75,7 +75,9 @@ export function CourseCard({ course }: { course: Course }) {
   const percent = completion(course);
   const [menu, setMenu] = useState(false);
   const { mutate, notify } = useWorkspace();
-  const completed = course.videos.filter((v) => v.progress.is_completed).length;
+  const completed = course.videos.filter(
+    (v) => v.availability_status === "available" && v.progress.is_completed,
+  ).length;
   const next =
     course.videos.find(
       (v) => v.availability_status === "available" && !v.progress.is_completed,

@@ -15,11 +15,12 @@ test("3D studio renders through one context, responds to input, and stays respon
     "ready",
   );
   await expect(page.locator("canvas")).toHaveCount(1);
+  const scene = page.locator('[data-three-scene="hero"]');
+  await scene.scrollIntoViewIfNeeded();
   await expect(page.locator("canvas.studio-webgl")).toHaveAttribute(
     "data-active-scenes",
     /^[1-9]/,
   );
-  const scene = page.locator('[data-three-scene="hero"]');
   await scene.focus();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowLeft");

@@ -31,6 +31,8 @@ import {
   type PlayerHandle,
 } from "@/components/player/youtube-player";
 import { LessonNotes } from "@/components/notes/lesson-notes";
+import { VideoChapters } from "@/components/player/video-chapters";
+import { useVideoChapters } from "@/components/player/use-video-chapters";
 export function CourseWorkspace({
   courseId,
   videoId,
@@ -71,7 +73,19 @@ export function CourseWorkspace({
     course?.target_completion_date || "",
   );
   const [refreshing, setRefreshing] = useState(false);
+  const [sidebarView, setSidebarView] = useState<"auto" | "lessons" | "chapters">(
+    "auto",
+  );
+  const [playback, setPlayback] = useState<{
+    lessonId: string;
+    seconds: number;
+  } | null>(null);
   const player = useRef<PlayerHandle>(null);
+  const lesson = videoId
+    ? course?.videos.find((v) => v.id === videoId)
+    : course?.videos.find((v) => v.id === selectedId) ||
+      course?.videos.find((v) => !v.progress.is_completed && v.availability_status === "available") || course?.videos[0];
+  const { chapters, loading: chaptersLoading, error: chaptersError, retry: retryChapters } = useVideoChapters(lesson);
   if (!course)
     return (
       <div className="large-empty">
@@ -85,15 +99,12 @@ export function CourseWorkspace({
         </Button>
       </div>
     );
-  const lesson = videoId
-    ? course.videos.find((v) => v.id === videoId)
-    : course.videos.find((v) => v.id === selectedId) ||
-      course.videos.find(
-        (v) =>
-          !v.progress.is_completed && v.availability_status === "available",
-      ) ||
-      course.videos[0];
   const percent = completion(course);
+  const showChapters = sidebarView === "chapters" || (sidebarView === "auto" && chapters.length > 0);
+  const position =
+    playback?.lessonId === lesson?.id
+      ? playback?.seconds || 0
+      : lesson?.progress.last_position_seconds || 0;
   const filtered = course.videos.filter((v) =>
     v.title.toLowerCase().includes(query.toLowerCase()),
   );
@@ -222,105 +233,146 @@ export function CourseWorkspace({
       )}
       <div className="learning-layout">
         <aside className="panel lesson-sidebar">
-          <div className="lesson-sidebar-header">
-            <div>
-              <h3>Your learning path</h3>
-              <strong>{percent}%</strong>
-            </div>
-            <Progress value={percent} />
-            <p>
-              {course.videos.filter((v) => v.progress.is_completed).length}{" "}
-              completed ·{" "}
-              {
-                course.videos.filter(
-                  (v) =>
-                    v.availability_status === "available" &&
-                    !v.progress.is_completed,
-                ).length
-              }{" "}
-              to go
-            </p>
-            <div className="search-input">
-              <Search size={15} />
-              <input
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setPage(1);
-                }}
-                placeholder="Find a lesson..."
-                aria-label="Search lessons"
-              />
-            </div>
-          </div>
-          <div className="lesson-list">
-            {filtered.slice(0, page * 50).map((v, index) => (
-              <Link
-                key={v.id}
-                href={`/courses/${course.id}/learn/${v.id}`}
-                className={cn(
-                  "lesson-item",
-                  lesson?.id === v.id && "current-lesson",
-                  v.availability_status !== "available" && "unavailable-lesson",
-                )}
+          {lesson?.availability_status === "available" && (
+            <div className="sidebar-view-switch" aria-label="Lesson navigation">
+              <button
+                aria-pressed={!showChapters}
+                onClick={() => setSidebarView("lessons")}
               >
-                <span
-                  className={cn(
-                    "lesson-state",
-                    v.progress.is_completed && "lesson-state-complete",
-                  )}
-                >
-                  {v.progress.is_completed ? (
-                    <Check size={13} />
-                  ) : v.progress.status === "needs_revision" ? (
-                    <RotateCcw size={13} />
-                  ) : lesson?.id === v.id ? (
-                    <Play size={12} fill="currentColor" />
-                  ) : (
-                    String(index + 1).padStart(2, "0")
-                  )}
-                </span>
+                Lessons <span>{course.videos.length}</span>
+              </button>
+              <button
+                aria-pressed={showChapters}
+                onClick={() => setSidebarView("chapters")}
+              >
+                  Chapters <span>{chaptersLoading ? "…" : chapters.length}</span>
+              </button>
+            </div>
+          )}
+          {showChapters ? (
+            <VideoChapters
+              key={lesson!.id}
+              chapters={chapters}
+              position={position}
+              loading={chaptersLoading}
+              error={chaptersError}
+              onRetry={retryChapters}
+              onSeek={(seconds) => player.current?.seek(seconds)}
+            />
+          ) : (
+            <>
+              <div className="lesson-sidebar-header">
                 <div>
-                  <strong>{v.title}</strong>
-                  <small>
-                    {v.availability_status !== "available"
-                      ? "Unavailable · progress preserved"
-                      : v.duration_seconds
-                        ? duration(v.duration_seconds)
-                        : "YouTube video"}
-                    {v.progress.last_position_seconds > 0 &&
-                      !v.progress.is_completed && (
-                        <> · {timestamp(v.progress.last_position_seconds)}</>
-                      )}
-                  </small>
+                  <h3>Your learning path</h3>
+                  <strong>{percent}%</strong>
                 </div>
-                {v.progress.is_completed && (
-                  <CircleCheck size={13} className="green-text" />
+                <Progress value={percent} />
+                <p>
+                  {course.videos.filter((v) => v.progress.is_completed).length}{" "}
+                  completed ·{" "}
+                  {
+                    course.videos.filter(
+                      (v) =>
+                        v.availability_status === "available" &&
+                        !v.progress.is_completed,
+                    ).length
+                  }{" "}
+                  to go
+                </p>
+                <div className="search-input">
+                  <Search size={15} />
+                  <input
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="Find a lesson..."
+                    aria-label="Search lessons"
+                  />
+                </div>
+              </div>
+              <div className="lesson-list">
+                {filtered.slice(0, page * 50).map((v, index) => (
+                  <Link
+                    key={v.id}
+                    href={`/courses/${course.id}/learn/${v.id}`}
+                    className={cn(
+                      "lesson-item",
+                      lesson?.id === v.id && "current-lesson",
+                      v.availability_status !== "available" &&
+                        "unavailable-lesson",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "lesson-state",
+                        v.progress.is_completed && "lesson-state-complete",
+                      )}
+                    >
+                      {v.progress.is_completed ? (
+                        <Check size={13} />
+                      ) : v.progress.status === "needs_revision" ? (
+                        <RotateCcw size={13} />
+                      ) : lesson?.id === v.id ? (
+                        <Play size={12} fill="currentColor" />
+                      ) : (
+                        String(index + 1).padStart(2, "0")
+                      )}
+                    </span>
+                    <div>
+                      <strong>{v.title}</strong>
+                      <small>
+                        {v.availability_status !== "available"
+                          ? "Unavailable · progress preserved"
+                          : v.duration_seconds
+                            ? duration(v.duration_seconds)
+                            : "YouTube video"}
+                        {v.progress.last_position_seconds > 0 &&
+                          !v.progress.is_completed && (
+                            <>
+                              {" "}
+                              · {timestamp(v.progress.last_position_seconds)}
+                            </>
+                          )}
+                      </small>
+                    </div>
+                    {v.progress.is_completed && (
+                      <CircleCheck size={13} className="green-text" />
+                    )}
+                  </Link>
+                ))}
+                {filtered.length > page * 50 && (
+                  <Button
+                    className="load-more"
+                    variant="ghost"
+                    onClick={() => setPage(page + 1)}
+                  >
+                    Load more lessons
+                  </Button>
                 )}
-              </Link>
-            ))}
-            {filtered.length > page * 50 && (
-              <Button
-                className="load-more"
-                variant="ghost"
-                onClick={() => setPage(page + 1)}
-              >
-                Load more lessons
-              </Button>
-            )}
-            {!filtered.length && (
-              <p className="small-empty">No lessons match your search.</p>
-            )}
-          </div>
-          <div className="lesson-sidebar-footer">
-            <span>✳</span>One lesson closer to your goal.
-          </div>
+                {!filtered.length && (
+                  <p className="small-empty">No lessons match your search.</p>
+                )}
+              </div>
+              <div className="lesson-sidebar-footer">
+                <span>✳</span>One lesson closer to your goal.
+              </div>
+            </>
+          )}
         </aside>
         <div className="learning-main">
           {lesson ? (
             <>
               {lesson.availability_status === "available" ? (
-                <YouTubePlayer key={lesson.id} ref={player} lesson={lesson} />
+                <YouTubePlayer
+                  key={lesson.id}
+                  ref={player}
+                  lesson={lesson}
+                  onPositionChange={(seconds) =>
+                    setPlayback({ lessonId: lesson.id, seconds })
+                  }
+                />
               ) : (
                 <div className="unavailable-player">
                   <Circle size={30} />

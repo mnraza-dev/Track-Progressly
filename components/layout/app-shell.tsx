@@ -161,7 +161,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="sidebar-footer">
             <span className="free-plan">
               <span />
-              Free plan
+              {isConnected ? "Connected workspace" : "Browser workspace"}
             </span>
             <button
               className="icon-button"

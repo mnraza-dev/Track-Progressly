@@ -26,6 +26,7 @@ import { LearningMix } from "@/components/analytics/progress-charts";
 import { dailySeries } from "@/lib/analytics";
 import { isConnected } from "@/lib/supabase/client";
 import { SceneArtwork } from "@/components/three/scene-provider";
+import { ProductStage } from "@/components/three/product-stage";
 export function Dashboard() {
   const { data } = useWorkspace();
   const router = useRouter();
@@ -107,9 +108,9 @@ export function Dashboard() {
             THROUGH
           </span>
           <h2>
-            Start something.
+            Less someday.
             <br />
-            <em>See it through.</em>
+            <em>More today.</em>
           </h2>
           <p>
             A home for the tutorials you want to finish.
@@ -144,20 +145,7 @@ export function Dashboard() {
           </div>
         </div>
         <div className="hero-art">
-          <SceneArtwork
-            kind="hero"
-            interactive
-            label="A sculptural learning orbit with floating books and a video lesson. Drag or use the arrow keys to rotate."
-          />
-          <span className="scene-caption">
-            <span className="scene-caption-dot" /> A NEW PERSPECTIVE
-          </span>
-          <span className="hero-orbit-label orbit-label-top">
-            IDEAS IN MOTION <ArrowUpRight size={13} />
-          </span>
-          <span className="hero-orbit-label orbit-label-bottom">
-            MOVE YOUR CURSOR. STAY CURIOUS.
-          </span>
+          <ProductStage compact />
         </div>
         <span className="hero-edge-mark" aria-hidden="true">
           ＋
