@@ -20,7 +20,7 @@ The public product page is also available at `/welcome`. Once Supabase is config
 
 ## Product design and Three.js studio
 
-The product uses translucent glass surfaces, fine borders, and a petrol, glacier mint, orchid, and apricot palette. The dashboard and public page share an interactive Watch / Practice / Remember showcase; its controls switch between custom Three.js scenes and explain the learning process. Blur is reduced on mobile, with opaque panel fallbacks when backdrop filtering is unavailable.
+The product uses a minimalist shadcn/ui system: neutral white and charcoal surfaces, an indigo accent, semantic light/dark tokens, Plus Jakarta Sans headings, and Inter body text. The dashboard and public page share an interactive Watch / Practice / Remember showcase; its controls switch between custom Three.js scenes and explain the learning process. Buttons, cards, dialogs, inputs, textareas, tabs, switches, badges, checkboxes, and separators use the official shadcn components backed by Radix. `next-themes` persists Light, Dark, or System and follows operating-system changes. Existing workspace and theme storage keys are retained so rebranding does not discard saved data.
 
 The interface uses a shared Three.js WebGL renderer for the dashboard sculpture, physical daily-goal ring, category artwork, library empty state, learning goals, analytics insights, import guide, authentication, and public homepage. The scenes use custom procedural models, PBR materials, environment lighting, and pointer parallax. The hero can be rotated with a mouse drag or the arrow keys; Home and the reset control restore its orientation.
 
@@ -78,7 +78,7 @@ Imported descriptions are reused without another request. For manually added vid
 References: [video description metadata](https://developers.google.com/youtube/v3/docs/videos#snippet.description), [IFrame playback controls](https://developers.google.com/youtube/iframe_api_reference#seekTo). Browser tests use an IFrame API fixture to verify seek calls, pending seeks, section highlighting, metadata failures, and lesson switching without making live YouTube requests.
 
 - `app/`: App Router pages, public authentication pages, auth callback, and authenticated route handlers.
-- `components/`: reusable Radix/shadcn-style UI primitives, layout, courses, player, notes, dashboard, and Recharts analytics.
+- `components/`: shadcn/ui primitives, layout, courses, player, notes, dashboard, and Recharts analytics.
 - `features/`: authentication/import UI and pure local workspace mutations.
 - `lib/`: Supabase SSR clients, YouTube service, Zod validation, formatting and progress utilities.
 - `stores/`: lightweight Zustand workspace state; mutations are serialized to avoid stale state and update only after a successful persistence operation.
@@ -109,7 +109,7 @@ bun run build
 
 Vitest covers URL parsing, unavailable metadata, paginated imports, API quota failure, duration parsing, duplicate courses, completion/undo, notes persistence, input validation, and timezone streaks. PGlite runs the actual migration inside a local PostgreSQL engine, with two test users and authenticated roles, to verify RLS and ownership rejection, atomic imports, secure rate limits, notes/practice persistence, and refresh preservation. It stubs only Supabase's `auth.users`/`auth.uid()` surface; Supabase's hosted auth/email/OAuth flows still require testing against your configured project.
 
-Playwright uses a clean browser context for each test and exercises manual course creation, completion, note autosave/reload, practice, goals, analytics, profile persistence, and URL validation on desktop and mobile. Run these tests without Supabase environment variables to exercise the independent local mode. Tests create data only in isolated browser contexts.
+Playwright checks rendered text contrast in both themes, theme persistence and operating-system changes, and the larger typography. It uses a clean browser context for each test and exercises manual course creation, completion, note autosave/reload, practice, goals, analytics, profile persistence, and URL validation on desktop and mobile. Run these tests without Supabase environment variables to exercise the independent local mode. Tests create data only in isolated browser contexts.
 
 Refresh the README screenshots from an isolated illustrative workspace with `UPDATE_PRODUCT_SHOTS=1 bun run test:e2e tests/e2e/product.spec.ts --project=desktop`. Normal test runs leave the tracked product images unchanged.
 

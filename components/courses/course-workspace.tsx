@@ -410,7 +410,7 @@ export function CourseWorkspace({
                 <div className="lesson-detail-actions">
                   <Button
                     variant={
-                      lesson.progress.is_completed ? "secondary" : "primary"
+                      lesson.progress.is_completed ? "outline" : "default"
                     }
                     onClick={() =>
                       void mutate({

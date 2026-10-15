@@ -1,636 +1,638 @@
-/* Learning data, with the same ink-and-paper palette as the studio. */
-.chart-frame {
-  min-width: 0;
-}
-.chart-tools {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 16px 0 6px;
-}
-.chart-tools > span {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--text-secondary);
-  font-size: 11px;
-}
-.chart-key,
-.comparison-legend i,
-.mix-legend i {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: #8d7ade;
-}
-.chart-view-switch {
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--surface-soft);
-}
-.chart-view-switch button {
-  display: grid;
-  place-items: center;
-  width: 29px;
-  height: 26px;
-  border-radius: 4px;
-  color: var(--muted);
-  cursor: pointer;
-}
-.chart-view-switch button[aria-pressed="true"] {
-  background: var(--surface);
-  color: var(--purple);
-  box-shadow: 0 1px 3px #22222210;
-}
-.chart-view-switch button:hover {
-  color: var(--purple);
-}
-.chart-plot {
-  width: 100%;
-  min-width: 0;
-}
-.chart-plot svg:focus-visible,
-.donut-wrap svg:focus-visible {
-  outline: 2px solid var(--purple);
-  outline-offset: -2px;
-  border-radius: 5px;
-}
-.chart-data {
-  font-size: 11px;
-  color: var(--text-secondary);
-  border-top: 1px solid var(--border);
-  margin-top: 13px;
-  padding-top: 11px;
-}
-.chart-data summary {
-  width: fit-content;
-  cursor: pointer;
-}
-.chart-data summary:hover {
-  color: var(--purple);
-}
-.chart-data table {
-  width: 100%;
-  margin-top: 12px;
-  text-align: left;
-  border-collapse: collapse;
-  font-size: 11px;
-}
-.chart-data caption {
-  text-align: left;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-.chart-data td,
-.chart-data th {
-  border-bottom: 1px solid var(--border);
-  padding: 8px 10px 8px 0;
-  font-weight: 400;
-}
-.chart-data thead th {
-  font-weight: 600;
-}
-.chart-data td {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.chart-table-scroll {
-  max-height: 240px;
-  overflow: auto;
-}
-.learning-perspective-grid,
-.analytics-detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-  gap: 22px;
-  margin-top: 24px;
-  align-items: stretch;
-}
-.learning-perspective-grid > *,
-.analytics-detail-grid > * {
-  min-width: 0;
-}
-.learning-mix-panel,
-.comparison-panel,
-.rhythm-panel,
-.weekly-goal-chart {
-  padding: 26px;
-}
-.learning-mix-panel .panel-heading h2,
-.comparison-panel .panel-heading h2,
-.rhythm-panel .panel-heading h2,
-.weekly-goal-chart .panel-heading h2 {
-  font-size: 19px;
-  color: var(--foreground);
-  font-weight: 550;
-}
-.learning-mix-panel .section-index,
-.comparison-panel .section-index,
-.rhythm-panel .section-index,
-.weekly-goal-chart .section-index {
-  color: var(--text-secondary);
-  font-size: 8px;
-  margin-bottom: 7px;
-}
-.learning-mix-panel .panel-heading > svg {
-  color: var(--muted);
-}
-.comparison-panel .panel-heading p,
-.rhythm-panel .panel-heading p,
-.weekly-goal-chart .panel-heading p {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 7px;
-}
-.donut-wrap {
-  position: relative;
-  margin-top: 5px;
-  min-width: 0;
-}
-.donut-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  pointer-events: none;
-  gap: 3px;
-}
-.donut-center strong {
-  font-size: 43px;
-  line-height: 1.1;
-  font-weight: 500;
-  letter-spacing: -2px;
-  color: var(--foreground);
-}
-.donut-center span {
-  font-size: 11px;
-  color: var(--text-secondary);
-  max-width: 110px;
-  text-align: center;
-}
-.mix-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-.mix-legend button {
-  display: grid;
-  grid-template-columns: 8px 1fr 24px 40px;
-  text-align: left;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 8px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-.mix-legend button:hover,
-.mix-legend button[aria-pressed="true"] {
-  background: var(--surface-soft);
-  color: var(--foreground);
-}
-.mix-legend button strong {
-  text-align: right;
-  font-size: 12px;
-  color: var(--foreground);
-  font-weight: 550;
-}
-.mix-legend button small {
-  text-align: right;
-  font-size: 10px;
-  color: var(--muted);
-}
-.chart-footnote {
-  margin: 14px 0;
-  font-size: 10px;
-  line-height: 1.7;
-  color: var(--text-secondary);
-}
-.chart-card-link {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--purple);
-  font-size: 11px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-.chart-card-link:hover {
-  color: var(--purple-dark);
-}
-.panel.landscape-panel {
-  padding: 26px;
-  background: #292637;
-  border-color: #373343;
-  overflow: hidden;
-  position: relative;
-  color: #f4f0e6;
-}
-.landscape-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-}
-.landscape-heading .section-index {
-  color: #b6adcc;
-  font-size: 8px;
-}
-.landscape-heading h2 {
-  font-size: 22px;
-  font-weight: 450;
-  letter-spacing: -0.6px;
-  color: #f4f0e6;
-}
-.landscape-heading > svg {
-  color: #b4a7d1;
-}
-.landscape-body {
-  display: grid;
-  grid-template-columns: minmax(150px, 0.85fr) minmax(0, 1.65fr);
-  align-items: center;
-  gap: 10px;
-  min-height: 300px;
-}
-.landscape-copy {
-  position: relative;
-  z-index: 1;
-}
-.landscape-period {
-  font-size: 8px;
-  letter-spacing: 1.6px;
-  color: #a59bad;
-  font-family: var(--font-geist-mono), monospace;
-}
-.landscape-copy > strong {
-  display: flex;
-  flex-direction: column;
-  font-size: 54px;
-  font-weight: 450;
-  letter-spacing: -2px;
-  line-height: 1.1;
-  margin-top: 16px;
-  color: #e2f2aa;
-  font-variant-numeric: tabular-nums;
-}
-.landscape-copy > strong span {
-  color: #cec6d9;
-  font-size: 11px;
-  letter-spacing: 0;
-  font-weight: 400;
-  margin-top: 7px;
-}
-.landscape-copy p {
-  color: #b4aabe;
-  font-size: 11px;
-  max-width: 180px;
-  line-height: 1.8;
-  margin: 17px 0;
-}
-.landscape-metrics {
-  display: inline-flex;
-  border: 1px solid #5d526e;
-  border-radius: 6px;
-  padding: 3px;
-  gap: 3px;
-}
-.landscape-metrics button {
-  font-size: 10px;
-  padding: 7px 10px;
-  border-radius: 3px;
-  color: #c0b5ce;
-  cursor: pointer;
-}
-.landscape-metrics button[aria-pressed="true"] {
-  background: #52465f;
-  color: #f7f2e6;
-}
-.landscape-copy > a {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #d4d4b8;
-  font-size: 9px;
-  margin-top: 20px;
-}
-.landscape-copy > a:hover {
-  color: #e2f2aa;
-}
-.landscape-visual {
-  min-width: 0;
-  position: relative;
-}
-.landscape-visual > .scene-artwork {
-  height: 290px;
-  width: 100%;
-}
-.landscape-hint {
-  display: block;
-  font-size: 7px;
-  text-align: center;
-  letter-spacing: 1px;
-  color: #9e93ae;
-  margin: -18px 0 10px;
-  pointer-events: none;
-}
-.landscape-visual .scene-reset {
-  color: #dcd5e6;
-  background: #5b4d72;
-  border-color: #786391;
-}
-.landscape-days {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  border-top: 1px solid #494151;
-  gap: 5px;
-  padding-top: 16px;
-}
-.landscape-days button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 3px 9px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  color: #b1a6bf;
-  font-size: 10px;
-}
-.landscape-days button strong {
-  color: #ddd5e5;
-  font-size: 16px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-.landscape-days button i {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #766882;
-}
-.landscape-days button:hover {
-  background: #3b3347;
-}
-.landscape-days button[aria-pressed="true"] {
-  background: #433a50;
-  border-color: #61546f;
-  color: #e4edc6;
-}
-.landscape-days button[aria-pressed="true"] strong {
-  color: #e2f2aa;
-}
-.landscape-days button[aria-pressed="true"] i {
-  background: #e2f2aa;
-}
-.landscape-footer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #aa9eb7;
-  font-size: 9px;
-  border-top: 1px solid #494151;
-  padding-top: 14px;
-  margin-top: 15px;
-  flex-wrap: wrap;
-}
-.landscape-footer strong {
-  font-weight: 500;
-  color: #dad4e3;
-}
-.landscape-footer span:last-child {
-  margin-left: auto;
-  font-size: 8px;
-}
-.landscape-panel button:focus-visible,
-.landscape-panel a:focus-visible {
-  outline: 2px solid #e2f2aa;
-  outline-offset: 3px;
-}
-.comparison-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 15px;
-  margin: 20px 0 8px;
-  font-size: 9px;
-  color: var(--text-secondary);
-}
-.comparison-legend span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.course-chart-links {
-  display: grid;
-  margin-top: 10px;
-}
-.course-chart-links a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-top: 1px solid var(--border);
-  padding: 12px 0;
-  color: var(--text-secondary);
-  font-size: 11px;
-}
-.course-chart-links a > span {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.course-chart-links a strong {
-  font-weight: 550;
-  color: var(--foreground);
-}
-.course-chart-links a:hover {
-  color: var(--purple);
-}
-.rhythm-panel .chart-plot {
-  margin-top: 20px;
-}
-.rhythm-insight {
-  padding: 14px;
-  border-radius: 6px;
-  background: var(--surface-soft);
-  font-size: 11px;
-  color: var(--text-secondary);
-  line-height: 1.8;
-  margin-top: 18px;
-}
-.chart-placeholder {
-  display: flex;
-  min-height: 255px;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 15px;
-  color: var(--muted);
-}
-.chart-placeholder p {
-  font-size: 12px;
-  text-align: center;
-}
-.chart-placeholder a {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  color: var(--purple);
-  font-size: 11px;
-}
-.analytics-data-caption {
-  margin-top: 20px;
-  font-size: 10px;
-  color: var(--text-secondary);
-}
-.weekly-goal-chart {
-  margin: 24px 0;
-}
-.weekly-goal-chart .panel-heading > svg {
-  color: var(--purple);
-}
-.mix-legend button:focus-visible,
-.chart-view-switch button:focus-visible {
-  outline: 2px solid var(--purple);
-  outline-offset: 2px;
-}
-
-@media (max-width: 1180px) {
-  .learning-perspective-grid {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+@layer components {
+  /* Learning data, with the same ink-and-paper palette as the studio. */
+  .chart-frame {
+    min-width: 0;
   }
-  .landscape-body {
-    grid-template-columns: 1fr;
-    gap: 0;
+  .chart-tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 16px 0 6px;
   }
-  .landscape-copy {
+  .chart-tools > span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  .chart-key,
+  .comparison-legend i,
+  .mix-legend i {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--chart-1);
+  }
+  .chart-view-switch {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--surface-soft);
+  }
+  .chart-view-switch button {
     display: grid;
-    grid-template-columns: 1fr auto;
-    column-gap: 18px;
-    padding-top: 22px;
+    place-items: center;
+    width: 29px;
+    height: 26px;
+    border-radius: 4px;
+    color: var(--muted-foreground);
+    cursor: pointer;
   }
-  .landscape-period {
-    grid-column: 1;
+  .chart-view-switch button[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--purple);
+    box-shadow: 0 1px 3px #22222210;
   }
-  .landscape-copy > strong {
-    grid-column: 1;
-    font-size: 42px;
-    margin-top: 9px;
+  .chart-view-switch button:hover {
+    color: var(--purple);
   }
-  .landscape-copy > p {
-    grid-column: 2;
-    grid-row: 1 / 3;
-    align-self: center;
-    margin: 0;
-    max-width: 150px;
+  .chart-plot {
+    width: 100%;
+    min-width: 0;
   }
-  .landscape-metrics {
-    grid-column: 1;
-    justify-self: start;
-    margin-top: 17px;
+  .chart-plot svg:focus-visible,
+  .donut-wrap svg:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: -2px;
+    border-radius: 5px;
   }
-  .landscape-copy > a {
-    grid-column: 2;
-    grid-row: 3;
-    align-self: center;
-    margin-top: 17px;
+  .chart-data {
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
+    margin-top: 13px;
+    padding-top: 11px;
   }
-  .landscape-visual > .scene-artwork {
-    height: 240px;
+  .chart-data summary {
+    width: fit-content;
+    cursor: pointer;
   }
-  .landscape-footer span:last-child {
-    margin-left: 0;
-    flex-basis: 100%;
+  .chart-data summary:hover {
+    color: var(--purple);
   }
-}
-@media (max-width: 800px) {
+  .chart-data table {
+    width: 100%;
+    margin-top: 12px;
+    text-align: left;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .chart-data caption {
+    text-align: left;
+    color: var(--muted-foreground);
+    margin-bottom: 8px;
+  }
+  .chart-data td,
+  .chart-data th {
+    border-bottom: 1px solid var(--border);
+    padding: 8px 10px 8px 0;
+    font-weight: 400;
+  }
+  .chart-data thead th {
+    font-weight: 600;
+  }
+  .chart-data td {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .chart-table-scroll {
+    max-height: 240px;
+    overflow: auto;
+  }
   .learning-perspective-grid,
   .analytics-detail-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
-  }
-  .learning-mix-panel {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0 20px;
-    align-items: center;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 22px;
+    margin-top: 24px;
+    align-items: stretch;
   }
-  .learning-mix-panel .panel-heading {
-    grid-column: 1 / -1;
+  .learning-perspective-grid > *,
+  .analytics-detail-grid > * {
+    min-width: 0;
   }
-  .mix-legend {
-    grid-column: 2;
-    grid-row: 2;
-  }
-  .chart-footnote {
-    grid-column: 1 / -1;
-  }
-  .chart-card-link {
-    grid-column: 1 / -1;
-  }
-}
-@media (max-width: 480px) {
   .learning-mix-panel,
   .comparison-panel,
   .rhythm-panel,
-  .weekly-goal-chart,
+  .weekly-goal-chart {
+    padding: 26px;
+  }
+  .learning-mix-panel .panel-heading h2,
+  .comparison-panel .panel-heading h2,
+  .rhythm-panel .panel-heading h2,
+  .weekly-goal-chart .panel-heading h2 {
+    font-size: 19px;
+    color: var(--foreground);
+    font-weight: 550;
+  }
+  .learning-mix-panel .section-index,
+  .comparison-panel .section-index,
+  .rhythm-panel .section-index,
+  .weekly-goal-chart .section-index {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-bottom: 7px;
+  }
+  .learning-mix-panel .panel-heading > svg {
+    color: var(--muted-foreground);
+  }
+  .comparison-panel .panel-heading p,
+  .rhythm-panel .panel-heading p,
+  .weekly-goal-chart .panel-heading p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 7px;
+  }
+  .donut-wrap {
+    position: relative;
+    margin-top: 5px;
+    min-width: 0;
+  }
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    pointer-events: none;
+    gap: 3px;
+  }
+  .donut-center strong {
+    font-size: 43px;
+    line-height: 1.1;
+    font-weight: 500;
+    letter-spacing: -2px;
+    color: var(--foreground);
+  }
+  .donut-center span {
+    font-size: 12px;
+    color: var(--text-secondary);
+    max-width: 110px;
+    text-align: center;
+  }
+  .mix-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .mix-legend button {
+    display: grid;
+    grid-template-columns: 8px 1fr 24px 40px;
+    text-align: left;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .mix-legend button:hover,
+  .mix-legend button[aria-pressed="true"] {
+    background: var(--surface-soft);
+    color: var(--foreground);
+  }
+  .mix-legend button strong {
+    text-align: right;
+    font-size: 13px;
+    color: var(--foreground);
+    font-weight: 550;
+  }
+  .mix-legend button small {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+  .chart-footnote {
+    margin: 14px 0;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+  .chart-card-link {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--purple);
+    font-size: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .chart-card-link:hover {
+    color: var(--purple-dark);
+  }
   .panel.landscape-panel {
-    padding: 22px 18px;
+    padding: 26px;
+    background: #191820;
+    border-color: #37343f;
+    overflow: hidden;
+    position: relative;
+    color: #f4f2fa;
+  }
+  .landscape-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+  }
+  .landscape-heading .section-index {
+    color: #c7c1d6;
+    font-size: 11px;
   }
   .landscape-heading h2 {
     font-size: 22px;
+    font-weight: 450;
+    letter-spacing: -0.6px;
+    color: #f4f2fa;
+  }
+  .landscape-heading > svg {
+    color: #c7bafa;
+  }
+  .landscape-body {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.85fr) minmax(0, 1.65fr);
+    align-items: center;
+    gap: 10px;
+    min-height: 300px;
+  }
+  .landscape-copy {
+    position: relative;
+    z-index: 1;
+  }
+  .landscape-period {
+    font-size: 11px;
+    letter-spacing: 1.6px;
+    color: #bbb3c7;
+    font-family: var(--font-geist-mono), monospace;
   }
   .landscape-copy > strong {
-    font-size: 45px;
+    display: flex;
+    flex-direction: column;
+    font-size: 54px;
+    font-weight: 450;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-top: 16px;
+    color: #c5b8ff;
+    font-variant-numeric: tabular-nums;
   }
-  .landscape-copy > p {
-    max-width: 140px;
-    font-size: 10px;
+  .landscape-copy > strong span {
+    color: #d0c8df;
+    font-size: 12px;
+    letter-spacing: 0;
+    font-weight: 400;
+    margin-top: 7px;
   }
-  .landscape-copy > a {
-    font-size: 8px;
+  .landscape-copy p {
+    color: #c7c1d6;
+    font-size: 12px;
+    max-width: 180px;
+    line-height: 1.8;
+    margin: 17px 0;
   }
-  .landscape-visual > .scene-artwork {
-    height: 250px;
-  }
-  .landscape-days {
-    gap: 2px;
-  }
-  .landscape-days button {
-    font-size: 9px;
-    padding: 10px 1px;
-  }
-  .landscape-days button strong {
-    font-size: 15px;
-  }
-  .learning-mix-panel {
-    display: block;
-  }
-  .chart-tools > span {
-    font-size: 10px;
-  }
-  .chart-tools {
-    gap: 5px;
-  }
-  .chart-view-switch button {
-    width: 31px;
-    height: 30px;
+  .landscape-metrics {
+    display: inline-flex;
+    border: 1px solid #655974;
+    border-radius: 6px;
+    padding: 3px;
+    gap: 3px;
   }
   .landscape-metrics button {
-    padding: 8px 12px;
+    font-size: 11px;
+    padding: 7px 10px;
+    border-radius: 3px;
+    color: #c7c1d6;
+    cursor: pointer;
   }
-  .chart-plot {
-    margin-left: -5px;
-    width: calc(100% + 5px);
+  .landscape-metrics button[aria-pressed="true"] {
+    background: #40364f;
+    color: #f4f2fa;
+  }
+  .landscape-copy > a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #c7bafa;
+    font-size: 11px;
+    margin-top: 20px;
+  }
+  .landscape-copy > a:hover {
+    color: #c5b8ff;
+  }
+  .landscape-visual {
+    min-width: 0;
+    position: relative;
+  }
+  .landscape-visual > .scene-artwork {
+    height: 290px;
+    width: 100%;
+  }
+  .landscape-hint {
+    display: block;
+    font-size: 11px;
+    text-align: center;
+    letter-spacing: 1px;
+    color: #bbb3c7;
+    margin: -18px 0 10px;
+    pointer-events: none;
+  }
+  .landscape-visual .scene-reset {
+    color: #dcd5e6;
+    background: #5b4d72;
+    border-color: #786391;
+  }
+  .landscape-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    border-top: 1px solid #494151;
+    gap: 5px;
+    padding-top: 16px;
+  }
+  .landscape-days button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 3px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    color: #c7c1d6;
+    font-size: 11px;
+  }
+  .landscape-days button strong {
+    color: #ddd5e5;
+    font-size: 16px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .landscape-days button i {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #766882;
+  }
+  .landscape-days button:hover {
+    background: #3b3347;
+  }
+  .landscape-days button[aria-pressed="true"] {
+    background: #433a50;
+    border-color: #61546f;
+    color: #e1d8ff;
+  }
+  .landscape-days button[aria-pressed="true"] strong {
+    color: #c5b8ff;
+  }
+  .landscape-days button[aria-pressed="true"] i {
+    background: #c5b8ff;
+  }
+  .landscape-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #c7c1d6;
+    font-size: 11px;
+    border-top: 1px solid #494151;
+    padding-top: 14px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+  .landscape-footer strong {
+    font-weight: 500;
+    color: #dad4e3;
+  }
+  .landscape-footer span:last-child {
+    margin-left: auto;
+    font-size: 11px;
+  }
+  .landscape-panel button:focus-visible,
+  .landscape-panel a:focus-visible {
+    outline: 2px solid #c5b8ff;
+    outline-offset: 3px;
+  }
+  .comparison-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 15px;
+    margin: 20px 0 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .comparison-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .course-chart-links {
+    display: grid;
+    margin-top: 10px;
+  }
+  .course-chart-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--border);
+    padding: 12px 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  .course-chart-links a > span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .course-chart-links a strong {
+    font-weight: 550;
+    color: var(--foreground);
+  }
+  .course-chart-links a:hover {
+    color: var(--purple);
+  }
+  .rhythm-panel .chart-plot {
+    margin-top: 20px;
+  }
+  .rhythm-insight {
+    padding: 14px;
+    border-radius: 6px;
+    background: var(--surface-soft);
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-top: 18px;
+  }
+  .chart-placeholder {
+    display: flex;
+    min-height: 255px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+    color: var(--muted-foreground);
+  }
+  .chart-placeholder p {
+    font-size: 13px;
+    text-align: center;
+  }
+  .chart-placeholder a {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    color: var(--purple);
+    font-size: 12px;
+  }
+  .analytics-data-caption {
+    margin-top: 20px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .weekly-goal-chart {
+    margin: 24px 0;
+  }
+  .weekly-goal-chart .panel-heading > svg {
+    color: var(--purple);
+  }
+  .mix-legend button:focus-visible,
+  .chart-view-switch button:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 1180px) {
+    .learning-perspective-grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+    .landscape-body {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .landscape-copy {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: 18px;
+      padding-top: 22px;
+    }
+    .landscape-period {
+      grid-column: 1;
+    }
+    .landscape-copy > strong {
+      grid-column: 1;
+      font-size: 42px;
+      margin-top: 9px;
+    }
+    .landscape-copy > p {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      align-self: center;
+      margin: 0;
+      max-width: 150px;
+    }
+    .landscape-metrics {
+      grid-column: 1;
+      justify-self: start;
+      margin-top: 17px;
+    }
+    .landscape-copy > a {
+      grid-column: 2;
+      grid-row: 3;
+      align-self: center;
+      margin-top: 17px;
+    }
+    .landscape-visual > .scene-artwork {
+      height: 240px;
+    }
+    .landscape-footer span:last-child {
+      margin-left: 0;
+      flex-basis: 100%;
+    }
+  }
+  @media (max-width: 800px) {
+    .learning-perspective-grid,
+    .analytics-detail-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+    }
+    .learning-mix-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 20px;
+      align-items: center;
+    }
+    .learning-mix-panel .panel-heading {
+      grid-column: 1 / -1;
+    }
+    .mix-legend {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    .chart-footnote {
+      grid-column: 1 / -1;
+    }
+    .chart-card-link {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 480px) {
+    .learning-mix-panel,
+    .comparison-panel,
+    .rhythm-panel,
+    .weekly-goal-chart,
+    .panel.landscape-panel {
+      padding: 22px 18px;
+    }
+    .landscape-heading h2 {
+      font-size: 22px;
+    }
+    .landscape-copy > strong {
+      font-size: 45px;
+    }
+    .landscape-copy > p {
+      max-width: 140px;
+      font-size: 11px;
+    }
+    .landscape-copy > a {
+      font-size: 11px;
+    }
+    .landscape-visual > .scene-artwork {
+      height: 250px;
+    }
+    .landscape-days {
+      gap: 2px;
+    }
+    .landscape-days button {
+      font-size: 11px;
+      padding: 10px 1px;
+    }
+    .landscape-days button strong {
+      font-size: 15px;
+    }
+    .learning-mix-panel {
+      display: block;
+    }
+    .chart-tools > span {
+      font-size: 11px;
+    }
+    .chart-tools {
+      gap: 5px;
+    }
+    .chart-view-switch button {
+      width: 31px;
+      height: 30px;
+    }
+    .landscape-metrics button {
+      padding: 8px 12px;
+    }
+    .chart-plot {
+      margin-left: -5px;
+      width: calc(100% + 5px);
+    }
   }
 }

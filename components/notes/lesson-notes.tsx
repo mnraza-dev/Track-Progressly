@@ -1,5 +1,6 @@
 "use client";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -313,10 +314,9 @@ export function LessonNotes({
                 const item = lesson.tasks.find((t) => t.title === title);
                 return (
                   <label key={title}>
-                    <Input
-                      type="checkbox"
+                    <Checkbox
                       checked={item?.is_completed || false}
-                      onChange={() =>
+                      onCheckedChange={() =>
                         void mutate({
                           op: "task",
                           video_id: lesson.id,
@@ -344,10 +344,9 @@ export function LessonNotes({
               .map((t) => (
                 <div key={t.id}>
                   <label>
-                    <Input
-                      type="checkbox"
+                    <Checkbox
                       checked={t.is_completed}
-                      onChange={() =>
+                      onCheckedChange={() =>
                         void mutate({
                           op: "task",
                           video_id: lesson.id,

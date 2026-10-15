@@ -84,8 +84,16 @@ export function ActivityChart({
           >
             <defs>
               <linearGradient id={gradient} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#8d7ade" stopOpacity={0.32} />
-                <stop offset="100%" stopColor="#8d7ade" stopOpacity={0.02} />
+                <stop
+                  offset="0%"
+                  stopColor="var(--chart-1)"
+                  stopOpacity={0.32}
+                />
+                <stop
+                  offset="100%"
+                  stopColor="var(--chart-1)"
+                  stopOpacity={0.02}
+                />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -97,7 +105,7 @@ export function ActivityChart({
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "var(--muted)", fontSize: 11 }}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
               dy={8}
               minTickGap={22}
             />
@@ -105,7 +113,7 @@ export function ActivityChart({
               width={34}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "var(--muted)", fontSize: 10 }}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
               allowDecimals={false}
               domain={[
                 0,
@@ -120,7 +128,7 @@ export function ActivityChart({
               cursor={
                 view === "bar"
                   ? { fill: "#8d7ade12" }
-                  : { stroke: "#8d7ade", strokeDasharray: "3 4" }
+                  : { stroke: "var(--chart-1)", strokeDasharray: "3 4" }
               }
               labelFormatter={(_, payload) => payload[0]?.payload.label || ""}
               formatter={(value) => [`${value} ${unit}`, "Learning"]}
@@ -128,13 +136,13 @@ export function ActivityChart({
             {goal && metric === "minutes" ? (
               <ReferenceLine
                 y={goal}
-                stroke="#648d7b"
+                stroke="var(--chart-2)"
                 strokeDasharray="5 5"
                 ifOverflow="extendDomain"
                 label={{
                   value: `Goal ${goal}m`,
-                  fill: "#648d7b",
-                  fontSize: 10,
+                  fill: "var(--chart-2)",
+                  fontSize: 12,
                   position: "insideTopRight",
                 }}
               />
@@ -143,12 +151,12 @@ export function ActivityChart({
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="#8d7ade"
+                stroke="var(--chart-1)"
                 strokeWidth={2.5}
                 fill={`url(#${gradient})`}
                 activeDot={{
                   r: 5,
-                  fill: "#8d7ade",
+                  fill: "var(--chart-1)",
                   stroke: "var(--surface)",
                   strokeWidth: 3,
                 }}
@@ -157,7 +165,7 @@ export function ActivityChart({
             ) : (
               <Bar
                 dataKey="value"
-                fill="#8d7ade"
+                fill="var(--chart-1)"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={32}
                 isAnimationActive={false}

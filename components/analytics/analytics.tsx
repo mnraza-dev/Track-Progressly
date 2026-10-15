@@ -95,7 +95,7 @@ export function Analytics() {
             detail: `${tasks.filter((t) => t.is_completed).length} of ${tasks.length} tasks · all time`,
           },
         ].map((s) => (
-          <Card key={s.label} className="stat-card">
+          <Card key={s.label} className="stat-card gap-0">
             <div className="stat-top">
               <span>{s.label}</span>
               <span className={`stat-icon ${s.color}`}>

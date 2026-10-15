@@ -32,6 +32,7 @@ import { isConnected } from "@/lib/supabase/client";
 import { signOut } from "@/features/auth/sign-out";
 import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -165,7 +166,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               onClick={toggleTheme}
               aria-label="Toggle color theme"
             >
-              {resolvedTheme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+              {resolvedTheme === "dark" ? (
+                <Sun size={17} />
+              ) : (
+                <Moon size={17} />
+              )}
             </button>
             {isConnected && (
               <button
@@ -210,7 +215,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span>Find a course or note</span>
               <kbd>⌘ K</kbd>
             </button>
-            <div className="topbar-separator" />
+            <Separator orientation="vertical" className="topbar-separator" />
             <button
               className="icon-button notification-button"
               aria-label="Notifications"

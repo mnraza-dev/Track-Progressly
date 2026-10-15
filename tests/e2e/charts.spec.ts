@@ -91,7 +91,7 @@ test("real activity powers chart views, lesson segments, and the interactive 3D 
     .scrollIntoViewIfNeeded();
   await expect(page.locator(".recharts-reference-line line")).toHaveAttribute(
     "stroke",
-    "#648d7b",
+    "var(--chart-2)",
   );
   await page.screenshot({
     path: `test-results/charts-goals-${testInfo.project.name}.png`,

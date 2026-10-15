@@ -40,7 +40,7 @@ Follow active learning time, completed lessons, course progress, and practice. S
 
 Set a daily minute or lesson target, a weekly time goal, or a course deadline in **Learning goals**. Your learning calendar and streak follow the timezone you choose in **Settings**.
 
-*The screenshots show an illustrative workspace. Your workspace starts with your courses and your activity.*
+_The screenshots show an illustrative workspace. Your workspace starts with your courses and your activity._
 
 ## Make it feel like yours
 

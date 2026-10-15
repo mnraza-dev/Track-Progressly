@@ -25,10 +25,10 @@ export function dailySeries(activity: Activity[], today: string, days = 7) {
   });
 }
 export const lessonSegments = [
-  { key: "completed", name: "Completed", color: "#648d7b" },
-  { key: "in_progress", name: "In progress", color: "#8d7ade" },
-  { key: "needs_revision", name: "Needs revision", color: "#cf835c" },
-  { key: "not_started", name: "Not started", color: "#c4c5bd" },
+  { key: "completed", name: "Completed", color: "var(--chart-2)" },
+  { key: "in_progress", name: "In progress", color: "var(--chart-1)" },
+  { key: "needs_revision", name: "Needs revision", color: "var(--chart-3)" },
+  { key: "not_started", name: "Not started", color: "var(--chart-4)" },
 ] as const;
 export function courseBreakdown(courses: Course[]) {
   return courses

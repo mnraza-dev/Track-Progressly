@@ -113,7 +113,7 @@ test("product tour uses isolated data and keeps both themes readable", async ({
     });
   }
   await page.goto("/settings");
-  await page.getByRole("button", { name: "Dark", exact: true }).click();
+  await page.getByRole("tab", { name: "Dark", exact: true }).click();
   await page.goto("/dashboard");
   await page.addStyleTag({
     content: "nextjs-portal { visibility: hidden !important; }",

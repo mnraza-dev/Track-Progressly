@@ -215,16 +215,16 @@ export function Settings() {
             <p className="muted">Choose a theme, or follow your device.</p>
             <Tabs value={theme || "system"} onValueChange={setTheme}>
               <TabsList className="theme-options" aria-label="Color theme">
-              {[
-                { key: "light", icon: Sun, label: "Light" },
-                { key: "dark", icon: Moon, label: "Dark" },
-                { key: "system", icon: Monitor, label: "System" },
-              ].map((t) => (
-                <TabsTrigger key={t.key} value={t.key}>
-                  <t.icon size={21} />
-                  {t.label}
-                </TabsTrigger>
-              ))}
+                {[
+                  { key: "light", icon: Sun, label: "Light" },
+                  { key: "dark", icon: Moon, label: "Dark" },
+                  { key: "system", icon: Monitor, label: "System" },
+                ].map((t) => (
+                  <TabsTrigger key={t.key} value={t.key}>
+                    <t.icon size={21} />
+                    {t.label}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </Tabs>
           </Card>

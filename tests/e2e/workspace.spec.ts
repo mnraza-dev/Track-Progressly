@@ -146,11 +146,11 @@ test("bookmarks, mastery flags, note revisions, theme and public homepage", asyn
     page.getByText("Remember to practice.", { exact: true }),
   ).toBeVisible();
   await page.goto("/settings");
-  await page.getByRole("button", { name: "Dark", exact: true }).click();
+  await page.getByRole("tab", { name: "Dark", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.getByRole("button", { name: "Light", exact: true }).click();
+  await page.getByRole("tab", { name: "Light", exact: true }).click();
   await page.goto("/welcome");
   await expect(
     page.getByRole("heading", { name: /Stop collecting tutorials/ }),

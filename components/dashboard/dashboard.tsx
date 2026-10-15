@@ -446,7 +446,7 @@ function Stat({
   index: string;
 }) {
   return (
-    <Card className="stat-card">
+    <Card className="stat-card gap-0">
       <div className="stat-top">
         <span>{label}</span>
         <span className={`stat-icon ${color}`}>{icon}</span>

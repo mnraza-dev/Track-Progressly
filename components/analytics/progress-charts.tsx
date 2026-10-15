@@ -164,7 +164,7 @@ export function CourseComparison({ courses }: { courses: Course[] }) {
                   allowDecimals={false}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "var(--muted)", fontSize: 10 }}
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
                 />
                 <YAxis
                   type="category"
@@ -175,7 +175,7 @@ export function CourseComparison({ courses }: { courses: Course[] }) {
                   tickFormatter={(name: string) =>
                     name.length > 16 ? `${name.slice(0, 15)}…` : name
                   }
-                  tick={{ fill: "var(--foreground)", fontSize: 11 }}
+                  tick={{ fill: "var(--foreground)", fontSize: 12 }}
                 />
                 <Tooltip
                   contentStyle={chartTooltipStyle}
@@ -284,7 +284,7 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "var(--muted)", fontSize: 11 }}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
               dy={8}
             />
             <YAxis
@@ -293,7 +293,7 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
               axisLine={false}
               tickLine={false}
               domain={[0, maximum ? "auto" : 60]}
-              tick={{ fill: "var(--muted)", fontSize: 10 }}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
             />
             <Tooltip
               contentStyle={chartTooltipStyle}
@@ -311,8 +311,8 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
                   key={row.name}
                   fill={
                     maximum > 0 && row.minutes === maximum
-                      ? "#648d7b"
-                      : "#aabfaf"
+                      ? "var(--chart-2)"
+                      : "var(--chart-4)"
                   }
                 />
               ))}

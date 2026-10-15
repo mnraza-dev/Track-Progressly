@@ -14,6 +14,7 @@ import { useState } from "react";
 import { completion, duration, cn } from "@/lib/utils";
 import { useWorkspace } from "@/stores/workspace";
 import { SceneArtwork } from "@/components/three/scene-provider";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { Course } from "@/types";
 export function CourseArtwork({
@@ -90,7 +91,10 @@ export function CourseCard({ course }: { course: Course }) {
           title={course.title}
           thumbnail={course.thumbnail_url}
         />
-        <span className={cn("course-status", percent === 100 && "complete")}>
+        <Badge
+          variant="outline"
+          className={cn("course-status", percent === 100 && "complete")}
+        >
           {percent === 100 ? <Check size={11} /> : <span />}
           {percent === 100
             ? "Completed"
@@ -99,7 +103,7 @@ export function CourseCard({ course }: { course: Course }) {
               : percent > 0
                 ? "In progress"
                 : "Ready to start"}
-        </span>
+        </Badge>
       </Link>
       <div className="course-card-body">
         <div className="course-meta">
