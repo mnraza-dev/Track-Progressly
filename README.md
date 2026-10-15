@@ -18,6 +18,18 @@ Open http://localhost:3000. With no Supabase variables, the application opens an
 
 The public product page is also available at `/welcome`. Once Supabase is configured, `/` displays this public homepage and application routes require sign-in.
 
+## Three.js studio
+
+The interface uses a shared Three.js WebGL renderer for the dashboard sculpture, physical daily-goal ring, category artwork, library empty state, learning goals, analytics insights, import guide, authentication, and public homepage. The scenes use custom procedural models, PBR materials, environment lighting, and pointer parallax. The hero can be rotated with a mouse drag or the arrow keys; Home and the reset control restore its orientation.
+
+The Three.js module loads on the client. One canvas renders visible artwork using independent camera/scissor regions, with capped pixel density and a 30 fps rendering target. Off-screen scenes stop drawing, hidden tabs pause the render loop, and removed scenes dispose their geometry, materials, and textures. Reduced-motion preferences stop ambient animation. An HTML/CSS illustration remains available when WebGL is unavailable or its context is lost; supported contexts recover automatically.
+
+The dashboard and analytics include a Three.js timeline built from the last seven days of saved activity. Switch between minutes and completed lessons, select a day to highlight its column, and rotate the scene with a mouse or keyboard. Column heights are relative to the largest value in that week; zero days have no raised column. Concentric rings on the goals page reflect progress toward the first three goals.
+
+Interactive area/bar charts show learning activity with period and metric controls. A selectable donut splits available lessons by status, stacked bars compare courses, weekday bars show learning rhythm, and the goals chart overlays the daily minute target. Data tables and HTML legends provide the same information without relying on graphics. All charts use actual saved data; archived courses and unavailable lessons are excluded from library charts. Empty accounts display zero values.
+
+The daily-goal ring uses actual saved learning progress. Learning data and playback behavior are unchanged by the visual redesign. The dashboard's quick import field forwards the pasted link to the validated importer.
+
 ## Connect Supabase
 
 1. Create a free Supabase project.

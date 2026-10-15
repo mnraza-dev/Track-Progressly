@@ -65,7 +65,9 @@ test("manual course, completion, notes, practice and reload persistence", async 
     page.getByRole("heading", { name: "Daily learning time" }),
   ).toBeVisible();
   await page.goto("/analytics");
-  await expect(page.getByText("50%", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".course-chart-links").getByText("50%", { exact: true }),
+  ).toBeVisible();
   await page.goto("/settings");
   await page.getByLabel("Display name").fill("Alex");
   await page.getByRole("button", { name: "Save my preferences" }).click();

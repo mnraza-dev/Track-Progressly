@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -15,6 +15,8 @@ import {
 import { useWorkspace } from "@/stores/workspace";
 import { localDay, streak, longestStreak, completion } from "@/lib/utils";
 import { subDays, format } from "date-fns";
+import { SceneArtwork } from "@/components/three/scene-provider";
+import { ActivityChart } from "@/components/analytics/activity-chart";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -32,6 +34,27 @@ export function Goals() {
       a.day >= format(subDays(new Date(`${today}T12:00:00Z`), 6), "yyyy-MM-dd"),
   );
   const currentStreak = streak(data.activity, data.profile.timezone);
+  const weekMinutes = Math.floor(
+    week
+      .filter((row) => row.day <= today)
+      .reduce((n, row) => n + row.active_seconds, 0) / 60,
+  );
+  const goalRings = useMemo(
+    () =>
+      data.goals.slice(0, 3).map((goal) => {
+        const actual =
+          goal.goal_type === "daily_videos"
+            ? todayData?.videos_completed || 0
+            : goal.goal_type === "daily_minutes"
+              ? (todayData?.active_seconds || 0) / 60
+              : weekMinutes;
+        return actual / goal.target_value;
+      }),
+    [data.goals, todayData, weekMinutes],
+  );
+  const dailyTarget =
+    data.goals.find((g) => g.goal_type === "daily_minutes")?.target_value ||
+    data.profile.daily_minutes;
   const labels = {
     daily_minutes: "Daily learning time",
     daily_videos: "Daily lesson target",
@@ -56,6 +79,12 @@ export function Goals() {
         </Button>
       </div>
       <div className="goal-overview">
+        <SceneArtwork
+          kind="rings"
+          values={goalRings}
+          className="goal-overview-art"
+          label={`Progress toward your first three learning goals: ${goalRings.length ? goalRings.map((value) => `${Math.round(Math.min(1, value) * 100)} percent`).join(", ") : "no goals set yet"}`}
+        />
         <div>
           <span className="stat-icon orange">
             <Flame size={22} />
@@ -81,7 +110,7 @@ export function Goals() {
           </span>
           <div>
             <strong>
-              {Math.floor(week.reduce((n, a) => n + a.active_seconds, 0) / 60)}
+              {weekMinutes}
               <span> minutes this week</span>
             </strong>
             <p>Time invested in the person you’re becoming.</p>
@@ -96,9 +125,7 @@ export function Goals() {
                 ? todayData?.videos_completed || 0
                 : g.goal_type === "daily_minutes"
                   ? Math.floor((todayData?.active_seconds || 0) / 60)
-                  : Math.floor(
-                      week.reduce((n, a) => n + a.active_seconds, 0) / 60,
-                    );
+                  : weekMinutes;
             const met = actual >= g.target_value;
             return (
               <section key={g.id} className="panel goal-card">
@@ -155,9 +182,11 @@ export function Goals() {
         </div>
       ) : (
         <div className="goal-empty panel">
-          <div className="empty-icon">
-            <Target size={31} />
-          </div>
+          <SceneArtwork
+            kind="goal"
+            className="goal-empty-scene"
+            label="A three-dimensional learning goal waiting to be filled"
+          />
           <div>
             <h2>A habit starts with an intention.</h2>
             <p>
@@ -171,6 +200,26 @@ export function Goals() {
           </Button>
         </div>
       )}
+      <section className="panel weekly-goal-chart">
+        <div className="panel-heading">
+          <div>
+            <span className="section-index">
+              PROGRESS AGAINST YOUR INTENTION
+            </span>
+            <h2>A little more consistent</h2>
+            <p>
+              Your last seven days, with your {dailyTarget}-minute daily target.
+            </p>
+          </div>
+          <Target size={21} />
+        </div>
+        <ActivityChart
+          activity={data.activity}
+          timezone={data.profile.timezone}
+          goal={dailyTarget}
+          height={250}
+        />
+      </section>
       <section className="panel calendar-panel">
         <div className="panel-heading">
           <div>

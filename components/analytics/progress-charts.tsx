@@ -1,0 +1,344 @@
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+import { ArrowUpRight, BookOpen } from "lucide-react";
+import {
+  courseBreakdown,
+  lessonDistribution,
+  lessonSegments,
+  weekdayData,
+} from "@/lib/analytics";
+import { chartTooltipStyle } from "./activity-chart";
+import type { Activity, Course } from "@/types";
+
+export function LearningMix({ courses }: { courses: Course[] }) {
+  const distribution = lessonDistribution(courses);
+  const total = distribution.reduce((n, row) => n + row.value, 0);
+  const [selected, setSelected] = useState<string | null>(null);
+  const current = distribution.find((row) => row.key === selected);
+  return (
+    <section
+      className="panel learning-mix-panel"
+      aria-labelledby="learning-mix-title"
+    >
+      <div className="panel-heading">
+        <div>
+          <span className="section-index">ONE LESSON AT A TIME</span>
+          <h2 id="learning-mix-title">Your learning mix</h2>
+        </div>
+        <BookOpen size={19} />
+      </div>
+      <div className="donut-wrap" data-chart="lesson-distribution">
+        <ResponsiveContainer width="100%" height={230} minWidth={0}>
+          <PieChart>
+            <Pie
+              data={
+                total
+                  ? distribution.filter((row) => row.value > 0)
+                  : [
+                      {
+                        key: "empty",
+                        name: "No lessons yet",
+                        value: 1,
+                        color: "var(--border)",
+                      },
+                    ]
+              }
+              dataKey="value"
+              nameKey="name"
+              innerRadius={77}
+              outerRadius={98}
+              paddingAngle={total ? 3 : 0}
+              stroke="none"
+              startAngle={90}
+              endAngle={-270}
+              isAnimationActive={false}
+              onClick={(row) =>
+                total > 0 &&
+                typeof row.key === "string" &&
+                setSelected(selected === row.key ? null : row.key)
+              }
+            >
+              {(total
+                ? distribution.filter((row) => row.value > 0)
+                : [{ key: "empty", color: "var(--border)" }]
+              ).map((row) => (
+                <Cell
+                  key={row.key}
+                  fill={row.color}
+                  opacity={selected && selected !== row.key ? 0.3 : 1}
+                />
+              ))}
+            </Pie>
+            {total > 0 && (
+              <Tooltip
+                contentStyle={chartTooltipStyle}
+                formatter={(value) => [`${value} lessons`]}
+              />
+            )}
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="donut-center" aria-live="polite">
+          <strong>{current ? current.value : total}</strong>
+          <span>{current ? current.name : "available lessons"}</span>
+        </div>
+      </div>
+      <div className="mix-legend">
+        {distribution.map((row) => (
+          <button
+            key={row.key}
+            aria-pressed={selected === row.key}
+            onClick={() => setSelected(selected === row.key ? null : row.key)}
+          >
+            <i style={{ background: row.color }} />
+            <span>{row.name}</span>
+            <strong>{row.value}</strong>
+            <small>{total ? Math.round((row.value / total) * 100) : 0}%</small>
+          </button>
+        ))}
+      </div>
+      <p className="chart-footnote">
+        {total
+          ? "Select a segment to take a closer look. Archived courses and unavailable videos are excluded."
+          : "Add your first course to start building your learning picture."}
+      </p>
+      <Link className="chart-card-link" href="/courses">
+        Explore your library <ArrowUpRight size={14} />
+      </Link>
+    </section>
+  );
+}
+
+export function CourseComparison({ courses }: { courses: Course[] }) {
+  const rows = courseBreakdown(courses);
+  return (
+    <section className="panel comparison-panel">
+      <div className="panel-heading">
+        <div>
+          <span className="section-index">YOUR FINISH LINES</span>
+          <h2>Course by course</h2>
+          <p>Available lessons, split by their current status.</p>
+        </div>
+      </div>
+      {rows.length ? (
+        <>
+          <div className="comparison-legend">
+            {lessonSegments.map((segment) => (
+              <span key={segment.key}>
+                <i style={{ background: segment.color }} />
+                {segment.name}
+              </span>
+            ))}
+          </div>
+          <div
+            className="chart-plot"
+            data-chart="course-comparison"
+            style={{ height: Math.max(160, rows.length * 58 + 36) }}
+          >
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <BarChart
+                layout="vertical"
+                data={rows}
+                margin={{ left: 0, right: 12, bottom: 0, top: 6 }}
+                barSize={17}
+              >
+                <CartesianGrid
+                  horizontal={false}
+                  stroke="var(--border)"
+                  strokeDasharray="2 5"
+                />
+                <XAxis
+                  type="number"
+                  allowDecimals={false}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "var(--muted)", fontSize: 10 }}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={105}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(name: string) =>
+                    name.length > 16 ? `${name.slice(0, 15)}…` : name
+                  }
+                  tick={{ fill: "var(--foreground)", fontSize: 11 }}
+                />
+                <Tooltip
+                  contentStyle={chartTooltipStyle}
+                  cursor={{ fill: "#8d7ade0c" }}
+                  formatter={(value, name) => [`${value} lessons`, name]}
+                />
+                {lessonSegments.map((segment) => (
+                  <Bar
+                    key={segment.key}
+                    dataKey={segment.key}
+                    name={segment.name}
+                    fill={segment.color}
+                    stackId="lessons"
+                    isAnimationActive={false}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="course-chart-links">
+            {rows.map((row) => (
+              <Link key={row.id} href={`/courses/${row.id}`}>
+                <span>{row.name}</span>
+                <strong>
+                  {row.total
+                    ? Math.round((row.completed / row.total) * 100)
+                    : 0}
+                  %
+                </strong>
+                <ArrowUpRight size={13} />
+              </Link>
+            ))}
+          </div>
+          <details className="chart-data">
+            <summary>View course data</summary>
+            <div className="chart-table-scroll">
+              <table>
+                <caption>Available lessons in each course</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Course</th>
+                    {lessonSegments.map((segment) => (
+                      <th scope="col" key={segment.key}>
+                        {segment.name}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.id}>
+                      <th scope="row">{row.name}</th>
+                      {lessonSegments.map((segment) => (
+                        <td key={segment.key}>{row[segment.key]}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </>
+      ) : (
+        <div className="chart-placeholder">
+          <BookOpen size={27} />
+          <p>Your courses will appear here as you add them.</p>
+          <Link href="/courses/new">
+            Add a course <ArrowUpRight size={14} />
+          </Link>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
+  const rows = weekdayData(activity);
+  const maximum = Math.max(...rows.map((row) => row.minutes));
+  const best = rows.find((row) => row.minutes === maximum);
+  return (
+    <section className="panel rhythm-panel">
+      <div className="panel-heading">
+        <div>
+          <span className="section-index">MAKE IT A HABIT</span>
+          <h2>Find your rhythm</h2>
+          <p>Learning minutes by weekday in this period.</p>
+        </div>
+      </div>
+      <div
+        className="chart-plot"
+        data-chart="weekday-rhythm"
+        style={{ height: 220 }}
+      >
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <BarChart
+            data={rows}
+            margin={{ top: 10, right: 8, left: 0, bottom: 8 }}
+            barCategoryGap="28%"
+          >
+            <CartesianGrid
+              vertical={false}
+              stroke="var(--border)"
+              strokeDasharray="2 5"
+            />
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "var(--muted)", fontSize: 11 }}
+              dy={8}
+            />
+            <YAxis
+              width={32}
+              allowDecimals={false}
+              axisLine={false}
+              tickLine={false}
+              domain={[0, maximum ? "auto" : 60]}
+              tick={{ fill: "var(--muted)", fontSize: 10 }}
+            />
+            <Tooltip
+              contentStyle={chartTooltipStyle}
+              formatter={(value) => [`${value} minutes`, "Learning"]}
+              cursor={{ fill: "#648d7b0c" }}
+            />
+            <Bar
+              dataKey="minutes"
+              radius={[5, 5, 0, 0]}
+              maxBarSize={36}
+              isAnimationActive={false}
+            >
+              {rows.map((row) => (
+                <Cell
+                  key={row.name}
+                  fill={
+                    maximum > 0 && row.minutes === maximum
+                      ? "#648d7b"
+                      : "#aabfaf"
+                  }
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <p className="rhythm-insight">
+        {maximum > 0
+          ? `${best?.name} leads with ${maximum} minutes. Notice which days give you the most room to learn.`
+          : "Your first sessions will reveal the days that work for you."}
+      </p>
+      <details className="chart-data">
+        <summary>View weekday data</summary>
+        <table>
+          <caption>Total learning minutes by weekday</caption>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.name}>
+                <th scope="row">{row.name}</th>
+                <td>{row.minutes} minutes</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </section>
+  );
+}

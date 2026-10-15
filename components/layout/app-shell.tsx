@@ -115,7 +115,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
           <ChevronDown size={14} />
         </button>
-        <div className="nav-label">WORKSPACE</div>
+        <div className="nav-label">YOUR LEARNING STUDIO</div>
         <nav>
           {navigation.map((item) => (
             <Link
@@ -143,10 +143,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Sparkles size={19} />
             </span>
             <strong>
-              A little every day.
-              <br />A long way over time.
+              A daily practice.
+              <br />A different perspective.
             </strong>
-            <p>Make learning a habit that sticks.</p>
+            <p>Make time for one good lesson.</p>
             <Link href="/goals">
               Set a learning goal <ArrowUpRight size={15} />
             </Link>
@@ -203,14 +203,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Menu size={21} />
             </button>
-            <span className="breadcrumb-home">Workspace</span>
+            <span className="breadcrumb-home">My workspace</span>
             <span className="breadcrumb-divider">/</span>
             <span>{title}</span>
           </div>
           <div className="topbar-right">
             <button className="global-search" onClick={() => setSearch(true)}>
               <Search size={16} />
-              <span>Search anything...</span>
+              <span>Find a course or note</span>
               <kbd>⌘ K</kbd>
             </button>
             <div className="topbar-separator" />
@@ -254,9 +254,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </main>
         <footer className="page-footer">
-          <span>Made for curious minds.</span>
+          <span>LEARNTRACK / YOUR LEARNING STUDIO</span>
           <span>
-            Small steps. Real progress. <Sparkles size={13} />
+            Keep making. <Sparkles size={13} />
           </span>
         </footer>
       </div>

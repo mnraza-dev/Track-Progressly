@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import { SceneArtwork } from "@/components/three/scene-provider";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -147,11 +147,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
             <br />
             and the person you’re becoming.
           </p>
-          <Image
-            width={450}
-            height={250}
-            src="/artwork/learning.svg"
-            alt="A little learning, every day"
+          <SceneArtwork
+            kind="hero"
+            interactive
+            className="auth-scene"
+            label="An interactive sculpture of books, a video lesson, and an orbit of ideas"
           />
           <span className="auth-story-footer">
             <ShieldCheck size={16} />

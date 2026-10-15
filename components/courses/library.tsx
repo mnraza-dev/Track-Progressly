@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   Plus,
   Search,
-  BookOpen,
   SlidersHorizontal,
   LayoutGrid,
   List,
@@ -14,6 +13,7 @@ import {
 import { useWorkspace } from "@/stores/workspace";
 import { completion } from "@/lib/utils";
 import { CourseCard } from "./course-card";
+import { SceneArtwork } from "@/components/three/scene-provider";
 import { Button } from "@/components/ui/button";
 export function Library({ resume = false }: { resume?: boolean }) {
   const { data } = useWorkspace();
@@ -147,9 +147,11 @@ export function Library({ resume = false }: { resume?: boolean }) {
         </div>
       ) : (
         <div className="large-empty">
-          <div className="empty-icon">
-            <BookOpen size={34} strokeWidth={1.4} />
-          </div>
+          <SceneArtwork
+            kind="books"
+            className="empty-scene"
+            label="A stack of books ready for your next learning project"
+          />
           <span className="eyebrow">MAKE SPACE FOR SOMETHING NEW</span>
           <h2>
             {data.courses.length

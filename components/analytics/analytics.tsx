@@ -6,15 +6,17 @@ import {
   CircleCheck,
   BookOpen,
   Code2,
-  TrendingUp,
-  Target,
-  CalendarDays,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
-import { completion, duration, localDay } from "@/lib/utils";
+import { duration, localDay } from "@/lib/utils";
 import { format, subDays } from "date-fns";
 import { ActivityChart } from "./activity-chart";
-import { Progress } from "@/components/ui/progress";
+import { LearningLandscape } from "./learning-landscape";
+import {
+  LearningMix,
+  CourseComparison,
+  WeekdayRhythm,
+} from "./progress-charts";
 export function Analytics() {
   const { data } = useWorkspace();
   const [range, setRange] = useState(30);
@@ -27,7 +29,7 @@ export function Analytics() {
     "yyyy-MM-dd",
   );
   const activity = data.activity.filter(
-    (a) => range === 0 || a.day >= threshold,
+    (a) => a.day <= today && (range === 0 || a.day >= threshold),
   );
   const total = activity.reduce((n, a) => n + a.active_seconds, 0);
   const videos = activity.reduce((n, a) => n + a.videos_completed, 0);
@@ -38,12 +40,6 @@ export function Analytics() {
         (tasks.filter((t) => t.is_completed).length / tasks.length) * 100,
       )
     : 0;
-  const days: Record<string, number> = {};
-  activity.forEach((a) => {
-    const day = format(new Date(`${a.day}T12:00:00Z`), "EEEE");
-    days[day] = (days[day] || 0) + a.active_seconds;
-  });
-  const best = Object.entries(days).sort((a, b) => b[1] - a[1])[0];
   return (
     <>
       <div className="page-heading">
@@ -147,6 +143,7 @@ export function Analytics() {
           timezone={data.profile.timezone}
           days={range}
           metric={metric}
+          height={280}
         />
         {!activity.length && (
           <div className="chart-empty-caption">
@@ -155,59 +152,29 @@ export function Analytics() {
           </div>
         )}
       </section>
-      <div className="analytics-bottom">
-        <section className="panel course-completion-panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Course by course</h2>
-              <p>A clearer view of your finish lines.</p>
-            </div>
-            <Target size={21} />
-          </div>
-          {data.courses.length ? (
-            data.courses
-              .filter((c) => c.status !== "archived")
-              .map((c) => (
-                <div className="completion-row" key={c.id}>
-                  <div>
-                    <span>{c.title}</span>
-                    <strong>{completion(c)}%</strong>
-                  </div>
-                  <Progress value={completion(c)} />
-                </div>
-              ))
-          ) : (
-            <div className="small-empty">
-              <BookOpen size={27} />
-              <p>Course progress will appear as you learn.</p>
-            </div>
-          )}
-        </section>
-        <section className="panel insights-panel">
-          <span className="goal-icon">
-            <TrendingUp size={23} />
-          </span>
-          <h2>Find your rhythm.</h2>
-          <p>
-            {best && best[1] > 0
-              ? `${best[0]} is your most active learning day. Keep making space for what works for you.`
-              : "Your best learning rhythm is the one that fits your life. Start small, and keep coming back."}
-          </p>
-          <div>
-            <CalendarDays size={15} />
-            {
-              activity.filter(
-                (a) => a.active_seconds > 0 || a.videos_completed > 0,
-              ).length
-            }{" "}
-            active learning days in this period
-          </div>
-          <div>
-            <Clock3 size={15} />
-            Timezone: {data.profile.timezone}
-          </div>
-        </section>
+      <div className="analytics-detail-grid">
+        <CourseComparison courses={data.courses} />
+        <WeekdayRhythm activity={activity} />
       </div>
+      <div className="learning-perspective-grid">
+        <LearningLandscape
+          activity={data.activity}
+          timezone={data.profile.timezone}
+        />
+        <LearningMix courses={data.courses} />
+      </div>
+      <p className="analytics-data-caption">
+        {
+          activity.filter(
+            (a) =>
+              a.active_seconds > 0 ||
+              a.videos_completed > 0 ||
+              a.practice_completed > 0,
+          ).length
+        }{" "}
+        active days in this period · Timezone: {data.profile.timezone}. The
+        learning mix and course status show your current library.
+      </p>
     </>
   );
 }

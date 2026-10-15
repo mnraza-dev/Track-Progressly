@@ -1,122 +1,174 @@
 import Link from "next/link";
-import Image from "next/image";
 import {
+  ArrowUpRight,
   ArrowRight,
+  Play,
   Check,
   ListVideo,
   StickyNote,
   Target,
-  Play,
   ShieldCheck,
 } from "lucide-react";
 import { Logo } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
+import { SceneArtwork } from "@/components/three/scene-provider";
 export function Landing() {
   return (
     <div className="landing-page">
       <header className="landing-header">
-        <Logo />
+        <Link href="/" aria-label="LearnTrack homepage">
+          <Logo />
+        </Link>
         <nav>
-          <Link href="#how-it-works">How it works</Link>
+          <Link href="#how-it-works">The idea</Link>
           <Link href="/login">Sign in</Link>
           <Button asChild>
             <Link href="/signup">
               Get started free
-              <ArrowRight size={15} />
+              <ArrowUpRight size={16} />
             </Link>
           </Button>
         </nav>
       </header>
       <main>
         <section className="landing-hero">
-          <div>
-            <span className="hero-kicker">FOR YOUR EVER-CURIOUS MIND</span>
+          <div className="landing-hero-copy">
+            <span className="hero-kicker">
+              <span />A LEARNING SPACE. A FRESH PERSPECTIVE.
+            </span>
             <h1>
               Stop collecting tutorials.
               <br />
-              Start completing them<span>.</span>
+              <em>Start completing them.</em>
             </h1>
             <p>
-              A calmer home for your YouTube courses, notes, and learning goals.
-              Turn “saved for later” into skills that stay.
+              You’ve saved enough tutorials for a lifetime.
+              <br />
+              Give the next one a place to become a skill.
             </p>
             <Button asChild>
               <Link href="/signup">
                 Start your learning journey
-                <ArrowRight size={16} />
+                <ArrowUpRight size={17} />
               </Link>
             </Button>
             <span className="hero-footnote">
               <Check size={13} />
-              Your pace. Your path. Always free.
+              Free to start. Free to keep going.
+            </span>
+            <div className="landing-hero-index">
+              <span>01 — WATCH</span>
+              <span>02 — PRACTICE</span>
+              <span>03 — REMEMBER</span>
+            </div>
+          </div>
+          <div className="landing-art">
+            <SceneArtwork
+              kind="hero"
+              interactive
+              label="An interactive learning sculpture: books, a video lesson, and orbiting ideas. Drag or use arrow keys to explore."
+            />
+            <span className="landing-art-label">
+              A LITTLE SHIFT IN PERSPECTIVE.
             </span>
           </div>
-          <Image
-            src="/artwork/learning.svg"
-            width={600}
-            height={333}
-            alt="Videos, notes, and steady progress, together in one place"
-          />
         </section>
+        <div className="landing-manifesto">
+          <span>LESS “SAVED FOR LATER.”</span>
+          <span className="manifesto-star">✳</span>
+          <span>MORE “LOOK WHAT I MADE.”</span>
+        </div>
         <section id="how-it-works" className="landing-features">
           <div className="landing-section-heading">
-            <span className="eyebrow">
-              SMALL STEPS. EXTRAORDINARY PROGRESS.
-            </span>
+            <span className="eyebrow">A PLACE FOR YOUR NEXT CHAPTER</span>
             <h2>
-              A little less friction.
-              <br />A lot more follow-through.
+              Good things come
+              <br />
+              from <em>following through.</em>
             </h2>
+            <p>Everything you need to turn watching into doing.</p>
           </div>
           {[
             {
               icon: ListVideo,
-              title: "Bring a link. Find a path.",
-              body: "Import an entire YouTube playlist or build your own course. Every lesson stays in order, with progress that’s yours.",
+              kind: "code" as const,
+              number: "01",
+              title: "A path, from a playlist.",
+              body: "Bring a YouTube link. Get an ordered learning path, with a clear view of what’s done and what comes next.",
             },
             {
               icon: Play,
-              title: "Pick up where you left off.",
-              body: "Keep your place in every video. Track what you watched and choose when a lesson is complete.",
+              kind: "books" as const,
+              number: "02",
+              title: "Pick up. Move forward.",
+              body: "Keep your place in each video. Resume where you stopped, then decide when a lesson is complete.",
             },
             {
               icon: StickyNote,
-              title: "Make the knowledge yours.",
-              body: "Capture ideas with Markdown notes, timestamp a useful explanation, and put your learning into practice.",
+              kind: "design" as const,
+              number: "03",
+              title: "Make the idea yours.",
+              body: "Keep notes with the lesson, bookmark a useful moment, and work through a practice checklist.",
             },
             {
               icon: Target,
-              title: "Show up for your future self.",
-              body: "Set realistic goals, build a streak, and see your actual learning activity. One small step at a time.",
+              kind: "goal" as const,
+              number: "04",
+              title: "Make a little time.",
+              body: "Set an intention you can keep. See your actual learning time, course progress, and days you showed up.",
             },
           ].map((f) => (
-            <article key={f.title} className="panel">
-              <span className="goal-icon">
-                <f.icon size={21} />
-              </span>
-              <h3>{f.title}</h3>
-              <p>{f.body}</p>
+            <article key={f.title} className="panel landing-feature">
+              <div className="landing-feature-art">
+                <SceneArtwork
+                  kind={f.kind}
+                  label={`A sculptural illustration for ${f.title.toLowerCase()}`}
+                />
+              </div>
+              <div className="landing-feature-copy">
+                <span className="tiny-label">
+                  {f.number} / <f.icon size={14} />
+                </span>
+                <h3>{f.title}</h3>
+                <p>{f.body}</p>
+              </div>
             </article>
           ))}
         </section>
         <section className="landing-cta">
-          <h2>Your next chapter is waiting.</h2>
-          <p>Bring your curiosity. We’ll help with the follow-through.</p>
-          <Button asChild>
-            <Link href="/signup">
-              Get started free
-              <ArrowRight size={16} />
-            </Link>
-          </Button>
-          <span>
-            <ShieldCheck size={14} />
-            Private by design. Free by choice.
-          </span>
+          <SceneArtwork
+            kind="orbit"
+            className="landing-cta-art"
+            label="A continuous, intertwined learning sculpture"
+          />
+          <div>
+            <span className="eyebrow">ONE GOOD PLACE TO BEGIN</span>
+            <h2>
+              Your next skill
+              <br />
+              is <em>worth the time.</em>
+            </h2>
+            <p>Start with one course. See where it takes you.</p>
+            <Button asChild>
+              <Link href="/signup">
+                Get started free
+                <ArrowUpRight size={17} />
+              </Link>
+            </Button>
+            <span className="landing-privacy">
+              <ShieldCheck size={14} />
+              Your notes. Your progress. Your space.
+            </span>
+          </div>
         </section>
       </main>
       <footer>
         <Logo />
-        <span>Made for curious minds. Always learning.</span>
+        <span>A DAILY PRACTICE. A DIFFERENT PERSPECTIVE.</span>
+        <Link href="/login">
+          Back to your learning
+          <ArrowRight size={14} />
+        </Link>
       </footer>
     </div>
   );

@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import { SceneArtwork } from "@/components/three/scene-provider";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -58,7 +58,7 @@ export function ImportForm() {
   const [links, setLinks] = useState([{ url: "", title: "" }]);
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { input: "" },
+    defaultValues: { input: params.get("url") || "" },
   });
   async function getPreview({ input }: z.infer<typeof schema>) {
     setBusy(true);
@@ -452,11 +452,10 @@ export function ImportForm() {
                 </section>
               </div>
             ))}
-            <Image
-              width={450}
-              height={250}
-              src="/artwork/learning.svg"
-              alt="Learning, one step at a time"
+            <SceneArtwork
+              kind="books"
+              className="import-guide-art"
+              label="A small library of possibilities"
             />
           </div>
         </aside>

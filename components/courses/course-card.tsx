@@ -51,8 +51,20 @@ export function CourseArtwork({
         />
       ) : (
         <>
-          <SceneArtwork kind={slug.includes('design') ? 'design' : slug.includes('data') || slug.includes('python') ? 'data' : 'code'} label={`A sculptural study in ${category.toLowerCase()}`} />
-          <span className="art-topline">{category.toUpperCase()}<span>↗</span></span>
+          <SceneArtwork
+            kind={
+              slug.includes("design")
+                ? "design"
+                : slug.includes("data") || slug.includes("python")
+                  ? "data"
+                  : "code"
+            }
+            label={`A sculptural study in ${category.toLowerCase()}`}
+          />
+          <span className="art-topline">
+            {category.toUpperCase()}
+            <span>↗</span>
+          </span>
           <span className="art-bottomline">KEEP MAKING.</span>
         </>
       )}
