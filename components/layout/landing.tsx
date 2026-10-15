@@ -313,17 +313,17 @@ export function Landing() {
               <summary>Can I start without setting anything up?</summary>
               <p>
                 Yes. The local workspace saves your courses, notes, and goals in
-                this browser. You can build courses manually without API
-                credentials. YouTube link imports require the server’s YouTube
-                API key.
+                this browser. You can build a course manually by adding video
+                links. Importing a whole playlist is available when YouTube
+                imports are enabled for your workspace.
               </p>
             </details>
             <details>
               <summary>Can I take my learning across devices?</summary>
               <p>
-                With Supabase configured, you can sign in and save to your
-                account. A local workspace stays in the browser where you
-                created it and is not automatically copied into a cloud account.
+                If your workspace supports accounts, sign in to save across
+                devices. A local workspace stays in the browser where you
+                created it and is not automatically copied into an account.
               </p>
             </details>
             <details>

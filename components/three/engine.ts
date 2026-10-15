@@ -78,12 +78,12 @@ export class StudioRenderer {
       registration.options.selected,
     );
     scene.add(model);
-    const ambient = new THREE.HemisphereLight("#ffffff", "#b3a2cb", 0.85);
+    const ambient = new THREE.HemisphereLight("#ffffff", "#78958c", 0.85);
     scene.add(ambient);
     const key = new THREE.DirectionalLight("#fff4e1", 2.1);
     key.position.set(-3, 5, 5);
     scene.add(key);
-    const fill = new THREE.DirectionalLight("#beb5ff", 1.0);
+    const fill = new THREE.DirectionalLight("#addfd0", 1.0);
     fill.position.set(4, 1, -2);
     scene.add(fill);
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 30);

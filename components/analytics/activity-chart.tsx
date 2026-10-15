@@ -127,7 +127,9 @@ export function ActivityChart({
               labelStyle={{ color: "var(--foreground)", marginBottom: 5 }}
               cursor={
                 view === "bar"
-                  ? { fill: "#8d7ade12" }
+                  ? {
+                      fill: "color-mix(in srgb, var(--chart-1) 8%, transparent)",
+                    }
                   : { stroke: "var(--chart-1)", strokeDasharray: "3 4" }
               }
               labelFormatter={(_, payload) => payload[0]?.payload.label || ""}

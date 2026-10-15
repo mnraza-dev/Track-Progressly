@@ -296,6 +296,7 @@ export function CourseWorkspace({
                 <div className="search-input">
                   <Search size={15} />
                   <Input
+                    className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
                     value={query}
                     onChange={(e) => {
                       setQuery(e.target.value);

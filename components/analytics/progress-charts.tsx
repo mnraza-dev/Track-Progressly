@@ -179,7 +179,9 @@ export function CourseComparison({ courses }: { courses: Course[] }) {
                 />
                 <Tooltip
                   contentStyle={chartTooltipStyle}
-                  cursor={{ fill: "#8d7ade0c" }}
+                  cursor={{
+                    fill: "color-mix(in srgb, var(--chart-1) 5%, transparent)",
+                  }}
                   formatter={(value, name) => [`${value} lessons`, name]}
                 />
                 {lessonSegments.map((segment) => (
@@ -298,7 +300,9 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
             <Tooltip
               contentStyle={chartTooltipStyle}
               formatter={(value) => [`${value} minutes`, "Learning"]}
-              cursor={{ fill: "#648d7b0c" }}
+              cursor={{
+                fill: "color-mix(in srgb, var(--chart-2) 5%, transparent)",
+              }}
             />
             <Bar
               dataKey="minutes"

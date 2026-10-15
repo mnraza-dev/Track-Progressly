@@ -46,11 +46,11 @@
   }
   .chart-view-switch button[aria-pressed="true"] {
     background: var(--surface);
-    color: var(--purple);
+    color: var(--primary);
     box-shadow: 0 1px 3px #22222210;
   }
   .chart-view-switch button:hover {
-    color: var(--purple);
+    color: var(--primary);
   }
   .chart-plot {
     width: 100%;
@@ -58,7 +58,7 @@
   }
   .chart-plot svg:focus-visible,
   .donut-wrap svg:focus-visible {
-    outline: 2px solid var(--purple);
+    outline: 2px solid var(--primary);
     outline-offset: -2px;
     border-radius: 5px;
   }
@@ -74,7 +74,7 @@
     cursor: pointer;
   }
   .chart-data summary:hover {
-    color: var(--purple);
+    color: var(--primary);
   }
   .chart-data table {
     width: 100%;
@@ -220,21 +220,21 @@
     display: flex;
     align-items: center;
     gap: 7px;
-    color: var(--purple);
+    color: var(--primary);
     font-size: 12px;
     padding-top: 12px;
     border-top: 1px solid var(--border);
   }
   .chart-card-link:hover {
-    color: var(--purple-dark);
+    color: var(--accent-foreground);
   }
   .panel.landscape-panel {
     padding: 26px;
-    background: #191820;
-    border-color: #37343f;
+    background: var(--scene-background);
+    border-color: var(--scene-border);
     overflow: hidden;
     position: relative;
-    color: #f4f2fa;
+    color: var(--scene-foreground);
   }
   .landscape-heading {
     display: flex;
@@ -243,17 +243,17 @@
     gap: 15px;
   }
   .landscape-heading .section-index {
-    color: #c7c1d6;
+    color: var(--scene-muted);
     font-size: 11px;
   }
   .landscape-heading h2 {
     font-size: 22px;
     font-weight: 450;
     letter-spacing: -0.6px;
-    color: #f4f2fa;
+    color: var(--scene-foreground);
   }
   .landscape-heading > svg {
-    color: #c7bafa;
+    color: var(--scene-primary);
   }
   .landscape-body {
     display: grid;
@@ -269,7 +269,7 @@
   .landscape-period {
     font-size: 11px;
     letter-spacing: 1.6px;
-    color: #bbb3c7;
+    color: var(--scene-muted);
     font-family: var(--font-geist-mono), monospace;
   }
   .landscape-copy > strong {
@@ -280,18 +280,18 @@
     letter-spacing: -2px;
     line-height: 1.1;
     margin-top: 16px;
-    color: #c5b8ff;
+    color: var(--scene-primary);
     font-variant-numeric: tabular-nums;
   }
   .landscape-copy > strong span {
-    color: #d0c8df;
+    color: var(--scene-muted);
     font-size: 12px;
     letter-spacing: 0;
     font-weight: 400;
     margin-top: 7px;
   }
   .landscape-copy p {
-    color: #c7c1d6;
+    color: var(--scene-muted);
     font-size: 12px;
     max-width: 180px;
     line-height: 1.8;
@@ -299,7 +299,7 @@
   }
   .landscape-metrics {
     display: inline-flex;
-    border: 1px solid #655974;
+    border: 1px solid var(--scene-border);
     border-radius: 6px;
     padding: 3px;
     gap: 3px;
@@ -308,23 +308,23 @@
     font-size: 11px;
     padding: 7px 10px;
     border-radius: 3px;
-    color: #c7c1d6;
+    color: var(--scene-muted);
     cursor: pointer;
   }
   .landscape-metrics button[aria-pressed="true"] {
-    background: #40364f;
-    color: #f4f2fa;
+    background: var(--scene-selected);
+    color: var(--scene-foreground);
   }
   .landscape-copy > a {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #c7bafa;
+    color: var(--scene-primary);
     font-size: 11px;
     margin-top: 20px;
   }
   .landscape-copy > a:hover {
-    color: #c5b8ff;
+    color: var(--scene-primary);
   }
   .landscape-visual {
     min-width: 0;
@@ -339,19 +339,19 @@
     font-size: 11px;
     text-align: center;
     letter-spacing: 1px;
-    color: #bbb3c7;
+    color: var(--scene-muted);
     margin: -18px 0 10px;
     pointer-events: none;
   }
   .landscape-visual .scene-reset {
-    color: #dcd5e6;
-    background: #5b4d72;
-    border-color: #786391;
+    color: var(--scene-muted);
+    background: var(--scene-selected);
+    border-color: var(--scene-border);
   }
   .landscape-days {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    border-top: 1px solid #494151;
+    border-top: 1px solid var(--scene-border);
     gap: 5px;
     padding-top: 16px;
   }
@@ -364,11 +364,11 @@
     border-radius: 6px;
     cursor: pointer;
     border: 1px solid transparent;
-    color: #c7c1d6;
+    color: var(--scene-muted);
     font-size: 11px;
   }
   .landscape-days button strong {
-    color: #ddd5e5;
+    color: var(--scene-muted);
     font-size: 16px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
@@ -377,36 +377,36 @@
     width: 3px;
     height: 3px;
     border-radius: 50%;
-    background: #766882;
+    background: #668b80;
   }
   .landscape-days button:hover {
-    background: #3b3347;
+    background: var(--scene-hover);
   }
   .landscape-days button[aria-pressed="true"] {
-    background: #433a50;
-    border-color: #61546f;
-    color: #e1d8ff;
+    background: var(--scene-selected);
+    border-color: var(--scene-border);
+    color: var(--scene-primary);
   }
   .landscape-days button[aria-pressed="true"] strong {
-    color: #c5b8ff;
+    color: var(--scene-primary);
   }
   .landscape-days button[aria-pressed="true"] i {
-    background: #c5b8ff;
+    background: var(--scene-primary);
   }
   .landscape-footer {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #c7c1d6;
+    color: var(--scene-muted);
     font-size: 11px;
-    border-top: 1px solid #494151;
+    border-top: 1px solid var(--scene-border);
     padding-top: 14px;
     margin-top: 15px;
     flex-wrap: wrap;
   }
   .landscape-footer strong {
     font-weight: 500;
-    color: #dad4e3;
+    color: var(--scene-muted);
   }
   .landscape-footer span:last-child {
     margin-left: auto;
@@ -414,7 +414,7 @@
   }
   .landscape-panel button:focus-visible,
   .landscape-panel a:focus-visible {
-    outline: 2px solid #c5b8ff;
+    outline: 2px solid var(--scene-primary);
     outline-offset: 3px;
   }
   .comparison-legend {
@@ -455,7 +455,7 @@
     color: var(--foreground);
   }
   .course-chart-links a:hover {
-    color: var(--purple);
+    color: var(--primary);
   }
   .rhythm-panel .chart-plot {
     margin-top: 20px;
@@ -486,7 +486,7 @@
     display: flex;
     gap: 6px;
     align-items: center;
-    color: var(--purple);
+    color: var(--primary);
     font-size: 12px;
   }
   .analytics-data-caption {
@@ -498,11 +498,11 @@
     margin: 24px 0;
   }
   .weekly-goal-chart .panel-heading > svg {
-    color: var(--purple);
+    color: var(--primary);
   }
   .mix-legend button:focus-visible,
   .chart-view-switch button:focus-visible {
-    outline: 2px solid var(--purple);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
 

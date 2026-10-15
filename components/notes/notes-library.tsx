@@ -52,11 +52,7 @@ export function NotesLibrary() {
             Your ideas, your aha moments, and the things you want to remember.
           </p>
         </div>
-        <Button
-          variant="outline"
-          disabled={!notes.length}
-          onClick={exportAll}
-        >
+        <Button variant="outline" disabled={!notes.length} onClick={exportAll}>
           <Download size={16} />
           Export Markdown
         </Button>
@@ -65,6 +61,7 @@ export function NotesLibrary() {
         <div className="search-input">
           <Search size={17} />
           <Input
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
             aria-label="Search notes"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

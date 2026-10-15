@@ -47,7 +47,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     }
     if (!isConnected) {
       setError(
-        "Account features need Supabase. Connect your project using the setup guide, or explore the local workspace.",
+        "Accounts are not enabled for this workspace yet. You can start learning in the local workspace below.",
       );
       return;
     }
@@ -202,6 +202,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <div className="input-with-icon">
                   <User size={17} />
                   <Input
+                    className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
                     {...form.register("name")}
                     required
                     placeholder="What should we call you?"
@@ -216,6 +217,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <div className="input-with-icon">
                   <Mail size={17} />
                   <Input
+                    className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
                     {...form.register("email")}
                     type="email"
                     placeholder="you@example.com"
@@ -235,6 +237,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <div className="input-with-icon">
                   <LockKeyhole size={17} />
                   <Input
+                    className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
                     {...form.register("password")}
                     type="password"
                     placeholder="At least 8 characters"

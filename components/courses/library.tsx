@@ -76,6 +76,7 @@ export function Library({ resume = false }: { resume?: boolean }) {
         <div className="search-input">
           <Search size={18} />
           <Input
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search courses..."

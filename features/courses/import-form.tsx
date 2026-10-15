@@ -203,6 +203,7 @@ export function ImportForm() {
                 <div className="input-with-icon">
                   <Link2 size={17} />
                   <Input
+                    className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
                     {...form.register("input")}
                     placeholder="https://www.youtube.com/playlist?list=..."
                   />
@@ -224,7 +225,7 @@ export function ImportForm() {
               </Button>
               <span className="secure-hint">
                 <ShieldCheck size={14} />
-                Official YouTube API. No downloading or scraping.
+                Videos play on YouTube. Your learning stays organized here.
               </span>
             </form>
           ) : (
@@ -307,7 +308,7 @@ export function ImportForm() {
                 <div className="manual-lessons">
                   <h3>Your lessons</h3>
                   <p className="muted">
-                    Add video links and their titles. No API key needed.
+                    Add video links and give each lesson a title.
                   </p>
                   {links.map((link, index) => (
                     <div key={index} className="manual-lesson">

@@ -210,7 +210,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span>{title}</span>
           </div>
           <div className="topbar-right">
-            <button className="global-search" onClick={() => setSearch(true)}>
+            <button
+              className="global-search"
+              aria-label="Search workspace"
+              onClick={() => setSearch(true)}
+            >
               <Search size={16} />
               <span>Find a course or note</span>
               <kbd>⌘ K</kbd>
@@ -284,6 +288,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="search-input">
           <Search size={19} />
           <Input
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}

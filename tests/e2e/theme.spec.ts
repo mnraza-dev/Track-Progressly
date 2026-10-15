@@ -140,6 +140,7 @@ test("light, dark, and system themes persist with readable text and larger typog
   await expect(page.locator(".hero-copy h2")).toBeVisible();
   for (const sample of await textContrast(page, [
     ".hero-copy h2",
+    ".hero-copy h2 em",
     ".hero-copy p",
     '.hero-copy [data-slot="button"]',
     ".stage-caption p",

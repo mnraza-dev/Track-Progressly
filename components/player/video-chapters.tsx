@@ -67,6 +67,7 @@ export function VideoChapters({
           <label className="search-input chapter-search">
             <Search size={14} />
             <Input
+              className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               aria-label="Search video chapters"

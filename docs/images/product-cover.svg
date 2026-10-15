@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="470" viewBox="0 0 1440 470" role="img" aria-label="Progressly. Your next tutorial. Your next skill.">
   <defs>
-    <radialGradient id="light"><stop stop-color="#423650"/><stop offset="1" stop-color="#191820"/></radialGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ded7ff"/><stop offset=".4" stop-color="#a38af3"/><stop offset="1" stop-color="#6d4cb6"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#274b47"/><stop offset="1" stop-color="#14272a"/></radialGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c9eadf"/><stop offset=".4" stop-color="#5da995"/><stop offset="1" stop-color="#256b5b"/></linearGradient>
   </defs>
-  <rect width="1440" height="470" rx="20" fill="#111115"/>
-  <g transform="translate(64 55)" fill="#b7a7f5"><rect y="18" width="7" height="14" rx="2"/><rect x="12" y="10" width="7" height="22" rx="2" opacity=".8"/><rect x="24" width="7" height="32" rx="2" opacity=".6"/></g>
-  <text x="109" y="83" fill="#f4f2fa" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="600" letter-spacing="-1">Progressly</text>
-  <text x="65" y="151" fill="#c7c1d6" font-family="Inter,Arial,sans-serif" font-size="11" letter-spacing="2">YOUR YOUTUBE LEARNING STUDIO</text>
-  <text x="60" y="235" fill="#f4f2fa" font-family="Plus Jakarta Sans,Arial,sans-serif" font-size="66" letter-spacing="-3">Your next tutorial.</text>
-  <text x="60" y="313" fill="#bdb0f7" font-family="Plus Jakarta Sans,Arial,sans-serif" font-size="66" letter-spacing="-3">Your next skill.</text>
-  <text x="65" y="367" fill="#c7c1d6" font-family="Inter,Arial,sans-serif" font-size="17">Your courses, notes, and practice. A clear next step.</text>
-  <path d="M65 408H750" stroke="#37343f"/>
-  <g fill="#c7c1d6" font-family="Inter,Arial,sans-serif" font-size="10" letter-spacing="2"><text x="65" y="439">01 WATCH</text><text x="270" y="439">02 PRACTICE</text><text x="509" y="439">03 REMEMBER</text></g>
-  <rect x="876" y="32" width="532" height="406" rx="14" fill="url(#light)" stroke="#37343f"/>
-  <text x="901" y="66" fill="#c7c1d6" font-family="Inter,Arial,sans-serif" font-size="9" letter-spacing="2">A LITTLE PERSPECTIVE</text>
-  <ellipse cx="1150" cy="236" rx="156" ry="114" fill="none" stroke="#7f738f" transform="rotate(-27 1150 236)"/>
+  <rect width="1440" height="470" rx="20" fill="#0d1718"/>
+  <g transform="translate(64 55)" fill="#8cdcc8"><rect y="18" width="7" height="14" rx="2"/><rect x="12" y="10" width="7" height="22" rx="2" opacity=".8"/><rect x="24" width="7" height="32" rx="2" opacity=".6"/></g>
+  <text x="109" y="83" fill="#f0f6f2" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="600" letter-spacing="-1">Progressly</text>
+  <text x="65" y="151" fill="#b7cbc4" font-family="Inter,Arial,sans-serif" font-size="11" letter-spacing="2">YOUR YOUTUBE LEARNING STUDIO</text>
+  <text x="60" y="235" fill="#f0f6f2" font-family="Plus Jakarta Sans,Arial,sans-serif" font-size="66" letter-spacing="-3">Your next tutorial.</text>
+  <text x="60" y="313" fill="#edb28b" font-family="Plus Jakarta Sans,Arial,sans-serif" font-size="66" letter-spacing="-3">Your next skill.</text>
+  <text x="65" y="367" fill="#b7cbc4" font-family="Inter,Arial,sans-serif" font-size="17">Your courses, notes, and practice. A clear next step.</text>
+  <path d="M65 408H750" stroke="#355154"/>
+  <g fill="#b7cbc4" font-family="Inter,Arial,sans-serif" font-size="10" letter-spacing="2"><text x="65" y="439">01 WATCH</text><text x="270" y="439">02 PRACTICE</text><text x="509" y="439">03 REMEMBER</text></g>
+  <rect x="876" y="32" width="532" height="406" rx="14" fill="url(#light)" stroke="#355154"/>
+  <text x="901" y="66" fill="#b7cbc4" font-family="Inter,Arial,sans-serif" font-size="9" letter-spacing="2">A LITTLE PERSPECTIVE</text>
+  <ellipse cx="1150" cy="236" rx="156" ry="114" fill="none" stroke="#71988d" transform="rotate(-27 1150 236)"/>
   <ellipse cx="1145" cy="222" rx="103" ry="125" fill="none" stroke="url(#ring)" stroke-width="28" transform="rotate(29 1145 222)"/>
-  <g transform="translate(1028 152) rotate(-7 120 77)"><rect width="240" height="154" rx="10" fill="#b8abe4"/><rect x="5" y="5" width="230" height="144" rx="7" fill="#e6e3ec"/><path d="M5 27H235" stroke="#c5c0d0"/><circle cx="18" cy="16" r="3" fill="#a295c0"/><circle cx="30" cy="16" r="3" fill="#b4acbf"/><circle cx="42" cy="16" r="3" fill="#c0bac9"/><rect x="95" y="50" width="50" height="50" rx="12" fill="#8d72ce"/><path d="M115 62L132 75L115 88Z" fill="#f4f2fa"/><rect x="29" y="127" width="182" height="3" rx="1.5" fill="#cbc6d3"/><rect x="29" y="127" width="71" height="3" rx="1.5" fill="#8d72ce"/></g>
-  <g transform="translate(1034 334) rotate(8)"><rect width="213" height="23" rx="4" fill="#998ca9"/><rect x="5" y="2" width="202" height="16" rx="2" fill="#e8e3ed"/></g>
-  <circle cx="1290" cy="126" r="19" fill="#dad8df"/><circle cx="984" cy="303" r="11" fill="#c1cea0"/>
-  <text x="1142" y="411" text-anchor="middle" fill="#c7c1d6" font-family="Inter,Arial,sans-serif" font-size="9" letter-spacing="2">WATCH. PRACTICE. REMEMBER.</text>
+  <g transform="translate(1028 152) rotate(-7 120 77)"><rect width="240" height="154" rx="10" fill="#65b8a4"/><rect x="5" y="5" width="230" height="144" rx="7" fill="#eee9dc"/><path d="M5 27H235" stroke="#d2d8c9"/><circle cx="18" cy="16" r="3" fill="#4b8e80"/><circle cx="30" cy="16" r="3" fill="#a3b9a1"/><circle cx="42" cy="16" r="3" fill="#c0cdbb"/><rect x="95" y="50" width="50" height="50" rx="12" fill="#237e70"/><path d="M115 62L132 75L115 88Z" fill="#f0f6f2"/><rect x="29" y="127" width="182" height="3" rx="1.5" fill="#cbd6cb"/><rect x="29" y="127" width="71" height="3" rx="1.5" fill="#237e70"/></g>
+  <g transform="translate(1034 334) rotate(8)"><rect width="213" height="23" rx="4" fill="#aa7858"/><rect x="5" y="2" width="202" height="16" rx="2" fill="#ebddc9"/></g>
+  <circle cx="1290" cy="126" r="19" fill="#d3dfdb"/><circle cx="984" cy="303" r="11" fill="#dbad86"/>
+  <text x="1142" y="411" text-anchor="middle" fill="#b7cbc4" font-family="Inter,Arial,sans-serif" font-size="9" letter-spacing="2">WATCH. PRACTICE. REMEMBER.</text>
 </svg>

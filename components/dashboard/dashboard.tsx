@@ -224,7 +224,7 @@ export function Dashboard() {
           <div className="start-course-visual">
             <SceneArtwork
               kind="books"
-              label="A stack of sculptural books in ink, violet, and chartreuse"
+              label="A stack of sculptural books in teal, copper, and sage"
             />
           </div>
           <div className="start-course-copy">
@@ -253,6 +253,7 @@ export function Dashboard() {
             <div className="quick-link-input">
               <Link2 size={16} />
               <Input
+                className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
                 id="quick-course-link"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}

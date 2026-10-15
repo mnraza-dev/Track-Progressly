@@ -182,7 +182,7 @@ export function Settings() {
               className={`connection-status ${isConnected ? "connected" : ""}`}
             >
               {isConnected ? <CheckCircle2 size={17} /> : <Monitor size={17} />}{" "}
-              {isConnected ? "Supabase connected" : "Saved in this browser"}
+              {isConnected ? "Saved to your account" : "Saved in this browser"}
             </div>
             <p className="settings-help">
               {isConnected

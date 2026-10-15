@@ -293,24 +293,24 @@
     padding-top: 15px;
   }
   .product-bento .product-bento-focus {
-    background: #1c1a25;
-    color: #f4f1fb;
+    background: var(--scene-background);
+    color: var(--scene-foreground);
   }
   .product-bento-focus > svg {
-    color: #bdb0f7;
+    color: var(--scene-primary);
     margin-bottom: 30px;
   }
   .product-bento-focus h3 {
-    color: #f4f1fb;
+    color: var(--scene-foreground);
   }
   .product-bento .product-bento-focus > p {
-    color: #c2bcd2;
+    color: var(--scene-muted);
   }
   .product-bento-focus > span {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #c2b5fb;
+    color: var(--scene-primary);
     font-size: 11px;
     letter-spacing: 1px;
     margin-top: 35px;
