@@ -176,6 +176,11 @@ test("description chapters navigate the player, queue early seeks, and follow pl
 test("manual videos load chapter metadata with retry and do not carry chapters into another lesson", async ({
   page,
 }) => {
+  const duplicateKeys: string[] = [];
+  page.on("console", (message) => {
+    if (message.text().includes("Encountered two children with the same key"))
+      duplicateKeys.push(message.text());
+  });
   const data = chartWorkspace();
   data.courses[0].videos[1].youtube_video_id = "Ke90Tje7VS0";
   await page.addInitScript(
@@ -218,12 +223,21 @@ test("manual videos load chapter metadata with retry and do not carry chapters i
     page.getByRole("button", { name: "Jump to Practice at 3:30" }),
   ).toBeVisible();
   expect(requests).toBe(2);
+  await page
+    .getByRole("textbox", { name: "Lesson notes" })
+    .fill("First lesson notes.");
+  await expect(
+    page.getByText("All changes saved", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: /^Lessons / }).click();
   await page.locator(".lesson-item").filter({ hasText: "Lesson 1" }).click();
   await expect(page).toHaveURL(/\/learn\/lesson-1$/);
   await expect(
     page.getByRole("heading", { name: "Lesson 1", exact: true }),
   ).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Lesson notes" })).toHaveValue(
+    "",
+  );
   await page.getByRole("button", { name: /^Chapters / }).click();
   await expect(
     page.getByText(
@@ -232,4 +246,5 @@ test("manual videos load chapter metadata with retry and do not carry chapters i
   ).toBeVisible();
   await expect(page.getByRole("button", { name: /^Jump to/ })).toHaveCount(0);
   expect(requests).toBe(3);
+  expect(duplicateKeys).toEqual([]);
 });

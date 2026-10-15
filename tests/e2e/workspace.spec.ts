@@ -9,6 +9,10 @@ test("manual course, completion, notes, practice and reload persistence", async 
 }, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.text().includes("Encountered two children with the same key"))
+      errors.push(message.text());
+  });
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "A good day to learn" }),

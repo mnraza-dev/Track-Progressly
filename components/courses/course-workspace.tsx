@@ -381,7 +381,7 @@ export function CourseWorkspace({
             <>
               {lesson.availability_status === "available" ? (
                 <YouTubePlayer
-                  key={lesson.id}
+                  key={`player:${lesson.id}`}
                   ref={player}
                   lesson={lesson}
                   onPositionChange={(seconds) =>
@@ -474,7 +474,11 @@ export function CourseWorkspace({
                   </a>
                 </div>
               </div>
-              <LessonNotes key={lesson.id} lesson={lesson} player={player} />
+              <LessonNotes
+                key={`notes:${lesson.id}`}
+                lesson={lesson}
+                player={player}
+              />
               <div className="lesson-navigation">
                 <span>
                   <Clock size={14} />
