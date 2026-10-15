@@ -3073,3 +3073,30 @@ html[data-theme="dark"] .video-chapters .chapter-search {
     font-size: 9px;
   }
 }
+.chapter-empty {
+  min-height: 190px;
+  padding: 28px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-direction: column;
+  text-align: center;
+  color: var(--muted);
+}
+.chapter-empty p {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.9;
+}
+.chapter-empty button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--purple);
+  font-size: 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 12px;
+  cursor: pointer;
+}

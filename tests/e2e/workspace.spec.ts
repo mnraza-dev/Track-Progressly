@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/youtube", (route) =>
+    route.fulfill({ json: { videos: [] } }),
+  );
+});
 test("manual course, completion, notes, practice and reload persistence", async ({
   page,
 }, testInfo) => {

@@ -73,9 +73,9 @@ export function CourseWorkspace({
     course?.target_completion_date || "",
   );
   const [refreshing, setRefreshing] = useState(false);
-  const [sidebarView, setSidebarView] = useState<"auto" | "lessons" | "chapters">(
-    "auto",
-  );
+  const [sidebarView, setSidebarView] = useState<
+    "auto" | "lessons" | "chapters"
+  >("auto");
   const [playback, setPlayback] = useState<{
     lessonId: string;
     seconds: number;
@@ -84,8 +84,17 @@ export function CourseWorkspace({
   const lesson = videoId
     ? course?.videos.find((v) => v.id === videoId)
     : course?.videos.find((v) => v.id === selectedId) ||
-      course?.videos.find((v) => !v.progress.is_completed && v.availability_status === "available") || course?.videos[0];
-  const { chapters, loading: chaptersLoading, error: chaptersError, retry: retryChapters } = useVideoChapters(lesson);
+      course?.videos.find(
+        (v) =>
+          !v.progress.is_completed && v.availability_status === "available",
+      ) ||
+      course?.videos[0];
+  const {
+    chapters,
+    loading: chaptersLoading,
+    error: chaptersError,
+    retry: retryChapters,
+  } = useVideoChapters(lesson);
   if (!course)
     return (
       <div className="large-empty">
@@ -100,7 +109,10 @@ export function CourseWorkspace({
       </div>
     );
   const percent = completion(course);
-  const showChapters = sidebarView === "chapters" || (sidebarView === "auto" && chapters.length > 0);
+  const showChapters =
+    lesson?.availability_status === "available" &&
+    (sidebarView === "chapters" ||
+      (sidebarView === "auto" && chapters.length > 0));
   const position =
     playback?.lessonId === lesson?.id
       ? playback?.seconds || 0
@@ -245,7 +257,7 @@ export function CourseWorkspace({
                 aria-pressed={showChapters}
                 onClick={() => setSidebarView("chapters")}
               >
-                  Chapters <span>{chaptersLoading ? "…" : chapters.length}</span>
+                Chapters <span>{chaptersLoading ? "…" : chapters.length}</span>
               </button>
             </div>
           )}
@@ -370,7 +382,12 @@ export function CourseWorkspace({
                   ref={player}
                   lesson={lesson}
                   onPositionChange={(seconds) =>
-                    setPlayback({ lessonId: lesson.id, seconds })
+                    setPlayback((current) =>
+                      current?.lessonId === lesson.id &&
+                      Math.floor(current.seconds) === Math.floor(seconds)
+                        ? current
+                        : { lessonId: lesson.id, seconds },
+                    )
                   }
                 />
               ) : (
