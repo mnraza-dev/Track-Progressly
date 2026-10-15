@@ -182,7 +182,10 @@ test("manual videos load chapter metadata with retry and do not carry chapters i
       duplicateKeys.push(message.text());
   });
   const data = chartWorkspace();
-  data.courses[0].videos[1].youtube_video_id = "Ke90Tje7VS0";
+  const [firstLesson, secondLesson] = data.courses[0].videos;
+  firstLesson.id = crypto.randomUUID();
+  secondLesson.id = crypto.randomUUID();
+  secondLesson.youtube_video_id = "Ke90Tje7VS0";
   await page.addInitScript(
     (data) =>
       localStorage.setItem("learntrack-workspace-v1", JSON.stringify(data)),
@@ -213,7 +216,7 @@ test("manual videos load chapter metadata with retry and do not carry chapters i
       },
     });
   });
-  await page.goto("/courses/react/learn/lesson-0");
+  await page.goto(`/courses/react/learn/${firstLesson.id}`);
   await page.getByRole("button", { name: /^Chapters / }).click();
   await expect(
     page.getByText("We couldn’t check this video’s chapters."),
@@ -231,7 +234,7 @@ test("manual videos load chapter metadata with retry and do not carry chapters i
   ).toBeVisible();
   await page.getByRole("button", { name: /^Lessons / }).click();
   await page.locator(".lesson-item").filter({ hasText: "Lesson 1" }).click();
-  await expect(page).toHaveURL(/\/learn\/lesson-1$/);
+  await expect(page).toHaveURL(new RegExp(`/learn/${secondLesson.id}$`));
   await expect(
     page.getByRole("heading", { name: "Lesson 1", exact: true }),
   ).toBeVisible();

@@ -1,10 +1,10 @@
 import { importYouTube, YouTubeError } from "@/lib/youtube/service";
 import { serverSupabase } from "@/lib/supabase/server";
 import { z } from "zod";
+import { hasAllowedOrigin } from "@/lib/http/origin";
 const localLimits = new Map<string, { start: number; count: number }>();
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin)
+  if (!hasAllowedOrigin(request))
     return Response.json(
       { error: "Cross-origin requests are not allowed." },
       { status: 403 },
@@ -15,7 +15,10 @@ export async function POST(request: Request) {
       { status: 413 },
     );
   try {
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    ) {
       const db = await serverSupabase();
       const { data } = await db.auth.getUser();
       if (!data.user)
@@ -34,14 +37,8 @@ export async function POST(request: Request) {
           { status: 429 },
         );
     } else {
-      if (process.env.NODE_ENV === "production")
-        return Response.json(
-          {
-            error:
-              "Connect Supabase before enabling YouTube imports in production.",
-          },
-          { status: 503 },
-        );
+      // Browser workspaces can import in development and deployed builds.
+      // This per-process limit is best-effort across serverless instances.
       const ip =
         request.headers.get("x-forwarded-for")?.split(",")[0] || "local";
       const bucket = localLimits.get(ip);

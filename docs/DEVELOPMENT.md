@@ -14,9 +14,21 @@ cp .env.example .env.local
 bun run dev
 ```
 
-Open http://localhost:3000. With no Supabase variables, the application opens an explicitly labeled **local workspace**. Courses, notes, bookmarks, tasks, goals, and preferences persist in this browser using localStorage. There is no seeded or invented course data. Manual course creation works without any API credentials. This mode is for evaluation, not secure multi-user hosting. Local data is not automatically uploaded when cloud mode is configured.
+Open http://localhost:3000. With no Supabase variables, the application opens an explicitly labeled **local workspace**. Courses, notes, bookmarks, tasks, goals, and preferences persist in this browser using localStorage. There is no seeded or invented course data. Manual course creation works without any API credentials. Browser mode works in development and deployed builds; each browser keeps its own workspace, without accounts or cross-device sync. Local data is not automatically uploaded when cloud mode is configured.
 
 The public product page is also available at `/welcome`. Once Supabase is configured, `/` displays this public homepage and application routes require sign-in.
+
+## Deploy without Supabase
+
+Deploy as a Next.js server application so `/api/youtube` is available. Add `YOUTUBE_API_KEY` to the hosting provider's server environment. Your local `.env.local` is ignored by Git and is not included in a Git-based deployment.
+
+Leave both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` unset, then build and deploy. If these public variables were present in an earlier build, remove them from the hosting environment and redeploy: Next.js embeds their values into the browser bundle at build time. Setting only one Supabase variable keeps the app in browser mode.
+
+YouTube imports and chapter metadata lookups need only the server-side YouTube key. Courses, progress, notes, tasks, and goals stay in browser storage. Authentication and cross-device sync require Supabase. Browser storage belongs to the deployed origin, so data saved on localhost does not appear automatically on the deployed domain.
+
+Anonymous imports retain a ten-requests-per-minute, per-IP limit within each running server process. This is best-effort on serverless or multi-instance hosting; use the host's shared rate controls if you need a global limit. Cloud mode continues to require authentication and uses the database quota.
+
+Behind a reverse proxy, forward the public hostname in `Host` or `X-Forwarded-Host`. Both API mutation routes validate browser origins against those host headers, so an internal Next.js request URL such as `http://localhost:3000` does not block requests from the deployed domain.
 
 ## Product design and Three.js studio
 
@@ -109,6 +121,8 @@ bun run build
 
 Vitest covers URL parsing, unavailable metadata, paginated imports, API quota failure, duration parsing, duplicate courses, completion/undo, notes persistence, input validation, and timezone streaks. PGlite runs the actual migration inside a local PostgreSQL engine, with two test users and authenticated roles, to verify RLS and ownership rejection, atomic imports, secure rate limits, notes/practice persistence, and refresh preservation. It stubs only Supabase's `auth.users`/`auth.uid()` surface; Supabase's hosted auth/email/OAuth flows still require testing against your configured project.
 
+Route tests also cover production imports without Supabase, partially configured cloud credentials, anonymous and account quotas, public host forwarding, and rejected foreign origins. These tests mock YouTube metadata and cloud authentication without using real credentials.
+
 Playwright checks rendered text contrast in both themes, theme persistence and operating-system changes, and the larger typography. It uses a clean browser context for each test and exercises manual course creation, completion, note autosave/reload, practice, goals, analytics, profile persistence, and URL validation on desktop and mobile. Run these tests without Supabase environment variables to exercise the independent local mode. Tests create data only in isolated browser contexts.
 
 Refresh the README screenshots from an isolated illustrative workspace with `UPDATE_PRODUCT_SHOTS=1 bun run test:e2e tests/e2e/product.spec.ts --project=desktop`. Normal test runs leave the tracked product images unchanged.
@@ -117,9 +131,9 @@ Refresh the README screenshots from an isolated illustrative workspace with `UPD
 
 1. Push this repository to your Git host and import it into Vercel as a Next.js project.
 2. Use `bun install --frozen-lockfile` for installation and `bun run build` as the build command. Alternatively, npm can install from `package.json` if you generate and commit an npm lockfile.
-3. Add all three environment variables from `.env.example` to the correct Vercel environment.
-4. Apply the migration to your production Supabase project.
-5. Set Supabase's site URL to your production domain and allow its `/auth/callback` and password-reset callback. Add preview domains only if you need preview sign-in.
-6. Deploy and verify: signup/email confirmation, Google OAuth, playlist preview/confirm, video playback, completion, notes, logout/login persistence, and isolation using two accounts.
+3. For browser mode, add only `YOUTUBE_API_KEY` to the correct Vercel environment and leave both Supabase variables unset. For cloud mode, add both Supabase variables too. Redeploy after changing environment variables.
+4. For cloud mode, apply the migration to your production Supabase project.
+5. For cloud mode, set Supabase's site URL to your production domain and allow its `/auth/callback` and password-reset callback. Add preview domains only if you need preview sign-in.
+6. Deploy and verify playlist preview/confirm, video playback, completion, notes, and reload persistence. For cloud mode, also verify signup/email confirmation, Google OAuth, logout/login persistence, and isolation using two accounts.
 
 No hosted deployment or live Supabase/YouTube connection is included without your project credentials. Cloud integration is implemented, but hosted account flows and live YouTube imports must be validated with those credentials before treating a deployment as production-ready.

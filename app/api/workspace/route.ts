@@ -4,6 +4,7 @@ import { emptyProgress } from "@/types";
 import { importYouTube } from "@/lib/youtube/service";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { hasAllowedOrigin } from "@/lib/http/origin";
 async function authenticated() {
   const db = await serverSupabase();
   const { data, error } = await db.auth.getUser();
@@ -106,8 +107,7 @@ export async function GET() {
   }
 }
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin)
+  if (!hasAllowedOrigin(request))
     return Response.json(
       { error: "Cross-origin requests are not allowed." },
       { status: 403 },
