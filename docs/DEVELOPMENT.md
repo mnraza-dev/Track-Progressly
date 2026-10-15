@@ -81,6 +81,12 @@ Player tracking uses the official YouTube IFrame API. Active time is measured wh
 
 ## Architecture
 
+### Course creation
+
+After a successful import or manual course creation, the form clears its preview and fields before navigation. Next.js Cache Components preserves the route, so this reset allows the next Add course action to start fresh while unsuccessful submissions retain their input.
+
+`lib/id.ts` generates UUID v4 IDs for courses, lessons, notes, practice, bookmarks, and goals. It uses native `crypto.randomUUID` when available and cryptographic `getRandomValues` otherwise, supporting browsers where the native UUID method is unavailable. See [Web Crypto compatibility](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID).
+
 ### Video chapter navigation
 
 The lesson sidebar switches between course lessons and the current video's chapter timestamps. `lib/youtube/chapters.ts` reads timestamp/title lines from the saved video description, supports minute and hour formats, sorts and deduplicates sections, and discards timestamps beyond a known duration. The player reports its current position to highlight the active section. Chapter clicks use the IFrame Player API's `seekTo`, and a click during player loading is queued until readiness. Seeking does not add the skipped interval to learning time.

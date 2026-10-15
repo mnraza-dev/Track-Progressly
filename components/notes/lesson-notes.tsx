@@ -21,6 +21,7 @@ import {
 import { useWorkspace } from "@/stores/workspace";
 import { Button } from "@/components/ui/button";
 import { timestamp, downloadText } from "@/lib/utils";
+import { createId } from "@/lib/id";
 import type { Lesson, Note } from "@/types";
 import type { PlayerHandle } from "@/components/player/youtube-player";
 export function LessonNotes({
@@ -54,7 +55,7 @@ export function LessonNotes({
     if (!dirty.current) return;
     if (!pending.current)
       pending.current = {
-        id: editing?.id || crypto.randomUUID(),
+        id: editing?.id || createId(),
         timestamp:
           editing?.timestamp_seconds ??
           Math.floor(player.current?.position() || 0),
@@ -224,7 +225,7 @@ export function LessonNotes({
               onChange={(e) => {
                 if (!pending.current)
                   pending.current = {
-                    id: editing?.id || crypto.randomUUID(),
+                    id: editing?.id || createId(),
                     timestamp:
                       editing?.timestamp_seconds ??
                       Math.floor(player.current?.position() || 0),
@@ -320,7 +321,7 @@ export function LessonNotes({
                         void mutate({
                           op: "task",
                           video_id: lesson.id,
-                          id: item?.id || crypto.randomUUID(),
+                          id: item?.id || createId(),
                           title,
                           is_completed: !item?.is_completed,
                         })
@@ -378,7 +379,7 @@ export function LessonNotes({
                 void mutate({
                   op: "task",
                   video_id: lesson.id,
-                  id: crypto.randomUUID(),
+                  id: createId(),
                   title: task.trim(),
                   is_completed: false,
                 }).then(() => setTask(""));
@@ -414,7 +415,7 @@ export function LessonNotes({
               void mutate({
                 op: "bookmark",
                 video_id: lesson.id,
-                id: crypto.randomUUID(),
+                id: createId(),
                 timestamp_seconds: Math.floor(player.current?.position() || 0),
                 label: bookmarkLabel.trim() || "An idea worth revisiting",
               }).then(() => {

@@ -2,6 +2,7 @@ import type { Workspace, Course } from "@/types";
 import { emptyProgress } from "@/types";
 import type { Mutation } from "@/lib/validations";
 import { localDay } from "@/lib/utils";
+import { createId } from "@/lib/id";
 export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
   const next = structuredClone(state);
   const now = new Date().toISOString();
@@ -45,7 +46,7 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
         throw new Error("This video is already in your library.");
       const course: Course = {
         ...mutation.course,
-        id: crypto.randomUUID(),
+        id: createId(),
         created_at: now,
         updated_at: now,
         is_favorite: false,
@@ -53,7 +54,7 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
         completed_at: null,
         videos: mutation.course.videos.map((v) => ({
           ...v,
-          id: crypto.randomUUID(),
+          id: createId(),
           progress: { ...emptyProgress },
           notes: [],
           tasks: [],

@@ -20,6 +20,7 @@ import { SceneArtwork } from "@/components/three/scene-provider";
 import { ActivityChart } from "@/components/analytics/activity-chart";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { createId } from "@/lib/id";
 import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
 export function Goals() {
   const { data, mutate, notify } = useWorkspace();
@@ -315,7 +316,7 @@ export function Goals() {
             e.preventDefault();
             void mutate({
               op: "goal",
-              id: crypto.randomUUID(),
+              id: createId(),
               goal_type: type,
               target_value: value,
             }).then(() => {

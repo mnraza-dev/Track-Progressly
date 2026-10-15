@@ -138,6 +138,16 @@ export function ImportForm() {
       const added = useWorkspace
         .getState()
         .data.courses.find((c) => !existing.has(c.id));
+      // Cache Components preserves this page when navigating to the course.
+      // Clear a completed import so Add course starts a new transaction.
+      form.reset({ input: "" });
+      setTab("youtube");
+      setPreview(null);
+      setTitle("");
+      setCategory(params.get("category") || "Development");
+      setDescription("");
+      setDeadline("");
+      setLinks([{ url: "", title: "" }]);
       notify("Your course is ready. Let’s make progress!");
       router.push(added ? `/courses/${added.id}` : "/courses");
     } catch (e) {
