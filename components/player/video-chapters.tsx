@@ -1,4 +1,5 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Search, ListVideo, Play, LoaderCircle, RotateCcw } from "lucide-react";
 import {
@@ -65,7 +66,7 @@ export function VideoChapters({
         <>
           <label className="search-input chapter-search">
             <Search size={14} />
-            <input
+            <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               aria-label="Search video chapters"

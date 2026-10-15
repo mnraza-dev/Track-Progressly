@@ -21,9 +21,11 @@ async function installPlayer(page: Page, deferred = false) {
         state: 0,
         seeks: [] as number[],
         ready: () => {},
-        setPosition: (_value: number) => {},
+        setPosition: (value: number): void => {
+          state.position = value;
+        },
       };
-      (window as ChapterTestWindow).chapterTest = state;
+      (window as unknown as ChapterTestWindow).chapterTest = state;
       class Player {
         constructor(
           element: HTMLElement,
@@ -96,12 +98,18 @@ test("description chapters navigate the player, queue early seeks, and follow pl
     .getByRole("button", { name: "Jump to Practice at 3:30" })
     .click();
   expect(
-    await page.evaluate(() => (window as ChapterTestWindow).chapterTest.seeks),
+    await page.evaluate(
+      () => (window as unknown as ChapterTestWindow).chapterTest.seeks,
+    ),
   ).toEqual([]);
-  await page.evaluate(() => (window as ChapterTestWindow).chapterTest.ready());
+  await page.evaluate(() =>
+    (window as unknown as ChapterTestWindow).chapterTest.ready(),
+  );
   await expect
     .poll(() =>
-      page.evaluate(() => (window as ChapterTestWindow).chapterTest.seeks),
+      page.evaluate(
+        () => (window as unknown as ChapterTestWindow).chapterTest.seeks,
+      ),
     )
     .toEqual([210]);
   await expect(
@@ -113,7 +121,7 @@ test("description chapters navigate the player, queue early seeks, and follow pl
   await expect
     .poll(() =>
       page.evaluate(() =>
-        (window as ChapterTestWindow).chapterTest.seeks.at(-1),
+        (window as unknown as ChapterTestWindow).chapterTest.seeks.at(-1),
       ),
     )
     .toBe(0);
@@ -121,7 +129,7 @@ test("description chapters navigate the player, queue early seeks, and follow pl
     chapters.getByRole("button", { name: "Jump to Welcome at 0:00" }),
   ).toHaveAttribute("aria-current", "true");
   await page.evaluate(() =>
-    (window as ChapterTestWindow).chapterTest.setPosition(90),
+    (window as unknown as ChapterTestWindow).chapterTest.setPosition(90),
   );
   await expect(
     chapters.getByRole("button", { name: "Jump to Components at 1:20" }),
@@ -212,6 +220,10 @@ test("manual videos load chapter metadata with retry and do not carry chapters i
   expect(requests).toBe(2);
   await page.getByRole("button", { name: /^Lessons / }).click();
   await page.locator(".lesson-item").filter({ hasText: "Lesson 1" }).click();
+  await expect(page).toHaveURL(/\/learn\/lesson-1$/);
+  await expect(
+    page.getByRole("heading", { name: "Lesson 1", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: /^Chapters / }).click();
   await expect(
     page.getByText(

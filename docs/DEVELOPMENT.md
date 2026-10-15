@@ -1,8 +1,8 @@
-# Developing LearnTrack
+# Developing Progressly
 
 [← Back to the product](../README.md)
 
-Setup, integrations, architecture, validation, and deployment for the LearnTrack application.
+Setup, integrations, architecture, validation, and deployment for the Progressly application.
 
 ## Run locally
 
@@ -68,6 +68,14 @@ The importer supports up to 5,000 playlist videos. Repeated appearances of the s
 Player tracking uses the official YouTube IFrame API. Active time is measured while playback is running and the document is visible, saved about every 15 seconds, on pause, and best-effort on departure. It never infers learning time from a video's duration. Manual completion is the default. Automatic completion at 90% requires explicitly enabling it in Settings. Playback, seeking, and final saves depend on browser/YouTube restrictions; external YouTube playback cannot be tracked by this application.
 
 ## Architecture
+
+### Video chapter navigation
+
+The lesson sidebar switches between course lessons and the current video's chapter timestamps. `lib/youtube/chapters.ts` reads timestamp/title lines from the saved video description, supports minute and hour formats, sorts and deduplicates sections, and discards timestamps beyond a known duration. The player reports its current position to highlight the active section. Chapter clicks use the IFrame Player API's `seekTo`, and a click during player loading is queued until readiness. Seeking does not add the skipped interval to learning time.
+
+Imported descriptions are reused without another request. For manually added videos without a saved description, a client cache looks up public video metadata through the existing authenticated/rate-limited `/api/youtube` endpoint. Requests are deduplicated and cached for ten minutes; these lookups share the preview request limit. A failed lookup offers a retry. The integration reads creator timestamps from descriptions; YouTube-only automatically generated chapters without description timestamps are not displayed.
+
+References: [video description metadata](https://developers.google.com/youtube/v3/docs/videos#snippet.description), [IFrame playback controls](https://developers.google.com/youtube/iframe_api_reference#seekTo). Browser tests use an IFrame API fixture to verify seek calls, pending seeks, section highlighting, metadata failures, and lesson switching without making live YouTube requests.
 
 - `app/`: App Router pages, public authentication pages, auth callback, and authenticated route handlers.
 - `components/`: reusable Radix/shadcn-style UI primitives, layout, courses, player, notes, dashboard, and Recharts analytics.

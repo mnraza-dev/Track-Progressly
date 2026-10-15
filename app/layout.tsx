@@ -5,6 +5,7 @@ import "./studio.css";
 import "./charts.css";
 import "./product.css";
 import { SceneProvider } from "@/components/three/scene-provider";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LearnTrack — Small steps. Extraordinary progress.",
+  title: "Progressly — Small steps. Extraordinary progress.",
   description:
     "Stop collecting tutorials. Start completing them. A calmer home for your YouTube courses, notes, practice, and learning goals.",
 };
@@ -30,7 +31,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <SceneProvider>{children}</SceneProvider>
+        <ThemeProvider>
+          <SceneProvider>{children}</SceneProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -22,7 +22,7 @@ export function Landing() {
   return (
     <div className="product-landing">
       <header className="product-nav">
-        <Link href="/" aria-label="LearnTrack homepage">
+        <Link href="/" aria-label="Progressly homepage">
           <Logo />
         </Link>
         <nav aria-label="Product navigation">
@@ -109,7 +109,7 @@ export function Landing() {
           </div>
           <p>
             The gap between watching something and knowing it? A little
-            practice. A useful note. Picking up where you left off. LearnTrack
+            practice. A useful note. Picking up where you left off. Progressly
             gives those small things a home.
           </p>
           <div className="product-method-steps">
@@ -304,7 +304,7 @@ export function Landing() {
             <details>
               <summary>Do I need a YouTube account?</summary>
               <p>
-                No. LearnTrack uses public YouTube videos and playlists. You
+                No. Progressly uses public YouTube videos and playlists. You
                 watch through the embedded YouTube player. Private videos and
                 videos that cannot be embedded are unavailable.
               </p>

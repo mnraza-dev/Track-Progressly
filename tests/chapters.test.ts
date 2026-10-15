@@ -42,6 +42,12 @@ describe("Creator video timestamps", () => {
   });
   it("preserves titles that begin with a number", () => {
     expect(parseVideoChapters("3D basics - 0:00")[0].title).toBe("3D basics");
+    expect(parseVideoChapters("0:00 Introduction (live)")[0].title).toBe(
+      "Introduction (live)",
+    );
+    expect(parseVideoChapters("[0:00] Components [React]")[0].title).toBe(
+      "Components [React]",
+    );
   });
   it("marks the current chapter at boundaries, including seeking back to zero", () => {
     const chapters = parseVideoChapters(

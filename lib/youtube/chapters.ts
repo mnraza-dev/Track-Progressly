@@ -26,12 +26,12 @@ export function parseVideoChapters(
     if (duration > 0 && seconds >= duration) continue;
     const before = line
       .slice(0, match.index)
-      .replace(/^[\s\-–—•*#\[\]()]+|[\s\-–—:|\[\]()]+$/g, "")
+      .replace(/^[\s\-–—•*#]+|[\s\-–—:|\[(]+$/g, "")
       .replace(/^\d+[.)]\s*/, "")
       .trim();
     const after = line
       .slice(match.index + match[0].length)
-      .replace(/^[\s\-–—:|\[\]()]+|[\s\[\]()]+$/g, "")
+      .replace(/^[\s\-–—:|\])]+/g, "")
       .trim();
     const title = after || before;
     if (!title || chapters.has(seconds)) continue;

@@ -1,4 +1,5 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import { SceneArtwork } from "@/components/three/scene-provider";
 import { useState } from "react";
 import Link from "next/link";
@@ -127,7 +128,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <Logo />
         </Link>
         <Link href="/" className="text-link">
-          Explore LearnTrack
+          Explore Progressly
           <ArrowUp />
         </Link>
       </div>
@@ -183,7 +184,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           {!forgot && !reset && (
             <>
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={google}
                 className="google-button"
               >
@@ -200,7 +201,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 Your name
                 <div className="input-with-icon">
                   <User size={17} />
-                  <input
+                  <Input
                     {...form.register("name")}
                     required
                     placeholder="What should we call you?"
@@ -214,7 +215,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 Email address
                 <div className="input-with-icon">
                   <Mail size={17} />
-                  <input
+                  <Input
                     {...form.register("email")}
                     type="email"
                     placeholder="you@example.com"
@@ -233,7 +234,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 Password
                 <div className="input-with-icon">
                   <LockKeyhole size={17} />
-                  <input
+                  <Input
                     {...form.register("password")}
                     type="password"
                     placeholder="At least 8 characters"
@@ -274,7 +275,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             </div>
           )}
           <p className="auth-switch">
-            {signup ? "Already have an account?" : "New to LearnTrack?"}{" "}
+            {signup ? "Already have an account?" : "New to Progressly?"}{" "}
             <Link href={signup ? "/login" : "/signup"}>
               {signup ? "Sign in" : "Create an account"}
             </Link>

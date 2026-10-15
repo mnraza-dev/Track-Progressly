@@ -1,4 +1,6 @@
 "use client";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
@@ -24,7 +26,7 @@ import {
 import { useWorkspace } from "@/stores/workspace";
 import { completion, duration, timestamp, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
+import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
 import { Progress } from "@/components/ui/progress";
 import {
   YouTubePlayer,
@@ -293,7 +295,7 @@ export function CourseWorkspace({
                 </p>
                 <div className="search-input">
                   <Search size={15} />
-                  <input
+                  <Input
                     value={query}
                     onChange={(e) => {
                       setQuery(e.target.value);
@@ -436,7 +438,7 @@ export function CourseWorkspace({
                       : "Mark as completed"}
                   </Button>
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     onClick={() => player.current?.save()}
                   >
                     <Save size={15} />
@@ -525,7 +527,7 @@ export function CourseWorkspace({
         >
           <label>
             Course title
-            <input
+            <Input
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -533,7 +535,7 @@ export function CourseWorkspace({
           </label>
           <label>
             Category
-            <input
+            <Input
               required
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -541,7 +543,7 @@ export function CourseWorkspace({
           </label>
           <label>
             Target completion date
-            <input
+            <Input
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
@@ -549,7 +551,7 @@ export function CourseWorkspace({
           </label>
           <label>
             Learning intention
-            <textarea
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
@@ -568,11 +570,11 @@ export function CourseWorkspace({
         description="The course, lesson progress, notes, bookmarks, and practice tasks will be permanently deleted."
       >
         <div className="form-actions">
-          <Button variant="secondary" onClick={() => setDeleteOpen(false)}>
+          <Button variant="outline" onClick={() => setDeleteOpen(false)}>
             Keep course
           </Button>
           <Button
-            variant="danger"
+            variant="destructive"
             onClick={() =>
               void mutate({ op: "delete_course", id: course.id }).then(() => {
                 router.push("/courses");

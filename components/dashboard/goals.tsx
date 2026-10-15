@@ -1,4 +1,5 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -19,7 +20,7 @@ import { SceneArtwork } from "@/components/three/scene-provider";
 import { ActivityChart } from "@/components/analytics/activity-chart";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
+import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
 export function Goals() {
   const { data, mutate, notify } = useWorkspace();
   const [open, setOpen] = useState(false);
@@ -336,7 +337,7 @@ export function Goals() {
           </label>
           <label>
             Target {type === "daily_videos" ? "lessons" : "minutes"}
-            <input
+            <Input
               type="number"
               min={1}
               max={10080}

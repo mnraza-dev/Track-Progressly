@@ -1,4 +1,5 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,6 +20,7 @@ import { format } from "date-fns";
 import { useWorkspace } from "@/stores/workspace";
 import { completion, duration, streak, localDay } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { CourseCard, CourseArtwork } from "@/components/courses/course-card";
 import { ActivityChart } from "@/components/analytics/activity-chart";
 import { LearningLandscape } from "@/components/analytics/learning-landscape";
@@ -250,7 +252,7 @@ export function Dashboard() {
             <label htmlFor="quick-course-link">One link. A fresh start.</label>
             <div className="quick-link-input">
               <Link2 size={16} />
-              <input
+              <Input
                 id="quick-course-link"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
@@ -414,7 +416,7 @@ export function Dashboard() {
           <span className="local-dot" />
           <span>
             <strong>Personal. Local. Yours.</strong> Your work is saved in this
-            browser. Connect Supabase to take it across devices.
+            browser. Come back here to pick up where you left off.
           </span>
           <Link href="/settings">
             Workspace settings
@@ -444,7 +446,7 @@ function Stat({
   index: string;
 }) {
   return (
-    <div className="stat-card">
+    <Card className="stat-card">
       <div className="stat-top">
         <span>{label}</span>
         <span className={`stat-icon ${color}`}>{icon}</span>
@@ -454,6 +456,6 @@ function Stat({
         <p>{detail}</p>
         <span>{index}</span>
       </div>
-    </div>
+    </Card>
   );
 }

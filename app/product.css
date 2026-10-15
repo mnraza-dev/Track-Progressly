@@ -3100,3 +3100,18 @@ html[data-theme="dark"] .video-chapters .chapter-search {
   padding: 9px 12px;
   cursor: pointer;
 }
+html[data-theme] .icon-button {
+  color: var(--text-secondary);
+}
+html[data-theme] .sidebar .icon-button {
+  color: #adcbd0;
+}
+html[data-theme] .category-badge {
+  color: var(--purple);
+  background: var(--purple-light);
+  border: 1px solid var(--glass-edge);
+  border-radius: 5px;
+}
+html[data-theme] .course-actions .danger-text {
+  color: #b66f60;
+}

@@ -1,4 +1,6 @@
 "use client";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import {
@@ -213,7 +215,7 @@ export function LessonNotes({
               </ReactMarkdown>
             </div>
           ) : (
-            <textarea
+            <Textarea
               className="note-editor"
               aria-label="Lesson notes"
               placeholder="What clicked? Capture a key idea, a code snippet, or a question to come back to..."
@@ -311,7 +313,7 @@ export function LessonNotes({
                 const item = lesson.tasks.find((t) => t.title === title);
                 return (
                   <label key={title}>
-                    <input
+                    <Input
                       type="checkbox"
                       checked={item?.is_completed || false}
                       onChange={() =>
@@ -342,7 +344,7 @@ export function LessonNotes({
               .map((t) => (
                 <div key={t.id}>
                   <label>
-                    <input
+                    <Input
                       type="checkbox"
                       checked={t.is_completed}
                       onChange={() =>
@@ -383,7 +385,7 @@ export function LessonNotes({
                 }).then(() => setTask(""));
             }}
           >
-            <input
+            <Input
               value={task}
               onChange={(e) => setTask(e.target.value)}
               placeholder="Build something. Explain a concept. Try an exercise."
@@ -422,7 +424,7 @@ export function LessonNotes({
               });
             }}
           >
-            <input
+            <Input
               value={bookmarkLabel}
               onChange={(e) => setBookmarkLabel(e.target.value)}
               placeholder="What do you want to remember?"

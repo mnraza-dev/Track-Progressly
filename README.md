@@ -1,98 +1,77 @@
 <p align="center">
-  <img src="docs/images/product-cover.svg" alt="LearnTrack — Your next tutorial. Your next skill." width="100%" />
+  <img src="docs/images/product-cover.svg" alt="Progressly — Turn your next tutorial into your next skill." width="100%" />
 </p>
 
-# LearnTrack
+# Progressly
 
-### Stop collecting tutorials. Start completing them.
+**Your next tutorial. Your next skill.**
 
-A personal learning studio that turns YouTube playlists into a course you can actually finish. Keep your place, capture your thinking, practice what you learn, and see the small efforts adding up.
+Turn YouTube videos and playlists into learning you follow through on. Progressly keeps your courses, place in the video, notes, and practice together—so every session starts with a clear next step.
 
-**[The experience](#the-experience) · [Product tour](#product-tour) · [Get started](#get-started) · [Developer guide](docs/DEVELOPMENT.md)**
+[Start learning](#your-first-course) · [Explore the workspace](#a-home-for-your-learning) · [Find your rhythm](#see-the-effort-add-up) · [Common questions](#a-few-things-to-know)
 
-## Curiosity deserves a little structure
+## Your first course
 
-You save a playlist. Watch a few lessons. Leave a note somewhere. A week later, you’re trying to remember where you stopped.
+1. Open your workspace and choose **Add course**.
+2. Paste a public YouTube playlist or video link. Review the lessons and save your course. You can also choose **Create manually** to build your own learning path.
+3. Open a lesson and press play. Progressly saves your place, ready for your next session.
+4. Capture a useful idea in **Notes**, bookmark an explanation, or add a practice task.
+5. Mark the lesson complete when you’re ready. Your next step is waiting in **Continue learning**.
 
-LearnTrack keeps the whole learning process together: the next video, the useful timestamp, the concept to practice, and the progress you’re making. Built for self-directed learners, tutorial makers, and anyone with a “watch later” list that deserves a little follow-through.
+No YouTube account is needed to watch public videos.
 
-## The experience
+## A home for your learning
 
-| Bring the curiosity | Make it a practice | See yourself grow |
-| :--- | :--- | :--- |
-| Import a YouTube playlist or video, or build a course manually. Your lessons stay in order. | Resume your video, capture a note, bookmark an explanation, and try a practice task. | Follow actual learning time, completed lessons, course progress, and daily or weekly goals. |
+![Progressly dashboard with courses, learning activity, and an interactive learning sculpture](docs/images/workspace.jpg)
 
-## Product tour
+**Keep a focused library.** Search your courses, save favorites, and pause or archive a course when your priorities change. Import a single video for a quick skill or a whole playlist for something deeper.
 
-### A workspace that makes the next step clear
+**Return to the right moment.** Resume where you stopped. When a creator includes chapters or timestamps in the description, open **Chapters** beside the video to search sections and jump straight to an explanation. The current chapter follows your playback.
 
-Your courses, daily intention, learning activity, and a shortcut back to the lesson you left. An interactive Three.js showcase connects the three parts of learning: watch, practice, remember.
+**Remember what mattered.** Write Markdown notes beside the lesson. Save a timestamp with a thought, bookmark a moment worth revisiting, and flag concepts you want to review. Your notes stay connected to the lesson and are searchable in **My notes**.
 
-![LearnTrack dashboard with a learning showcase, course library, and real progress](docs/images/workspace.jpg)
+**Put an idea to work.** Add a practice task, try it, and check it off. Practice and watching have separate completion records, so finishing a video never pretends you’ve finished the work.
 
-### Progress with a little perspective
+## See the effort add up
 
-Switch between area and bar charts. Explore lesson status in a donut chart, compare course progress, and find your most active weekdays. A Three.js timeline gives the last seven days a physical shape, with selectable days and minutes/lessons controls.
+![Progressly analytics with activity charts, course progress, and learning patterns](docs/images/analytics.jpg)
 
-![LearnTrack analytics showing learning activity over time](docs/images/analytics.jpg)
+Follow active learning time, completed lessons, course progress, and practice. Switch between chart views, compare courses, and explore your week as an interactive 3D timeline. Charts begin with your own activity; an empty workspace starts at zero.
 
-*Screenshots use an illustrative workspace created for the product tour. The application starts empty and displays your saved activity.*
+Set a daily minute or lesson target, a weekly time goal, or a course deadline in **Learning goals**. Your learning calendar and streak follow the timezone you choose in **Settings**.
 
-### The details that help a lesson stick
+*The screenshots show an illustrative workspace. Your workspace starts with your courses and your activity.*
 
-| In your studio | What it does for you |
-| :--- | :--- |
-| **A personal course library** | Import playlists and individual videos. Search, filter, favorite, pause, archive, and refresh courses. |
-| **A player that keeps your place** | Resume from your last saved position. Mark lessons complete when you’re ready, or opt into automatic completion at 90%. |
-| **Notes beside the lesson** | Write Markdown, keep timestamped notes and bookmarks, and flag an idea for revision. |
-| **Practice beyond watching** | Keep practice tasks with each lesson. Watching and doing have separate completion records. |
-| **Goals that fit your day** | Set daily minute or lesson targets and weekly time goals. Follow streaks, a learning calendar, and course deadlines. |
-| **Honest analytics** | Learning time comes from active playback, with timezone-aware daily records. Empty charts stay empty until you learn. |
-| **A tactile interface** | Frosted glass surfaces in petrol, glacier mint, orchid, and apricot. Custom Three.js models, interactive views, light and dark themes, responsive layouts, and keyboard navigation. Reduced motion and WebGL fallback are supported. |
+## Make it feel like yours
 
-## Your workspace, your choice
+Choose **Light**, **Dark**, or **System** in Settings. Clean surfaces, clear contrast, and a focused accent keep the lessons in view. Interactive 3D details bring a little perspective to your workspace.
 
-**Start locally.** Without Supabase configured, courses, notes, tasks, goals, and preferences are saved in this browser. No account is needed. Manual course creation works without API credentials.
+Drag a sculpture to explore it, or focus it and use the arrow keys. Press **Home** or choose **Reset 3D view** to return to the original angle. Reduced motion follows your device preference, and the workspace remains usable when 3D is unavailable.
 
-**Connect an account.** The application includes Supabase integration for email/password, Google sign-in, and saving across devices. Cloud mode needs the database schema and access policies described in the developer guide before it can be used.
+## Your knowledge, yours to keep
 
-Local data stays in its original browser; configuring cloud mode does not automatically upload it. Browser storage can be cleared by the browser or its user.
+Use **Export all notes** in Settings to download your notes as Markdown. You can also export from My notes.
 
-## Get started
+In a browser workspace, your courses, notes, goals, and preferences stay in the browser where you created them. Return on the same device and browser to continue. Clearing browser storage removes that local workspace, so export notes you want to keep.
 
-You’ll need Node.js 22+ and Bun 1.4+.
-
-```sh
-bun install
-cp .env.example .env.local
-bun run dev
-```
-
-Open **[localhost:3000](http://localhost:3000)** for your workspace, or **[/welcome](http://localhost:3000/welcome)** for the public product page. If you already have `.env.local`, keep your existing file.
-
-| Integration | Environment variables | Needed for |
-| :--- | :--- | :--- |
-| YouTube Data API v3 | `YOUTUBE_API_KEY` | Importing and refreshing public YouTube metadata. Keep this key server-side. |
-| Supabase | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Accounts, Google sign-in, and cloud persistence. Requires the database schema; see cloud setup status below. |
-
-**[Read the complete setup and deployment guide →](docs/DEVELOPMENT.md)**
-
-## Built with care
-
-Next.js 16 · React 19 · TypeScript · Three.js · Recharts · Supabase · PostgreSQL · Zustand · Tailwind CSS
-
-One shared WebGL renderer draws the visible 3D scenes, caps pixel density, pauses in hidden tabs, and disposes removed models. Charts also have HTML legends or data tables, so the information remains usable without the artwork.
-
-Domain behavior and database isolation are covered with Vitest and PGlite. Playwright checks the learning workflows and visual interactions on desktop and mobile. See [validation commands](docs/DEVELOPMENT.md#checks).
+If your workspace supports accounts, sign in to save across devices. A local workspace is not automatically moved into an account.
 
 ## A few things to know
 
-- LearnTrack organizes and tracks learning; videos remain on YouTube and play through its embedded player.
-- Private, deleted, and non-embeddable videos may be unavailable. Manual course creation remains available when imports cannot complete.
-- Playback outside LearnTrack cannot be tracked. Final progress saves depend on browser and YouTube behavior.
-- Cloud sign-in, email, OAuth, and deployment require your own service configuration. This repository does not provide a hosted LearnTrack service.
-- **Cloud setup status:** this checkout is missing `supabase/migrations/001_learntrack.sql`, which the integration and database tests expect. Restore that migration before enabling cloud mode. Local mode does not depend on it.
+**Can I use private videos?** Public, embeddable YouTube videos work. Private, deleted, or restricted videos may be unavailable. Videos play through YouTube’s embedded player.
+
+**What if an import fails?** Check that the link is public, then try again. You can create a course manually and add the video links yourself.
+
+**Does watching complete a lesson?** You choose when to mark it complete. For automatic completion, enable **Automatic lesson completion** in Settings; lessons then complete at 90% playback. Practice stays separate.
+
+**Does Progressly track YouTube outside the app?** Learning time is recorded during active playback inside Progressly. Watching elsewhere does not update your workspace.
+
+**Where are the chapters?** Open a lesson, then choose **Chapters** in the left sidebar. Chapters appear when the creator provides recognizable timestamps in the video description. Lessons without timestamps show a clear empty state.
+
+**Can I use it on my phone?** Yes. Courses, the player, notes, goals, and charts adapt to smaller screens. Open the menu to move around your workspace.
 
 ---
 
 **One link. A little time. Something you’ll be glad you started.**
+
+Building or running Progressly? See the separate [developer guide](docs/DEVELOPMENT.md).

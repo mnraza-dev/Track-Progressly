@@ -1,4 +1,5 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -35,8 +36,8 @@ export function NotesLibrary() {
     .sort((a, b) => b.note.updated_at.localeCompare(a.note.updated_at));
   function exportAll() {
     downloadText(
-      `# My LearnTrack notes\n\n${notes.map((n) => `## ${n.course.title}\n### ${n.lesson.title} · ${timestamp(n.note.timestamp_seconds)}\n\n${n.note.content}`).join("\n\n")}`,
-      "learntrack-notes.md",
+      `# My Progressly notes\n\n${notes.map((n) => `## ${n.course.title}\n### ${n.lesson.title} · ${timestamp(n.note.timestamp_seconds)}\n\n${n.note.content}`).join("\n\n")}`,
+      "progressly-notes.md",
     );
   }
   return (
@@ -52,7 +53,7 @@ export function NotesLibrary() {
           </p>
         </div>
         <Button
-          variant="secondary"
+          variant="outline"
           disabled={!notes.length}
           onClick={exportAll}
         >
@@ -63,7 +64,7 @@ export function NotesLibrary() {
       <div className="library-toolbar">
         <div className="search-input">
           <Search size={17} />
-          <input
+          <Input
             aria-label="Search notes"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

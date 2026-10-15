@@ -1,4 +1,6 @@
 "use client";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { SceneArtwork } from "@/components/three/scene-provider";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -200,7 +202,7 @@ export function ImportForm() {
                 YouTube link or ID
                 <div className="input-with-icon">
                   <Link2 size={17} />
-                  <input
+                  <Input
                     {...form.register("input")}
                     placeholder="https://www.youtube.com/playlist?list=..."
                   />
@@ -256,7 +258,7 @@ export function ImportForm() {
               )}
               <label>
                 Course title
-                <input
+                <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="What will you learn?"
@@ -285,7 +287,7 @@ export function ImportForm() {
                 </label>
                 <label>
                   Target completion date <span>(optional)</span>
-                  <input
+                  <Input
                     type="date"
                     value={deadline}
                     onChange={(e) => setDeadline(e.target.value)}
@@ -294,7 +296,7 @@ export function ImportForm() {
               </div>
               <label>
                 Description or learning intention
-                <textarea
+                <Textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -311,7 +313,7 @@ export function ImportForm() {
                     <div key={index} className="manual-lesson">
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       <div>
-                        <input
+                        <Input
                           aria-label={`Lesson ${index + 1} video URL`}
                           placeholder="YouTube video URL"
                           value={link.url}
@@ -323,7 +325,7 @@ export function ImportForm() {
                             )
                           }
                         />
-                        <input
+                        <Input
                           aria-label={`Lesson ${index + 1} title`}
                           placeholder="Lesson title"
                           value={link.title}
@@ -350,7 +352,7 @@ export function ImportForm() {
                     </div>
                   ))}
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     onClick={() => setLinks([...links, { url: "", title: "" }])}
                   >
                     <Plus size={16} />

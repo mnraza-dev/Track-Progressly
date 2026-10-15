@@ -1,5 +1,7 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -21,6 +23,9 @@ import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
 import { signOut } from "@/features/auth/sign-out";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import { downloadText } from "@/lib/utils";
 export function Settings() {
   const router = useRouter();
@@ -30,17 +35,7 @@ export function Settings() {
   const [minutes, setMinutes] = useState(data.profile.daily_minutes);
   const [auto, setAuto] = useState(data.profile.auto_complete);
   const [busy, setBusy] = useState(false);
-  function theme(value: string) {
-    const chosen =
-      value === "system"
-        ? window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-        : value;
-    document.documentElement.setAttribute("data-theme", chosen);
-    localStorage.setItem("learntrack-theme", chosen);
-    notify("Your workspace appearance is updated.");
-  }
+  const { theme, setTheme } = useTheme();
   return (
     <>
       <div className="page-heading">
@@ -82,7 +77,7 @@ export function Settings() {
             <div className="form-stack">
               <label>
                 Display name
-                <input
+                <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="What should we call you?"
@@ -136,7 +131,7 @@ export function Settings() {
             <label className="setting-number">
               Daily learning intention{" "}
               <span>
-                <input
+                <Input
                   type="number"
                   min={1}
                   max={1440}
@@ -156,16 +151,11 @@ export function Settings() {
                   Practice is always tracked separately.
                 </p>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={auto}
+              <Switch
+                checked={auto}
                 aria-label="Automatic lesson completion"
-                className={`toggle-switch ${auto ? "on" : ""}`}
-                onClick={() => setAuto(!auto)}
-              >
-                <span />
-              </button>
+                onCheckedChange={setAuto}
+              />
             </div>
           </section>
           <Button type="submit" disabled={busy}>
@@ -196,19 +186,12 @@ export function Settings() {
             </div>
             <p className="settings-help">
               {isConnected
-                ? "Your courses, progress, and notes are private and securely saved to your account."
-                : "Your changes persist on this device. To enable private accounts and cloud sync, add your Supabase project credentials and run the SQL migration in the setup guide."}
+                ? "Your courses, progress, and notes are private and saved to your account."
+                : "Your courses, notes, and goals are saved in this browser. Return on this device to pick up where you left off. You can export your notes below."}
             </p>
-            {!isConnected && (
-              <div className="setup-file-list">
-                <code>.env.example</code>
-                <code>supabase/migrations/001_learntrack.sql</code>
-                <code>README.md</code>
-              </div>
-            )}
             {isConnected ? (
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={async () => {
                   await signOut();
                   router.push("/login");
@@ -219,7 +202,7 @@ export function Settings() {
                 Sign out
               </Button>
             ) : (
-              <Button variant="secondary" asChild>
+              <Button variant="outline" asChild>
                 <Link href="/signup">
                   Account setup
                   <ArrowUpRight size={15} />
@@ -227,33 +210,35 @@ export function Settings() {
               </Button>
             )}
           </section>
-          <section className="panel settings-panel">
-            <h2>Set the mood</h2>
-            <p className="muted">A little light, or a little focus.</p>
-            <div className="theme-options">
+          <Card className="settings-panel">
+            <h2>Appearance</h2>
+            <p className="muted">Choose a theme, or follow your device.</p>
+            <Tabs value={theme || "system"} onValueChange={setTheme}>
+              <TabsList className="theme-options" aria-label="Color theme">
               {[
                 { key: "light", icon: Sun, label: "Light" },
                 { key: "dark", icon: Moon, label: "Dark" },
                 { key: "system", icon: Monitor, label: "System" },
               ].map((t) => (
-                <button key={t.key} onClick={() => theme(t.key)}>
+                <TabsTrigger key={t.key} value={t.key}>
                   <t.icon size={21} />
                   {t.label}
-                </button>
+                </TabsTrigger>
               ))}
-            </div>
-          </section>
+              </TabsList>
+            </Tabs>
+          </Card>
           <section className="panel settings-panel">
             <h2>Your knowledge, yours to keep.</h2>
             <p className="settings-help">
               Export your notes as Markdown, ready to take anywhere.
             </p>
             <Button
-              variant="secondary"
+              variant="outline"
               onClick={() => {
                 downloadText(
-                  `# My LearnTrack notes\n\n${data.courses.flatMap((c) => c.videos.flatMap((v) => v.notes.map((n) => `## ${c.title} / ${v.title}\n\n${n.content}`))).join("\n\n")}`,
-                  "learntrack-notes.md",
+                  `# My Progressly notes\n\n${data.courses.flatMap((c) => c.videos.flatMap((v) => v.notes.map((n) => `## ${c.title} / ${v.title}\n\n${n.content}`))).join("\n\n")}`,
+                  "progressly-notes.md",
                 );
                 notify("Notes exported.");
               }}

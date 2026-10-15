@@ -1,4 +1,5 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -74,7 +75,7 @@ export function Library({ resume = false }: { resume?: boolean }) {
       <div className="library-toolbar">
         <div className="search-input">
           <Search size={18} />
-          <input
+          <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search courses..."

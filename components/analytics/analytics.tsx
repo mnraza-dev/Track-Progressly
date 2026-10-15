@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Card } from "@/components/ui/card";
 import {
   ChartNoAxesCombined,
   Clock3,
@@ -94,7 +95,7 @@ export function Analytics() {
             detail: `${tasks.filter((t) => t.is_completed).length} of ${tasks.length} tasks · all time`,
           },
         ].map((s) => (
-          <div key={s.label} className="stat-card">
+          <Card key={s.label} className="stat-card">
             <div className="stat-top">
               <span>{s.label}</span>
               <span className={`stat-icon ${s.color}`}>
@@ -103,7 +104,7 @@ export function Analytics() {
             </div>
             <div className="stat-value">{s.value}</div>
             <p>{s.detail}</p>
-          </div>
+          </Card>
         ))}
       </div>
       <section className="panel analytics-main-chart">

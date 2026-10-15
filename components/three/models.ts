@@ -90,7 +90,7 @@ function browserTexture(kind: "video" | "code") {
   c.font = "500 17px monospace";
   c.fillStyle = kind === "code" ? "#7f899e" : "#a6a197";
   c.fillText(
-    kind === "code" ? "a little practice.js" : "learntrack / a new perspective",
+    kind === "code" ? "a little practice.js" : "progressly / a new perspective",
     242,
     43,
   );

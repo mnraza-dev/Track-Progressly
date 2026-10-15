@@ -41,7 +41,7 @@ test("product showcase switches chapters, explains the product, and opens the wo
   });
   await page.getByText("Do I need a YouTube account?", { exact: true }).click();
   await expect(
-    page.getByText(/LearnTrack uses public YouTube videos/),
+    page.getByText(/Progressly uses public YouTube videos/),
   ).toBeVisible();
   await page
     .getByText("Can I start without setting anything up?", { exact: true })

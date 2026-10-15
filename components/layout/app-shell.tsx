@@ -1,7 +1,9 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
   BookOpen,
@@ -28,7 +30,7 @@ import {
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
 import { signOut } from "@/features/auth/sign-out";
-import { Dialog } from "@/components/ui/dialog";
+import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 const navigation = [
@@ -47,7 +49,7 @@ export function Logo() {
         <span />
         <span />
       </span>
-      learntrack<span className="brand-dot">.</span>
+      Progressly<span className="brand-dot">.</span>
     </span>
   );
 }
@@ -58,12 +60,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobile, setMobile] = useState(false);
   const [search, setSearch] = useState(false);
   const [query, setQuery] = useState("");
-  const [dark, setDark] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(false);
   useEffect(() => {
     void load();
-    const theme = localStorage.getItem("learntrack-theme") === "dark";
-    document.documentElement.dataset.theme = theme ? "dark" : "light";
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
@@ -82,16 +82,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         : "Workspace");
   const name = data.profile.display_name || "Your workspace";
   function toggleTheme() {
-    const value = document.documentElement.dataset.theme !== "dark";
-    setDark(value);
-    document.documentElement.dataset.theme = value ? "dark" : "light";
-    localStorage.setItem("learntrack-theme", value ? "dark" : "light");
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   }
   return (
     <div className="app-shell">
       <aside className={cn("sidebar", mobile && "sidebar-open")}>
         <div className="sidebar-brand">
-          <Link href="/dashboard" aria-label="LearnTrack dashboard">
+          <Link href="/dashboard" aria-label="Progressly dashboard">
             <Logo />
           </Link>
           <button
@@ -168,7 +165,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               onClick={toggleTheme}
               aria-label="Toggle color theme"
             >
-              {dark ? <Sun size={17} /> : <Moon size={17} />}
+              {resolvedTheme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
             </button>
             {isConnected && (
               <button
@@ -254,7 +251,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </main>
         <footer className="page-footer">
-          <span>LEARNTRACK / YOUR LEARNING STUDIO</span>
+          <span>PROGRESSLY / YOUR LEARNING STUDIO</span>
           <span>
             Keep making. <Sparkles size={13} />
           </span>
@@ -281,7 +278,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         <div className="search-input">
           <Search size={19} />
-          <input
+          <Input
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
