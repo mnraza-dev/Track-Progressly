@@ -99,6 +99,41 @@ describe("Persistent workspace mutations", () => {
     expect(state.activity[0].videos_completed).toBe(0);
     expect(state.activity[0].courses_completed).toBe(0);
   });
+  it("calculates progress for a single lesson course based on chapters", () => {
+    const singleLessonCourse = {
+      ...input,
+      videos: [
+        {
+          ...input.videos[0],
+          description:
+            "0:00 Intro\n1:00 Step 1\n2:00 Step 2\n3:00 Step 3\n4:00 Finish",
+          duration_seconds: 300,
+        },
+      ],
+    };
+    let state = applyMutation(emptyWorkspace, {
+      op: "create_course",
+      course: singleLessonCourse,
+    });
+    const videoId = state.courses[0].videos[0].id;
+    expect(completion(state.courses[0])).toBe(0);
+
+    state = applyMutation(state, {
+      op: "progress",
+      video_id: videoId,
+      position: 70,
+      active_seconds: 70,
+    });
+    expect(completion(state.courses[0])).toBe(20);
+
+    state = applyMutation(state, {
+      op: "progress",
+      video_id: videoId,
+      position: 190,
+      active_seconds: 120,
+    });
+    expect(completion(state.courses[0])).toBe(60);
+  });
   it("upserts notes without losing content or making duplicates", () => {
     let state = applyMutation(emptyWorkspace, {
       op: "create_course",

@@ -1,16 +1,30 @@
 "use client";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
-import { Search, ListVideo, Play, LoaderCircle, RotateCcw } from "lucide-react";
+import {
+  Search,
+  ListVideo,
+  Play,
+  Check,
+  LoaderCircle,
+  RotateCcw,
+} from "lucide-react";
 import {
   chapterAt,
   chapterTimestamp,
+  isChapterCompleted,
+  completedChaptersCount,
+  chapterProgressPercent,
   type VideoChapter,
 } from "@/lib/youtube/chapters";
+import { cn } from "@/lib/utils";
 
 export function VideoChapters({
   chapters,
   position,
+  duration = 0,
+  isLessonCompleted = false,
   onSeek,
   loading = false,
   error = false,
@@ -18,6 +32,8 @@ export function VideoChapters({
 }: {
   chapters: VideoChapter[];
   position: number;
+  duration?: number;
+  isLessonCompleted?: boolean;
   onSeek: (seconds: number) => void;
   loading?: boolean;
   error?: boolean;
@@ -25,6 +41,19 @@ export function VideoChapters({
 }) {
   const [query, setQuery] = useState("");
   const active = chapterAt(chapters, position);
+  const completedCount = completedChaptersCount(
+    chapters,
+    position,
+    duration,
+    isLessonCompleted,
+  );
+  const remainingCount = Math.max(0, chapters.length - completedCount);
+  const percent = chapterProgressPercent(
+    chapters,
+    position,
+    duration,
+    isLessonCompleted,
+  );
   const filtered = chapters
     .map((chapter, index) => ({ ...chapter, index }))
     .filter(
@@ -36,14 +65,26 @@ export function VideoChapters({
     <section className="video-chapters" aria-label="Video chapters">
       <div className="chapter-heading">
         <div>
-          <span className="section-index">JUMP TO AN IDEA</span>
+          <span className="section-index">CHAPTER PROGRESS</span>
           <h3>
-            In this lesson <span>{chapters.length}</span>
+            In this lesson <span>{chapters.length} chapters</span>
           </h3>
-          <p>From the video description</p>
+          <p>
+            {completedCount} completed · {remainingCount} to go
+          </p>
         </div>
-        <ListVideo size={19} />
+        <div className="chapter-heading-progress">
+          <strong>{percent}%</strong>
+        </div>
       </div>
+      {chapters.length > 0 && !loading && !error && (
+        <div className="chapter-progress-box">
+          <Progress value={percent} />
+          <p>
+            {completedCount} of {chapters.length} chapters completed ({percent}%)
+          </p>
+        </div>
+      )}
       {loading ? (
         <div className="chapter-empty">
           <LoaderCircle size={22} className="spin" />

@@ -3,6 +3,8 @@ import {
   parseVideoChapters,
   chapterAt,
   chapterTimestamp,
+  completedChaptersCount,
+  chapterProgressPercent,
 } from "@/lib/youtube/chapters";
 
 describe("Creator video timestamps", () => {
@@ -65,4 +67,38 @@ describe("Creator video timestamps", () => {
     expect(chapterTimestamp(80)).toBe("1:20");
     expect(chapterTimestamp(3723)).toBe("1:02:03");
   });
+  it("computes chapter completion and progress percentage correctly", () => {
+    const chapters = parseVideoChapters(
+      "0:00 Intro\n1:00 Setup\n3:00 Code\n5:00 Conclusion",
+      600,
+    );
+    expect(chapters).toHaveLength(4);
+    // At start (0 seconds), 0 chapters completed
+    expect(completedChaptersCount(chapters, 0, 600)).toBe(0);
+    expect(chapterProgressPercent(chapters, 0, 600)).toBe(0);
+
+    // At 59s (still in Intro), 0 chapters completed
+    expect(completedChaptersCount(chapters, 59, 600)).toBe(0);
+
+    // At 60s (reached Setup), Intro is completed (1 of 4 = 25%)
+    expect(completedChaptersCount(chapters, 60, 600)).toBe(1);
+    expect(chapterProgressPercent(chapters, 60, 600)).toBe(25);
+
+    // At 180s (reached Code), Intro & Setup completed (2 of 4 = 50%)
+    expect(completedChaptersCount(chapters, 180, 600)).toBe(2);
+    expect(chapterProgressPercent(chapters, 180, 600)).toBe(50);
+
+    // At 300s (reached Conclusion), 3 of 4 completed (75%)
+    expect(completedChaptersCount(chapters, 300, 600)).toBe(3);
+    expect(chapterProgressPercent(chapters, 300, 600)).toBe(75);
+
+    // At 598s (near end of duration 600), all 4 completed (100%)
+    expect(completedChaptersCount(chapters, 598, 600)).toBe(4);
+    expect(chapterProgressPercent(chapters, 598, 600)).toBe(100);
+
+    // When lesson is marked completed, all chapters are 100%
+    expect(completedChaptersCount(chapters, 0, 600, true)).toBe(4);
+    expect(chapterProgressPercent(chapters, 0, 600, true)).toBe(100);
+  });
 });
+
