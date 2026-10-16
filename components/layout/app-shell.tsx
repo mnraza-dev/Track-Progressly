@@ -26,6 +26,8 @@ import {
   CheckCircle2,
   Bell,
   ArrowRight,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
@@ -63,6 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [query, setQuery] = useState("");
   const { resolvedTheme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   useEffect(() => {
     void load();
     const handler = (e: KeyboardEvent) => {
@@ -86,19 +89,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   }
   return (
-    <div className="app-shell">
+    <div className={cn("app-shell", desktopCollapsed && "sidebar-collapsed")}>
       <aside className={cn("sidebar", mobile && "sidebar-open")}>
         <div className="sidebar-brand">
           <Link href="/dashboard" aria-label="Progressly dashboard">
             <Logo />
           </Link>
-          <button
-            className="icon-button mobile-close"
-            onClick={() => setMobile(false)}
-            aria-label="Close menu"
-          >
-            <X size={20} />
-          </button>
+          <div className="sidebar-brand-actions">
+            <button
+              className="icon-button desktop-collapse"
+              onClick={() => setDesktopCollapsed(true)}
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+            >
+              <PanelLeftClose size={18} />
+            </button>
+            <button
+              className="icon-button mobile-close"
+              onClick={() => setMobile(false)}
+              aria-label="Close menu"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
         <button
           className="workspace-selector"
@@ -199,11 +212,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <header className="topbar">
           <div className="breadcrumb">
             <button
-              className="icon-button mobile-toggle"
-              aria-label="Open menu"
-              onClick={() => setMobile(true)}
+              className="icon-button sidebar-toggle-btn"
+              aria-label={
+                desktopCollapsed ? "Open sidebar" : "Toggle sidebar menu"
+              }
+              title={desktopCollapsed ? "Open sidebar" : "Collapse sidebar"}
+              onClick={() => {
+                if (typeof window !== "undefined" && window.innerWidth <= 760) {
+                  setMobile(true);
+                } else {
+                  setDesktopCollapsed((prev) => !prev);
+                }
+              }}
             >
-              <Menu size={21} />
+              {desktopCollapsed ? (
+                <PanelLeftOpen size={19} />
+              ) : (
+                <>
+                  <PanelLeftClose size={18} className="desktop-toggle-icon" />
+                  <Menu size={20} className="mobile-toggle-icon" />
+                </>
+              )}
             </button>
             <span className="breadcrumb-home">My workspace</span>
             <span className="breadcrumb-divider">/</span>

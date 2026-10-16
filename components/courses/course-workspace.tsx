@@ -82,6 +82,7 @@ export function CourseWorkspace({
     course?.target_completion_date || "",
   );
   const [refreshing, setRefreshing] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarView, setSidebarView] = useState<
     "auto" | "lessons" | "chapters"
   >("auto");
@@ -117,15 +118,32 @@ export function CourseWorkspace({
         </Button>
       </div>
     );
-  const percent = completion(course);
-  const showChapters =
-    lesson?.availability_status === "available" &&
-    (sidebarView === "chapters" ||
-      (sidebarView === "auto" && chapters.length > 0));
+  const isSingleLessonWithChapters =
+    course.videos.length === 1 && chapters.length > 0;
   const position =
     playback?.lessonId === lesson?.id
       ? playback?.seconds || 0
       : lesson?.progress.last_position_seconds || 0;
+  const completedChapters = completedChaptersCount(
+    chapters,
+    position,
+    lesson?.duration_seconds,
+    lesson?.progress.is_completed,
+  );
+  const remainingChapters = Math.max(0, chapters.length - completedChapters);
+  const chapterPercent = chapterProgressPercent(
+    chapters,
+    position,
+    lesson?.duration_seconds,
+    lesson?.progress.is_completed,
+  );
+  const percent = isSingleLessonWithChapters
+    ? chapterPercent
+    : completion(course);
+  const showChapters =
+    lesson?.availability_status === "available" &&
+    (sidebarView === "chapters" ||
+      (sidebarView === "auto" && chapters.length > 0));
   const filtered = course.videos.filter((v) =>
     v.title.toLowerCase().includes(query.toLowerCase()),
   );
@@ -146,7 +164,15 @@ export function CourseWorkspace({
           <p>
             {course.channel_name || "Your personal course"}
             <span>·</span>
-            {course.videos.length} lessons<span>·</span>
+            {isSingleLessonWithChapters ? (
+              <>
+                1 lesson<span>·</span>
+                {chapters.length} chapters
+              </>
+            ) : (
+              <>{course.videos.length} lessons</>
+            )}
+            <span>·</span>
             {course.videos.some((v) => v.duration_seconds > 0)
               ? duration(
                   course.videos.reduce((n, v) => n + v.duration_seconds, 0),
@@ -155,6 +181,18 @@ export function CourseWorkspace({
           </p>
         </div>
         <div className="course-actions">
+          <button
+            className={cn("icon-button", !sidebarOpen && "active")}
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Open sidebar"}
+            title={sidebarOpen ? "Collapse sidebar" : "Open sidebar"}
+            onClick={() => setSidebarOpen((v) => !v)}
+          >
+            {sidebarOpen ? (
+              <PanelLeftClose size={18} />
+            ) : (
+              <PanelLeftOpen size={18} />
+            )}
+          </button>
           <button
             className={cn("icon-button", course.is_favorite && "favorite-icon")}
             aria-label="Toggle favorite"
@@ -252,138 +290,202 @@ export function CourseWorkspace({
           This course is paused. Resume it whenever you’re ready.
         </div>
       )}
-      <div className="learning-layout">
-        <aside className="panel lesson-sidebar">
-          {lesson?.availability_status === "available" && (
-            <div className="sidebar-view-switch" aria-label="Lesson navigation">
+      <div
+        className={cn("learning-layout", !sidebarOpen && "sidebar-collapsed")}
+      >
+        {sidebarOpen && (
+          <aside className="panel lesson-sidebar">
+            <div className="sidebar-top-bar">
+              {lesson?.availability_status === "available" ? (
+                <div
+                  className="sidebar-view-switch"
+                  aria-label="Lesson navigation"
+                >
+                  <button
+                    aria-pressed={!showChapters}
+                    onClick={() => setSidebarView("lessons")}
+                  >
+                    Lessons <span>{course.videos.length}</span>
+                  </button>
+                  <button
+                    aria-pressed={showChapters}
+                    onClick={() => setSidebarView("chapters")}
+                  >
+                    Chapters <span>{chaptersLoading ? "…" : chapters.length}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex-1" />
+              )}
               <button
-                aria-pressed={!showChapters}
-                onClick={() => setSidebarView("lessons")}
+                className="icon-button sidebar-collapse-button"
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Collapse sidebar"
+                title="Collapse sidebar"
               >
-                Lessons <span>{course.videos.length}</span>
-              </button>
-              <button
-                aria-pressed={showChapters}
-                onClick={() => setSidebarView("chapters")}
-              >
-                Chapters <span>{chaptersLoading ? "…" : chapters.length}</span>
+                <PanelLeftClose size={17} />
               </button>
             </div>
-          )}
-          {showChapters ? (
-            <VideoChapters
-              key={lesson!.id}
-              chapters={chapters}
-              position={position}
-              loading={chaptersLoading}
-              error={chaptersError}
-              onRetry={retryChapters}
-              onSeek={(seconds) => player.current?.seek(seconds)}
-            />
-          ) : (
-            <>
-              <div className="lesson-sidebar-header">
-                <div>
-                  <h3>Your learning path</h3>
-                  <strong>{percent}%</strong>
-                </div>
-                <Progress value={percent} />
-                <p>
-                  {course.videos.filter((v) => v.progress.is_completed).length}{" "}
-                  completed ·{" "}
-                  {
-                    course.videos.filter(
-                      (v) =>
-                        v.availability_status === "available" &&
-                        !v.progress.is_completed,
-                    ).length
-                  }{" "}
-                  to go
-                </p>
-                <div className="search-input">
-                  <Search size={15} />
-                  <Input
-                    className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder="Find a lesson..."
-                    aria-label="Search lessons"
-                  />
-                </div>
-              </div>
-              <div className="lesson-list">
-                {filtered.slice(0, page * 50).map((v, index) => (
-                  <Link
-                    key={v.id}
-                    href={`/courses/${course.id}/learn/${v.id}`}
-                    className={cn(
-                      "lesson-item",
-                      lesson?.id === v.id && "current-lesson",
-                      v.availability_status !== "available" &&
-                        "unavailable-lesson",
+            {showChapters ? (
+              <VideoChapters
+                key={lesson!.id}
+                chapters={chapters}
+                position={position}
+                duration={lesson?.duration_seconds}
+                isLessonCompleted={lesson?.progress.is_completed}
+                loading={chaptersLoading}
+                error={chaptersError}
+                onRetry={retryChapters}
+                onSeek={(seconds) => player.current?.seek(seconds)}
+              />
+            ) : (
+              <>
+                <div className="lesson-sidebar-header">
+                  <div>
+                    <h3>Your learning path</h3>
+                    <strong>{percent}%</strong>
+                  </div>
+                  <Progress value={percent} />
+                  <p>
+                    {isSingleLessonWithChapters ? (
+                      <>
+                        {completedChapters} completed · {remainingChapters} to go
+                        <span className="chapter-count-tag">
+                          {" "}({chapters.length} chapters)
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        {
+                          course.videos.filter((v) => v.progress.is_completed)
+                            .length
+                        }{" "}
+                        completed ·{" "}
+                        {
+                          course.videos.filter(
+                            (v) =>
+                              v.availability_status === "available" &&
+                              !v.progress.is_completed,
+                          ).length
+                        }{" "}
+                        to go
+                      </>
                     )}
-                  >
-                    <span
+                  </p>
+                  <div className="search-input">
+                    <Search size={15} />
+                    <Input
+                      className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
+                      value={query}
+                      onChange={(e) => {
+                        setQuery(e.target.value);
+                        setPage(1);
+                      }}
+                      placeholder="Find a lesson..."
+                      aria-label="Search lessons"
+                    />
+                  </div>
+                </div>
+                <div className="lesson-list">
+                  {filtered.slice(0, page * 50).map((v, index) => (
+                    <Link
+                      key={v.id}
+                      href={`/courses/${course.id}/learn/${v.id}`}
                       className={cn(
-                        "lesson-state",
-                        v.progress.is_completed && "lesson-state-complete",
+                        "lesson-item",
+                        lesson?.id === v.id && "current-lesson",
+                        v.availability_status !== "available" &&
+                          "unavailable-lesson",
                       )}
                     >
-                      {v.progress.is_completed ? (
-                        <Check size={13} />
-                      ) : v.progress.status === "needs_revision" ? (
-                        <RotateCcw size={13} />
-                      ) : lesson?.id === v.id ? (
-                        <Play size={12} fill="currentColor" />
-                      ) : (
-                        String(index + 1).padStart(2, "0")
+                      <span
+                        className={cn(
+                          "lesson-state",
+                          v.progress.is_completed && "lesson-state-complete",
+                        )}
+                      >
+                        {v.progress.is_completed ? (
+                          <Check size={13} />
+                        ) : v.progress.status === "needs_revision" ? (
+                          <RotateCcw size={13} />
+                        ) : lesson?.id === v.id ? (
+                          <Play size={12} fill="currentColor" />
+                        ) : (
+                          String(index + 1).padStart(2, "0")
+                        )}
+                      </span>
+                      <div>
+                        <strong>{v.title}</strong>
+                        <small>
+                          {v.availability_status !== "available"
+                            ? "Unavailable · progress preserved"
+                            : isSingleLessonWithChapters
+                              ? `${completedChapters} of ${chapters.length} chapters completed (${percent}%)`
+                              : v.duration_seconds
+                                ? duration(v.duration_seconds)
+                                : "YouTube video"}
+                          {v.progress.last_position_seconds > 0 &&
+                            !v.progress.is_completed &&
+                            !isSingleLessonWithChapters && (
+                              <>
+                                {" "}
+                                · {timestamp(v.progress.last_position_seconds)}
+                              </>
+                            )}
+                        </small>
+                      </div>
+                      {v.progress.is_completed && (
+                        <CircleCheck size={13} className="green-text" />
                       )}
-                    </span>
-                    <div>
-                      <strong>{v.title}</strong>
-                      <small>
-                        {v.availability_status !== "available"
-                          ? "Unavailable · progress preserved"
-                          : v.duration_seconds
-                            ? duration(v.duration_seconds)
-                            : "YouTube video"}
-                        {v.progress.last_position_seconds > 0 &&
-                          !v.progress.is_completed && (
-                            <>
-                              {" "}
-                              · {timestamp(v.progress.last_position_seconds)}
-                            </>
-                          )}
-                      </small>
-                    </div>
-                    {v.progress.is_completed && (
-                      <CircleCheck size={13} className="green-text" />
-                    )}
-                  </Link>
-                ))}
-                {filtered.length > page * 50 && (
-                  <Button
-                    className="load-more"
-                    variant="ghost"
-                    onClick={() => setPage(page + 1)}
-                  >
-                    Load more lessons
-                  </Button>
-                )}
-                {!filtered.length && (
-                  <p className="small-empty">No lessons match your search.</p>
-                )}
-              </div>
-              <div className="lesson-sidebar-footer">
-                <span>✳</span>One lesson closer to your goal.
-              </div>
-            </>
-          )}
-        </aside>
+                    </Link>
+                  ))}
+                  {filtered.length > page * 50 && (
+                    <Button
+                      className="load-more"
+                      variant="ghost"
+                      onClick={() => setPage(page + 1)}
+                    >
+                      Load more lessons
+                    </Button>
+                  )}
+                  {!filtered.length && (
+                    <p className="small-empty">No lessons match your search.</p>
+                  )}
+                </div>
+                <div className="lesson-sidebar-footer">
+                  <span>✳</span>
+                  {isSingleLessonWithChapters
+                    ? `${remainingChapters > 0 ? `${remainingChapters} chapters to go.` : "All chapters completed!"}`
+                    : "One lesson closer to your goal."}
+                </div>
+              </>
+            )}
+          </aside>
+        )}
         <div className="learning-main">
+          {!sidebarOpen && (
+            <div className="sidebar-open-control">
+              <Button
+                variant="outline"
+                size="sm"
+                className="sidebar-open-button"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open sidebar"
+              >
+                <PanelLeftOpen size={15} />
+                <span>
+                  {showChapters
+                    ? `Chapters (${completedChapters}/${chapters.length})`
+                    : `Lessons (${course.videos.filter((v) => v.progress.is_completed).length}/${course.videos.length})`}
+                </span>
+              </Button>
+              {isSingleLessonWithChapters && (
+                <span className="sidebar-open-progress">
+                  {percent}% completed · {completedChapters} of {chapters.length} chapters
+                </span>
+              )}
+            </div>
+          )}
           {lesson ? (
             <>
               {lesson.availability_status === "available" ? (
@@ -412,7 +514,16 @@ export function CourseWorkspace({
               )}
               <div className="lesson-detail">
                 <span className="eyebrow">
-                  LESSON {currentIndex + 1} OF {course.videos.length}
+                  {isSingleLessonWithChapters ? (
+                    <>
+                      CHAPTER {Math.max(1, chapterAt(chapters, position) + 1)} OF{" "}
+                      {chapters.length} · LESSON 1 OF 1
+                    </>
+                  ) : (
+                    <>
+                      LESSON {currentIndex + 1} OF {course.videos.length}
+                    </>
+                  )}
                 </span>
                 <h2>{lesson.title}</h2>
                 <div className="lesson-detail-actions">

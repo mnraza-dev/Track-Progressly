@@ -294,12 +294,45 @@
     flex-direction: column;
     padding: 30px 16px 14px;
     z-index: 30;
+    transition: transform 0.2s ease;
+  }
+  .main-shell {
+    transition: margin-left 0.2s ease;
+  }
+  .app-shell.sidebar-collapsed .sidebar {
+    transform: translateX(-100%);
+  }
+  .app-shell.sidebar-collapsed .main-shell {
+    margin-left: 0;
   }
   .sidebar-brand {
     padding: 0 12px 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+  .sidebar-brand-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .desktop-collapse {
+    display: inline-flex;
+  }
+  .desktop-toggle-icon {
+    display: inline-flex;
+  }
+  .mobile-toggle-icon {
+    display: none;
+  }
+  @media (max-width: 760px) {
+    .desktop-collapse,
+    .desktop-toggle-icon {
+      display: none !important;
+    }
+    .mobile-toggle-icon {
+      display: inline-flex !important;
+    }
   }
   .brand {
     display: inline-flex;

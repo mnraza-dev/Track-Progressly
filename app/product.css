@@ -487,6 +487,52 @@
     color: var(--muted-foreground);
   }
 
+  .sidebar-top-bar {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-right: 9px;
+  }
+  .sidebar-top-bar .sidebar-view-switch {
+    flex: 1;
+    border-bottom: none;
+  }
+  .sidebar-collapse-button {
+    flex-shrink: 0;
+    color: var(--muted-foreground);
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+  .sidebar-collapse-button:hover {
+    color: var(--foreground);
+    background: var(--muted);
+  }
+  .sidebar-open-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .sidebar-open-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    height: 34px;
+    border-radius: 7px;
+    background: var(--card);
+  }
+  .sidebar-open-progress {
+    font-size: 13px;
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
   .sidebar-view-switch {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -541,6 +587,41 @@
   }
   .chapter-heading > svg {
     color: var(--primary);
+  }
+  .chapter-heading-progress strong {
+    font-size: 15px;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .chapter-progress-box {
+    padding: 0 17px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .chapter-progress-box > p {
+    font-size: 11px;
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+  .chapter-number-complete {
+    background: color-mix(in srgb, var(--success, #10b981) 15%, transparent);
+    color: var(--success, #10b981);
+    border-color: color-mix(in srgb, var(--success, #10b981) 40%, transparent);
+  }
+  .chapter-number-active {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+  }
+  .chapter-badge-done {
+    color: var(--success, #10b981);
+    font-weight: 500;
+    font-size: 10px;
+  }
+  .chapter-count-tag {
+    font-size: 11px;
+    opacity: 0.85;
   }
   .video-chapters .chapter-search {
     margin: 0 13px 13px;
