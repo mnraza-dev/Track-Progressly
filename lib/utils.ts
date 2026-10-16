@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { Course, Activity } from "@/types";
 import { format, subDays } from "date-fns";
+import { parseVideoChapters, chapterProgressPercent } from "@/lib/youtube/chapters";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -9,13 +10,28 @@ export function completion(course: Course) {
   const available = course.videos.filter(
     (v) => v.availability_status === "available",
   );
-  return available.length
-    ? Math.round(
-        (available.filter((v) => v.progress.is_completed).length /
-          available.length) *
-          100,
-      )
-    : 0;
+  if (!available.length) return 0;
+  if (available.length === 1) {
+    const single = available[0];
+    if (single.progress.is_completed) return 100;
+    const chapters = parseVideoChapters(
+      single.description || "",
+      single.duration_seconds || 0,
+    );
+    if (chapters.length > 0) {
+      return chapterProgressPercent(
+        chapters,
+        single.progress.last_position_seconds || 0,
+        single.duration_seconds || 0,
+        single.progress.is_completed,
+      );
+    }
+  }
+  return Math.round(
+    (available.filter((v) => v.progress.is_completed).length /
+      available.length) *
+      100,
+  );
 }
 export function duration(seconds: number) {
   if (seconds >= 3600)

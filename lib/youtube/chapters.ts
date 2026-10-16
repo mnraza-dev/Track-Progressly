@@ -61,3 +61,62 @@ export function chapterTimestamp(seconds: number) {
     ? `${Math.floor(value / 3600)}:${String(minutes % 60).padStart(2, "0")}:${tail}`
     : `${minutes}:${tail}`;
 }
+
+export function isChapterCompleted(
+  chapter: VideoChapter,
+  index: number,
+  chapters: VideoChapter[],
+  position: number,
+  duration = 0,
+  isLessonCompleted = false,
+): boolean {
+  if (isLessonCompleted) return true;
+  const nextStart = chapters[index + 1]?.start_seconds;
+  if (typeof nextStart === "number") {
+    return position >= nextStart;
+  }
+  const end =
+    chapter.end_seconds ??
+    (duration > chapter.start_seconds ? duration : null);
+  if (typeof end === "number" && end > chapter.start_seconds) {
+    return position >= Math.max(chapter.start_seconds, end - 5);
+  }
+  return false;
+}
+
+export function completedChaptersCount(
+  chapters: VideoChapter[],
+  position: number,
+  duration = 0,
+  isLessonCompleted = false,
+): number {
+  if (!chapters.length) return 0;
+  if (isLessonCompleted) return chapters.length;
+  return chapters.filter((chapter, index) =>
+    isChapterCompleted(
+      chapter,
+      index,
+      chapters,
+      position,
+      duration,
+      isLessonCompleted,
+    ),
+  ).length;
+}
+
+export function chapterProgressPercent(
+  chapters: VideoChapter[],
+  position: number,
+  duration = 0,
+  isLessonCompleted = false,
+): number {
+  if (!chapters.length) return 0;
+  if (isLessonCompleted) return 100;
+  const count = completedChaptersCount(
+    chapters,
+    position,
+    duration,
+    isLessonCompleted,
+  );
+  return Math.min(100, Math.round((count / chapters.length) * 100));
+}
