@@ -24,6 +24,7 @@ import {
   Archive,
   PanelLeftClose,
   PanelLeftOpen,
+  Sparkles,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { completion, duration, timestamp, cn } from "@/lib/utils";
@@ -42,6 +43,8 @@ import {
 import { LessonNotes } from "@/components/notes/lesson-notes";
 import { VideoChapters } from "@/components/player/video-chapters";
 import { useVideoChapters } from "@/components/player/use-video-chapters";
+import { SceneArtwork } from "@/components/three/scene-provider";
+import { fireConfetti } from "@/lib/confetti";
 export function CourseWorkspace({
   courseId,
   videoId,
@@ -141,6 +144,7 @@ export function CourseWorkspace({
         next.delete(chapterIndex);
       } else {
         next.add(chapterIndex);
+        fireConfetti();
       }
       try {
         if (course?.id && lesson?.id) {
@@ -609,14 +613,18 @@ export function CourseWorkspace({
                         ? "in_progress"
                         : lesson.progress.status
                     }
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const newStatus = e.target.value as typeof lesson.progress.status;
+                      if (newStatus === "completed") {
+                        fireConfetti();
+                      }
                       void mutate({
                         op: "progress",
                         video_id: lesson.id,
-                        status: e.target.value as typeof lesson.progress.status,
+                        status: newStatus,
                         active_seconds: 0,
-                      })
-                    }
+                      });
+                    }}
                   >
                     <option value="in_progress">In progress</option>
                     <option value="completed">Completed</option>
@@ -638,6 +646,35 @@ export function CourseWorkspace({
                 lesson={lesson}
                 player={player}
               />
+              {percent === 100 && (
+                <div className="course-completed-celebration-card">
+                  <div className="course-trophy-scene">
+                    <SceneArtwork
+                      kind="trophy"
+                      interactive
+                      label="3D Course Completion Trophy"
+                    />
+                  </div>
+                  <div className="course-trophy-copy">
+                    <span className="trophy-badge">
+                      <Sparkles size={13} />
+                      COURSE COMPLETED
+                    </span>
+                    <h2>You finished this course!</h2>
+                    <p>
+                      Every lesson and exercise completed. Your momentum is extraordinary.
+                    </p>
+                    <div className="trophy-actions">
+                      <Button asChild size="sm" variant="outline">
+                        <Link href="/notes">Review notes</Link>
+                      </Button>
+                      <Button asChild size="sm">
+                        <Link href="/courses">Explore next course</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="lesson-navigation">
                 <span>
                   <Clock size={14} />

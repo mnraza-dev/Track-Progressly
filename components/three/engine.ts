@@ -11,6 +11,7 @@ type View = SceneRegistration & {
   targetRotation: number;
   visible: boolean;
   pointer: THREE.Vector2;
+  targetPointer: THREE.Vector2;
 };
 export class StudioRenderer {
   private renderer: THREE.WebGLRenderer;
@@ -96,7 +97,9 @@ export class StudioRenderer {
           ? 4.8
           : registration.options.kind === "timeline"
             ? 7.8
-            : 6,
+            : registration.options.kind === "trophy"
+              ? 5.2
+              : 6,
     );
     camera.lookAt(0, 0, 0);
     this.views.set(id, {
@@ -109,6 +112,7 @@ export class StudioRenderer {
       targetRotation: previous?.targetRotation ?? 0,
       visible: true,
       pointer: new THREE.Vector2(),
+      targetPointer: new THREE.Vector2(),
     });
     this.observer.observe(registration.element);
     registration.element.dataset.threeState = "ready";
@@ -218,14 +222,14 @@ export class StudioRenderer {
   };
   private pointer = (e: PointerEvent) => {
     for (const view of this.views.values()) {
-      if (!view.visible || !view.options.interactive) continue;
+      if (!view.visible) continue;
       const rect = view.element.getBoundingClientRect();
       const inside =
         e.clientX >= rect.left &&
         e.clientX <= rect.right &&
         e.clientY >= rect.top &&
         e.clientY <= rect.bottom;
-      view.pointer.set(
+      view.targetPointer.set(
         inside ? ((e.clientX - rect.left) / rect.width) * 2 - 1 : 0,
         inside ? -(((e.clientY - rect.top) / rect.height) * 2 - 1) : 0,
       );
@@ -283,21 +287,37 @@ export class StudioRenderer {
         8,
         delta || 0.03,
       );
-      moving ||= Math.abs(view.rotation - view.targetRotation) > 0.001;
+      view.pointer.x = THREE.MathUtils.damp(
+        view.pointer.x,
+        view.targetPointer.x,
+        6,
+        delta || 0.03,
+      );
+      view.pointer.y = THREE.MathUtils.damp(
+        view.pointer.y,
+        view.targetPointer.y,
+        6,
+        delta || 0.03,
+      );
+      moving ||=
+        Math.abs(view.rotation - view.targetRotation) > 0.001 ||
+        view.pointer.distanceTo(view.targetPointer) > 0.002;
       const float = ["goal", "timeline", "rings"].includes(view.options.kind)
         ? 0
-        : Math.sin(this.elapsed * 0.55 + rect.left * 0.004) * 0.045;
+        : Math.sin(this.elapsed * 0.6 + rect.left * 0.004) * 0.05;
       view.model.position.y = float;
-      view.model.rotation.x = view.base.x + view.pointer.y * 0.055;
+      view.model.rotation.x = view.base.x + view.pointer.y * 0.08;
       view.model.rotation.y =
         view.base.y +
         view.rotation +
-        view.pointer.x * 0.12 +
-        (view.options.kind === "orbit" ? this.elapsed * 0.08 : 0);
+        view.pointer.x * 0.15 +
+        (view.options.kind === "orbit" || view.options.kind === "trophy"
+          ? this.elapsed * 0.08
+          : 0);
       view.model.rotation.z =
         view.base.z +
-        (view.options.kind === "hero"
-          ? Math.sin(this.elapsed * 0.22) * 0.012
+        (view.options.kind === "hero" || view.options.kind === "trophy"
+          ? Math.sin(this.elapsed * 0.24) * 0.015
           : 0);
       this.renderer.setViewport(
         rect.left,

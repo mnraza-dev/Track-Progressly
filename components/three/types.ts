@@ -7,7 +7,8 @@ export type SceneKind =
   | "goal"
   | "orbit"
   | "timeline"
-  | "rings";
+  | "rings"
+  | "trophy";
 export type SceneOptions = {
   kind: SceneKind;
   progress?: number;

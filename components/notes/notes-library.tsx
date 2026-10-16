@@ -16,6 +16,7 @@ import {
 import { useWorkspace } from "@/stores/workspace";
 import { downloadText, timestamp } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { SceneArtwork } from "@/components/three/scene-provider";
 export function NotesLibrary() {
   const { data, notify } = useWorkspace();
   const [query, setQuery] = useState("");
@@ -123,8 +124,12 @@ export function NotesLibrary() {
         </div>
       ) : (
         <div className="large-empty">
-          <div className="empty-icon">
-            <StickyNote size={34} strokeWidth={1.4} />
+          <div className="empty-scene">
+            <SceneArtwork
+              kind="books"
+              interactive
+              label="Interactive 3D notebook stack"
+            />
           </div>
           <span className="eyebrow">MAKE THE KNOWLEDGE YOURS</span>
           <h2>

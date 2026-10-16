@@ -358,6 +358,47 @@ export function buildModel(
       }
     });
     root.rotation.set(0.18, -0.3, -0.08);
+  } else if (kind === "trophy") {
+    const base = box(1.9, 0.14, 1.4, palette.ink, 0.04);
+    base.position.y = -1.1;
+    root.add(base);
+
+    const subBase = box(1.5, 0.08, 1.1, palette.copper, 0.03);
+    subBase.position.y = -0.98;
+    root.add(subBase);
+
+    const crystal = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.72, 0),
+      material(palette.teal, 0.45, 0.15),
+    );
+    crystal.position.y = 0.1;
+    crystal.rotation.set(0.3, 0.5, 0.2);
+    root.add(crystal);
+
+    const ring1 = ring(1.22, 0.04, palette.copper, 0.65);
+    ring1.rotation.set(0.75, 0.4, 0.3);
+    ring1.position.y = 0.1;
+    root.add(ring1);
+
+    const ring2 = ring(1.02, 0.025, palette.silver, 0.85);
+    ring2.rotation.set(-0.6, -0.5, 0.4);
+    ring2.position.y = 0.1;
+    root.add(ring2);
+
+    const gem1 = sphere(0.14, palette.sage, 0.5);
+    gem1.position.set(1.15, 0.75, 0.35);
+    root.add(gem1);
+
+    const gem2 = sphere(0.1, palette.cream, 0.3);
+    gem2.position.set(-1.1, -0.4, 0.45);
+    root.add(gem2);
+
+    const crown = ring(0.45, 0.025, palette.copper, 0.75);
+    crown.rotation.x = Math.PI / 2;
+    crown.position.y = 1.05;
+    root.add(crown);
+
+    root.rotation.set(0.15, -0.25, 0);
   } else if (kind === "goal") {
     const base = ring(1.05, 0.09, "#d4d3c2", 0.08);
     root.add(base);
@@ -377,7 +418,7 @@ export function buildModel(
       const arc = ring(
         1.05,
         0.105,
-        palette.teal,
+        progress >= 1 ? palette.copper : palette.teal,
         0.25,
         Math.PI * 2 * Math.min(1, progress),
       );
@@ -385,9 +426,19 @@ export function buildModel(
       arc.position.z = 0.03;
       root.add(arc);
     }
-    const cap = sphere(0.11, palette.teal, 0.3);
+    const cap = sphere(0.11, progress >= 1 ? palette.copper : palette.teal, 0.3);
     cap.position.set(0, 1.05, 0.05);
     root.add(cap);
+
+    if (progress >= 1) {
+      const halo = ring(1.35, 0.02, palette.sage, 0.7);
+      halo.rotation.set(0.3, 0.2, 0);
+      root.add(halo);
+      const pearl = sphere(0.12, palette.cream, 0.2);
+      pearl.position.set(0, -1.05, 0.06);
+      root.add(pearl);
+    }
+
     root.rotation.set(0.1, -0.12, 0);
   } else {
     const knot = new THREE.Mesh(

@@ -21,6 +21,7 @@ import {
   type VideoChapter,
 } from "@/lib/youtube/chapters";
 import { cn } from "@/lib/utils";
+import { fireConfetti } from "@/lib/confetti";
 
 export function VideoChapters({
   chapters,
@@ -200,6 +201,9 @@ export function VideoChapters({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (!isCompleted) {
+                          fireConfetti({ x: e.clientX, y: e.clientY });
+                        }
                         onToggleComplete?.(chapter.index);
                       }}
                       className={cn(

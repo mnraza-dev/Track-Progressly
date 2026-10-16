@@ -51,6 +51,7 @@ import { dailySeries } from "@/lib/analytics";
 import { isConnected } from "@/lib/supabase/client";
 import { SceneArtwork } from "@/components/three/scene-provider";
 import { ProductStage } from "@/components/three/product-stage";
+import { fireConfetti } from "@/lib/confetti";
 
 export function Dashboard() {
   const { data, mutate, notify } = useWorkspace();
@@ -60,6 +61,7 @@ export function Dashboard() {
   const [now] = useState(() => new Date());
   const [link, setLink] = useState("");
   const [taskFilter, setTaskFilter] = useState<"pending" | "all">("pending");
+  const [hero3dMode, setHero3dMode] = useState(false);
 
   const { courses, activity, profile } = data;
 
@@ -301,6 +303,9 @@ export function Dashboard() {
     is_completed: boolean;
   }) => {
     try {
+      if (!task.is_completed) {
+        fireConfetti();
+      }
       await mutate({
         op: "task",
         video_id: task.videoId,
@@ -488,32 +493,78 @@ export function Dashboard() {
           </div>
 
           <div className="resume-hero-right">
-            <Link
-              href={`/courses/${resumeLessonItem.course.id}/learn/${resumeLessonItem.id}`}
-              className="resume-thumbnail-link"
-              aria-label="Resume this video lesson"
-            >
-              {resumeLessonItem.thumbnail_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={resumeLessonItem.thumbnail_url}
-                  alt={resumeLessonItem.title}
-                  className="resume-thumbnail-img"
+            <div className="resume-view-switch">
+              <button
+                type="button"
+                className={cn("resume-view-pill", !hero3dMode && "active")}
+                onClick={() => setHero3dMode(false)}
+                aria-label="Show video preview"
+              >
+                <Play size={11} fill="currentColor" />
+                <span>Video</span>
+              </button>
+              <button
+                type="button"
+                className={cn("resume-view-pill", hero3dMode && "active")}
+                onClick={() => setHero3dMode(true)}
+                aria-label="Show 3D interactive stage"
+              >
+                <Sparkles size={11} />
+                <span>3D Stage</span>
+              </button>
+            </div>
+
+            {hero3dMode ? (
+              <div className="resume-3d-stage">
+                <SceneArtwork
+                  kind={
+                    resumeLessonItem.course.category === "Development"
+                      ? "code"
+                      : resumeLessonItem.course.category === "Data & Python"
+                        ? "data"
+                        : resumeLessonItem.course.category === "Design"
+                          ? "design"
+                          : "rings"
+                  }
+                  progress={(resumeDetails?.percent || 0) / 100}
+                  interactive
+                  label={`3D interactive artifact for ${resumeLessonItem.course.title}`}
                 />
-              ) : (
-                <div className="resume-thumbnail-placeholder">
-                  <Play size={36} fill="currentColor" />
+                <div className="resume-3d-caption">
+                  <span className="resume-3d-hint">
+                    <Sparkles size={11} /> Interactive 3D Model · Drag to rotate
+                  </span>
+                  <strong>{resumeDetails?.percent || 0}% Progress</strong>
                 </div>
-              )}
-              <div className="resume-thumbnail-overlay">
-                <div className="resume-play-bubble">
-                  <Play size={20} fill="currentColor" />
-                </div>
-                <span className="resume-thumbnail-duration">
-                  {duration(resumeLessonItem.duration_seconds)}
-                </span>
               </div>
-            </Link>
+            ) : (
+              <Link
+                href={`/courses/${resumeLessonItem.course.id}/learn/${resumeLessonItem.id}`}
+                className="resume-thumbnail-link"
+                aria-label="Resume this video lesson"
+              >
+                {resumeLessonItem.thumbnail_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={resumeLessonItem.thumbnail_url}
+                    alt={resumeLessonItem.title}
+                    className="resume-thumbnail-img"
+                  />
+                ) : (
+                  <div className="resume-thumbnail-placeholder">
+                    <Play size={36} fill="currentColor" />
+                  </div>
+                )}
+                <div className="resume-thumbnail-overlay">
+                  <div className="resume-play-bubble">
+                    <Play size={20} fill="currentColor" />
+                  </div>
+                  <span className="resume-thumbnail-duration">
+                    {duration(resumeLessonItem.duration_seconds)}
+                  </span>
+                </div>
+              </Link>
+            )}
           </div>
         </section>
       ) : (
