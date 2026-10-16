@@ -129,7 +129,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <ChevronDown size={14} />
         </button>
         <div className="nav-label">YOUR LEARNING STUDIO</div>
-        <nav>
+        <nav data-tour="sidebar-nav">
           {navigation.map((item) => (
             <Link
               key={item.href}
@@ -249,6 +249,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Search size={16} />
               <span>Find a course or note</span>
               <kbd>⌘ K</kbd>
+            </button>
+            <button
+              className="tour-topbar-button"
+              onClick={startTour}
+              aria-label="Take interactive product tour"
+              title="Explore Progressly with an interactive tour"
+            >
+              <Sparkles size={14} className="tour-sparkle-icon" />
+              <span>Tour</span>
             </button>
             <Separator orientation="vertical" className="topbar-separator" />
             <button
