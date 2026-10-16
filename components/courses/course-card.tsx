@@ -122,9 +122,9 @@ export function CourseCard({ course }: { course: Course }) {
             ? "Completed"
             : course.status === "paused"
               ? "Paused"
-              : percent > 0
-                ? "In progress"
-                : "Ready to start"}
+              : course.status === "archived"
+                ? "Archived"
+                : "In progress"}
         </Badge>
       </Link>
       <div className="course-card-body">

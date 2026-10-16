@@ -95,7 +95,7 @@ export type ImportPreview = {
   >[];
 };
 export const emptyProgress: Lesson["progress"] = {
-  status: "not_started",
+  status: "in_progress",
   last_position_seconds: 0,
   watched_seconds: 0,
   is_completed: false,

@@ -604,7 +604,11 @@ export function CourseWorkspace({
                   <select
                     className="lesson-status-select"
                     aria-label="Lesson status"
-                    value={lesson.progress.status}
+                    value={
+                      lesson.progress.status === "not_started"
+                        ? "in_progress"
+                        : lesson.progress.status
+                    }
                     onChange={(e) =>
                       void mutate({
                         op: "progress",
@@ -614,7 +618,6 @@ export function CourseWorkspace({
                       })
                     }
                   >
-                    <option value="not_started">Not started</option>
                     <option value="in_progress">In progress</option>
                     <option value="completed">Completed</option>
                     <option value="needs_revision">Needs revision</option>

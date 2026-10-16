@@ -50,7 +50,7 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
         created_at: now,
         updated_at: now,
         is_favorite: false,
-        status: "not_started",
+        status: "in_progress",
         completed_at: null,
         videos: mutation.course.videos.map((v) => ({
           ...v,

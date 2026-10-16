@@ -34,7 +34,7 @@ export function Library({ resume = false }: { resume?: boolean }) {
             : status === "completed"
               ? completion(c) === 100
               : status === "in_progress"
-                ? c.status === "in_progress"
+                ? c.status === "in_progress" || c.status === "not_started"
                 : c.status === status) &&
         (category === "all" || c.category === category) &&
         `${c.title} ${c.channel_name} ${c.description}`
@@ -119,7 +119,6 @@ export function Library({ resume = false }: { resume?: boolean }) {
         {[
           "all",
           "in_progress",
-          "not_started",
           "completed",
           "paused",
           "favorites",
