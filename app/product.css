@@ -1431,6 +1431,251 @@
     font-family: var(--font-geist-mono), monospace;
   }
 
+  /* Resume Media Toggle (Video vs 3D Stage) */
+  .resume-view-switch {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    display: flex;
+    gap: 3px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 3px;
+    border-radius: 7px;
+  }
+
+  .resume-view-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 550;
+    padding: 4px 9px;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .resume-view-pill:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .resume-view-pill.active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  .resume-3d-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 220px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border));
+    background: radial-gradient(
+      circle at 50% 50%,
+      color-mix(in srgb, var(--primary) 12%, var(--card)) 0%,
+      var(--card) 100%
+    );
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .resume-3d-stage .scene-artwork {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .resume-3d-caption {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.65) 70%);
+    color: #ffffff;
+    font-size: 11px;
+    pointer-events: none;
+  }
+
+  .resume-3d-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .resume-3d-caption strong {
+    font-family: var(--font-geist-mono), monospace;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  /* 3D Course Completion Celebration Card */
+  .course-completed-celebration-card {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 24px;
+    align-items: center;
+    padding: 24px;
+    margin: 22px 0;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--success, #10b981) 40%, var(--border));
+    background: radial-gradient(
+      circle at 20% 50%,
+      color-mix(in srgb, var(--success, #10b981) 12%, var(--card)),
+      var(--card) 80%
+    );
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    animation: cardPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .course-trophy-scene {
+    position: relative;
+    height: 170px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .course-trophy-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .trophy-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--success, #10b981) 20%, transparent);
+    color: var(--success, #10b981);
+    align-self: flex-start;
+  }
+
+  .course-trophy-copy h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--foreground);
+  }
+
+  .course-trophy-copy p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+
+  .trophy-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  /* Global Polish & Micro-Animations */
+  @keyframes progressSheen {
+    0%, 25% { transform: translateX(-100%); }
+    65%, 100% { transform: translateX(100%); }
+  }
+
+  .progress-track > div {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-track > div::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: progressSheen 3.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  @keyframes checkSpring {
+    0% { transform: scale(0.6); opacity: 0.4; }
+    50% { transform: scale(1.22); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .task-checked-icon {
+    animation: checkSpring 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes flamePulse {
+    0%, 100% {
+      transform: scale(1) rotate(0deg);
+      filter: drop-shadow(0 0 2px rgba(249, 115, 22, 0.3));
+    }
+    50% {
+      transform: scale(1.15) rotate(4deg);
+      filter: drop-shadow(0 0 7px rgba(249, 115, 22, 0.65));
+    }
+  }
+
+  .stat-icon.orange svg {
+    animation: flamePulse 2.8s ease-in-out infinite;
+  }
+
+  .stat-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s ease,
+                border-color 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  @keyframes fadeInUpStagger {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dashboard-studio > section,
+  .dashboard-studio > .dashboard-action-grid,
+  .dashboard-studio > .dashboard-panels,
+  .dashboard-studio > .learning-perspective-grid {
+    animation: fadeInUpStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
+  .dashboard-studio > *:nth-child(2) { animation-delay: 0.04s; }
+  .dashboard-studio > *:nth-child(3) { animation-delay: 0.08s; }
+  .dashboard-studio > *:nth-child(4) { animation-delay: 0.12s; }
+  .dashboard-studio > *:nth-child(5) { animation-delay: 0.16s; }
+  .dashboard-studio > *:nth-child(6) { animation-delay: 0.20s; }
+
   /* ==========================================================================
      ENRICHED DASHBOARD: WEEKLY CONSISTENCY TRACKER
      ========================================================================== */
