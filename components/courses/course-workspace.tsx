@@ -120,6 +120,40 @@ export function CourseWorkspace({
     );
   const isSingleLessonWithChapters =
     course.videos.length === 1 && chapters.length > 0;
+  const [manualChapters, setManualChapters] = useState<Set<number>>(() => {
+    if (typeof window === "undefined" || !course?.id || !lesson?.id) {
+      return new Set<number>();
+    }
+    try {
+      const saved = localStorage.getItem(
+        `progressly_chapters_${course.id}_${lesson.id}`,
+      );
+      return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>();
+    } catch {
+      return new Set<number>();
+    }
+  });
+
+  const toggleChapterComplete = (chapterIndex: number) => {
+    setManualChapters((prev) => {
+      const next = new Set(prev);
+      if (next.has(chapterIndex)) {
+        next.delete(chapterIndex);
+      } else {
+        next.add(chapterIndex);
+      }
+      try {
+        if (course?.id && lesson?.id) {
+          localStorage.setItem(
+            `progressly_chapters_${course.id}_${lesson.id}`,
+            JSON.stringify([...next]),
+          );
+        }
+      } catch {}
+      return next;
+    });
+  };
+
   const position =
     playback?.lessonId === lesson?.id
       ? playback?.seconds || 0
@@ -129,6 +163,7 @@ export function CourseWorkspace({
     position,
     lesson?.duration_seconds,
     lesson?.progress.is_completed,
+    manualChapters,
   );
   const remainingChapters = Math.max(0, chapters.length - completedChapters);
   const chapterPercent = chapterProgressPercent(
@@ -136,6 +171,7 @@ export function CourseWorkspace({
     position,
     lesson?.duration_seconds,
     lesson?.progress.is_completed,
+    manualChapters,
   );
   const percent = isSingleLessonWithChapters
     ? chapterPercent
@@ -333,6 +369,8 @@ export function CourseWorkspace({
                 position={position}
                 duration={lesson?.duration_seconds}
                 isLessonCompleted={lesson?.progress.is_completed}
+                completedIndices={manualChapters}
+                onToggleComplete={toggleChapterComplete}
                 loading={chaptersLoading}
                 error={chaptersError}
                 onRetry={retryChapters}

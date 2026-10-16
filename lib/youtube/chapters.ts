@@ -69,8 +69,9 @@ export function isChapterCompleted(
   position: number,
   duration = 0,
   isLessonCompleted = false,
+  manualCompleted = false,
 ): boolean {
-  if (isLessonCompleted) return true;
+  if (isLessonCompleted || manualCompleted) return true;
   const nextStart = chapters[index + 1]?.start_seconds;
   if (typeof nextStart === "number") {
     return position >= nextStart;
@@ -89,9 +90,15 @@ export function completedChaptersCount(
   position: number,
   duration = 0,
   isLessonCompleted = false,
+  manualIndexes?: Set<number> | number[],
 ): number {
   if (!chapters.length) return 0;
   if (isLessonCompleted) return chapters.length;
+  const manualSet = manualIndexes
+    ? manualIndexes instanceof Set
+      ? manualIndexes
+      : new Set(manualIndexes)
+    : undefined;
   return chapters.filter((chapter, index) =>
     isChapterCompleted(
       chapter,
@@ -100,6 +107,7 @@ export function completedChaptersCount(
       position,
       duration,
       isLessonCompleted,
+      manualSet?.has(index),
     ),
   ).length;
 }
@@ -109,6 +117,7 @@ export function chapterProgressPercent(
   position: number,
   duration = 0,
   isLessonCompleted = false,
+  manualIndexes?: Set<number> | number[],
 ): number {
   if (!chapters.length) return 0;
   if (isLessonCompleted) return 100;
@@ -117,6 +126,7 @@ export function chapterProgressPercent(
     position,
     duration,
     isLessonCompleted,
+    manualIndexes,
   );
   return Math.min(100, Math.round((count / chapters.length) * 100));
 }

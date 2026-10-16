@@ -99,6 +99,14 @@ describe("Creator video timestamps", () => {
     // When lesson is marked completed, all chapters are 100%
     expect(completedChaptersCount(chapters, 0, 600, true)).toBe(4);
     expect(chapterProgressPercent(chapters, 0, 600, true)).toBe(100);
+
+    // When chapters are marked completed manually
+    expect(
+      completedChaptersCount(chapters, 0, 600, false, new Set([1, 2])),
+    ).toBe(2);
+    expect(
+      chapterProgressPercent(chapters, 0, 600, false, new Set([1, 2])),
+    ).toBe(50);
   });
 });
 

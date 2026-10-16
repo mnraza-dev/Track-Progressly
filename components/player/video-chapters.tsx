@@ -7,6 +7,8 @@ import {
   ListVideo,
   Play,
   Check,
+  CircleCheck,
+  Circle,
   LoaderCircle,
   RotateCcw,
 } from "lucide-react";
@@ -25,6 +27,8 @@ export function VideoChapters({
   position,
   duration = 0,
   isLessonCompleted = false,
+  completedIndices,
+  onToggleComplete,
   onSeek,
   loading = false,
   error = false,
@@ -34,6 +38,8 @@ export function VideoChapters({
   position: number;
   duration?: number;
   isLessonCompleted?: boolean;
+  completedIndices?: Set<number>;
+  onToggleComplete?: (chapterIndex: number) => void;
   onSeek: (seconds: number) => void;
   loading?: boolean;
   error?: boolean;
@@ -46,6 +52,7 @@ export function VideoChapters({
     position,
     duration,
     isLessonCompleted,
+    completedIndices,
   );
   const remainingCount = Math.max(0, chapters.length - completedCount);
   const percent = chapterProgressPercent(
@@ -53,6 +60,7 @@ export function VideoChapters({
     position,
     duration,
     isLessonCompleted,
+    completedIndices,
   );
   const filtered = chapters
     .map((chapter, index) => ({ ...chapter, index }))
@@ -124,56 +132,100 @@ export function VideoChapters({
                 position,
                 duration,
                 isLessonCompleted,
+                completedIndices?.has(chapter.index),
               );
               const isActive = active === chapter.index;
               return (
                 <li key={chapter.start_seconds}>
-                  <button
-                    onClick={() => onSeek(chapter.start_seconds)}
-                    aria-current={isActive ? "true" : undefined}
-                    aria-label={`Jump to ${chapter.title} ${isCompleted ? "(Completed)" : ""} at ${chapterTimestamp(chapter.start_seconds)}`}
-                    className={cn(isCompleted && "chapter-item-completed")}
+                  <div
+                    className={cn(
+                      "chapter-row",
+                      isCompleted && "chapter-item-completed",
+                      isActive && "chapter-item-active",
+                    )}
                   >
-                    <span
-                      className={cn(
-                        "chapter-number",
-                        isCompleted && "chapter-number-complete",
-                        isActive && !isCompleted && "chapter-number-active",
+                    <button
+                      type="button"
+                      onClick={() => onSeek(chapter.start_seconds)}
+                      aria-current={isActive ? "true" : undefined}
+                      aria-label={`Jump to ${chapter.title} ${isCompleted ? "(Completed)" : ""} at ${chapterTimestamp(chapter.start_seconds)}`}
+                      className="chapter-jump-btn"
+                    >
+                      <span
+                        className={cn(
+                          "chapter-number",
+                          isCompleted && "chapter-number-complete",
+                          isActive && !isCompleted && "chapter-number-active",
+                        )}
+                      >
+                        {isCompleted ? (
+                          <Check size={12} strokeWidth={2.5} />
+                        ) : isActive ? (
+                          <Play size={11} fill="currentColor" />
+                        ) : (
+                          String(chapter.index + 1).padStart(2, "0")
+                        )}
+                      </span>
+                      <span className="chapter-label">
+                        <strong>{chapter.title}</strong>
+                        <small>
+                          <time>{chapterTimestamp(chapter.start_seconds)}</time>
+                          {chapter.end_seconds !== null && (
+                            <>
+                              <i />
+                              {chapterTimestamp(
+                                chapter.end_seconds - chapter.start_seconds,
+                              )}{" "}
+                              long
+                            </>
+                          )}
+                          {isCompleted && (
+                            <>
+                              <i />
+                              <span className="chapter-badge-done">
+                                <Check size={10} strokeWidth={2.5} /> Done
+                              </span>
+                            </>
+                          )}
+                        </small>
+                      </span>
+                      {isActive && !isCompleted && (
+                        <span
+                          className="chapter-active-dot"
+                          aria-hidden="true"
+                        />
                       )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleComplete?.(chapter.index);
+                      }}
+                      className={cn(
+                        "chapter-mark-btn",
+                        isCompleted
+                          ? "chapter-marked-done"
+                          : "chapter-marked-pending",
+                      )}
+                      title={
+                        isCompleted
+                          ? "Mark chapter as incomplete"
+                          : "Mark chapter as completed"
+                      }
+                      aria-label={
+                        isCompleted
+                          ? `Mark ${chapter.title} as incomplete`
+                          : `Mark ${chapter.title} as completed`
+                      }
                     >
                       {isCompleted ? (
-                        <Check size={12} strokeWidth={2.5} />
-                      ) : isActive ? (
-                        <Play size={11} fill="currentColor" />
+                        <CircleCheck size={18} className="check-done-icon" />
                       ) : (
-                        String(chapter.index + 1).padStart(2, "0")
+                        <Circle size={18} className="check-pending-icon" />
                       )}
-                    </span>
-                    <span className="chapter-label">
-                      <strong>{chapter.title}</strong>
-                      <small>
-                        <time>{chapterTimestamp(chapter.start_seconds)}</time>
-                        {chapter.end_seconds !== null && (
-                          <>
-                            <i />
-                            {chapterTimestamp(
-                              chapter.end_seconds - chapter.start_seconds,
-                            )}{" "}
-                            long
-                          </>
-                        )}
-                        {isCompleted && (
-                          <>
-                            <i />
-                            <span className="chapter-badge-done">Completed</span>
-                          </>
-                        )}
-                      </small>
-                    </span>
-                    {isActive && (
-                      <span className="chapter-active-dot" aria-hidden="true" />
-                    )}
-                  </button>
+                    </button>
+                  </div>
                 </li>
               );
             })}

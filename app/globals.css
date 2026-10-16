@@ -1440,6 +1440,10 @@
     grid-template-columns: 285px minmax(0, 1fr);
     gap: 24px;
     align-items: start;
+    transition: grid-template-columns 0.2s ease;
+  }
+  .learning-layout.sidebar-collapsed {
+    grid-template-columns: minmax(0, 1fr);
   }
   .learning-main {
     min-width: 0;
