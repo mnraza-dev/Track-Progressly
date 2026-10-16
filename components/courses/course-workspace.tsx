@@ -22,9 +22,16 @@ import {
   ExternalLink,
   Pause,
   Archive,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { completion, duration, timestamp, cn } from "@/lib/utils";
+import {
+  chapterAt,
+  completedChaptersCount,
+  chapterProgressPercent,
+} from "@/lib/youtube/chapters";
 import { Button } from "@/components/ui/button";
 import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
 import { Progress } from "@/components/ui/progress";

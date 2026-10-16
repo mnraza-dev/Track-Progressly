@@ -116,41 +116,67 @@ export function VideoChapters({
             />
           </label>
           <ol className="chapter-list">
-            {filtered.map((chapter) => (
-              <li key={chapter.start_seconds}>
-                <button
-                  onClick={() => onSeek(chapter.start_seconds)}
-                  aria-current={active === chapter.index ? "true" : undefined}
-                  aria-label={`Jump to ${chapter.title} at ${chapterTimestamp(chapter.start_seconds)}`}
-                >
-                  <span className="chapter-number">
-                    {active === chapter.index ? (
-                      <Play size={11} fill="currentColor" />
-                    ) : (
-                      String(chapter.index + 1).padStart(2, "0")
-                    )}
-                  </span>
-                  <span className="chapter-label">
-                    <strong>{chapter.title}</strong>
-                    <small>
-                      <time>{chapterTimestamp(chapter.start_seconds)}</time>
-                      {chapter.end_seconds !== null && (
-                        <>
-                          <i />
-                          {chapterTimestamp(
-                            chapter.end_seconds - chapter.start_seconds,
-                          )}{" "}
-                          long
-                        </>
+            {filtered.map((chapter) => {
+              const isCompleted = isChapterCompleted(
+                chapter,
+                chapter.index,
+                chapters,
+                position,
+                duration,
+                isLessonCompleted,
+              );
+              const isActive = active === chapter.index;
+              return (
+                <li key={chapter.start_seconds}>
+                  <button
+                    onClick={() => onSeek(chapter.start_seconds)}
+                    aria-current={isActive ? "true" : undefined}
+                    aria-label={`Jump to ${chapter.title} ${isCompleted ? "(Completed)" : ""} at ${chapterTimestamp(chapter.start_seconds)}`}
+                    className={cn(isCompleted && "chapter-item-completed")}
+                  >
+                    <span
+                      className={cn(
+                        "chapter-number",
+                        isCompleted && "chapter-number-complete",
+                        isActive && !isCompleted && "chapter-number-active",
                       )}
-                    </small>
-                  </span>
-                  {active === chapter.index && (
-                    <span className="chapter-active-dot" aria-hidden="true" />
-                  )}
-                </button>
-              </li>
-            ))}
+                    >
+                      {isCompleted ? (
+                        <Check size={12} strokeWidth={2.5} />
+                      ) : isActive ? (
+                        <Play size={11} fill="currentColor" />
+                      ) : (
+                        String(chapter.index + 1).padStart(2, "0")
+                      )}
+                    </span>
+                    <span className="chapter-label">
+                      <strong>{chapter.title}</strong>
+                      <small>
+                        <time>{chapterTimestamp(chapter.start_seconds)}</time>
+                        {chapter.end_seconds !== null && (
+                          <>
+                            <i />
+                            {chapterTimestamp(
+                              chapter.end_seconds - chapter.start_seconds,
+                            )}{" "}
+                            long
+                          </>
+                        )}
+                        {isCompleted && (
+                          <>
+                            <i />
+                            <span className="chapter-badge-done">Completed</span>
+                          </>
+                        )}
+                      </small>
+                    </span>
+                    {isActive && (
+                      <span className="chapter-active-dot" aria-hidden="true" />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
           </ol>
           {!filtered.length && (
             <p className="chapter-no-results">No chapters match “{query}”.</p>

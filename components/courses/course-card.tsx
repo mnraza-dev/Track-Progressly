@@ -17,6 +17,10 @@ import { SceneArtwork } from "@/components/three/scene-provider";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { Course } from "@/types";
+import {
+  parseVideoChapters,
+  completedChaptersCount,
+} from "@/lib/youtube/chapters";
 export function CourseArtwork({
   category,
   title,
@@ -72,17 +76,35 @@ export function CourseArtwork({
     </div>
   );
 }
+
 export function CourseCard({ course }: { course: Course }) {
   const percent = completion(course);
   const [menu, setMenu] = useState(false);
   const { mutate, notify } = useWorkspace();
-  const completed = course.videos.filter(
-    (v) => v.availability_status === "available" && v.progress.is_completed,
+  const availableVideos = course.videos.filter(
+    (v) => v.availability_status === "available",
+  );
+  const completed = availableVideos.filter(
+    (v) => v.progress.is_completed,
   ).length;
+  const isSingle = availableVideos.length === 1;
+  const singleChapters = isSingle
+    ? parseVideoChapters(
+        availableVideos[0].description || "",
+        availableVideos[0].duration_seconds || 0,
+      )
+    : [];
+  const completedChapters =
+    singleChapters.length > 0
+      ? completedChaptersCount(
+          singleChapters,
+          availableVideos[0].progress.last_position_seconds || 0,
+          availableVideos[0].duration_seconds || 0,
+          availableVideos[0].progress.is_completed,
+        )
+      : 0;
   const next =
-    course.videos.find(
-      (v) => v.availability_status === "available" && !v.progress.is_completed,
-    ) || course.videos[0];
+    availableVideos.find((v) => !v.progress.is_completed) || course.videos[0];
   return (
     <article className="course-card">
       <Link href={`/courses/${course.id}`}>
@@ -174,12 +196,9 @@ export function CourseCard({ course }: { course: Course }) {
         </p>
         <div className="course-progress-label">
           <span>
-            {completed} of{" "}
-            {
-              course.videos.filter((v) => v.availability_status === "available")
-                .length
-            }{" "}
-            lessons
+            {singleChapters.length > 0
+              ? `${completedChapters} of ${singleChapters.length} chapters`
+              : `${completed} of ${availableVideos.length} lessons`}
           </span>
           <strong>{percent}%</strong>
         </div>
