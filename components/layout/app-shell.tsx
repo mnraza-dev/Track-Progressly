@@ -36,6 +36,7 @@ import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { useTour } from "@/components/tour/tour-context";
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My courses", href: "/courses", icon: BookOpen },
@@ -66,6 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
+  const { startTour } = useTour();
   useEffect(() => {
     void load();
     const handler = (e: KeyboardEvent) => {

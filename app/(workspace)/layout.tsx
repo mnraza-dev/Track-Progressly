@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+
 // Workspace data is loaded in the browser; navigation waits for its private state.
 export const instant = false;
 export default function WorkspaceLayout({
@@ -17,3 +18,4 @@ export default function WorkspaceLayout({
     </Suspense>
   );
 }
+

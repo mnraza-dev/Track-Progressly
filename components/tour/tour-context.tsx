@@ -181,7 +181,18 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
 export function useTour() {
   const ctx = useContext(TourContext);
   if (!ctx) {
-    throw new Error("useTour must be used within a TourProvider");
+    return {
+      isOpen: false,
+      currentStep: 0,
+      steps: DEFAULT_TOUR_STEPS,
+      startTour: () => {},
+      nextStep: () => {},
+      prevStep: () => {},
+      goToStep: () => {},
+      closeTour: () => {},
+      completeTour: () => {},
+    };
   }
   return ctx;
 }
+

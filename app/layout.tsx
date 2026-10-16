@@ -6,6 +6,8 @@ import "./charts.css";
 import "./product.css";
 import { SceneProvider } from "@/components/three/scene-provider";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { TourProvider } from "@/components/tour/tour-context";
+import { ProductTour } from "@/components/tour/product-tour";
 
 const inter = Inter({
   variable: "--font-body",
@@ -38,7 +40,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
-          <SceneProvider>{children}</SceneProvider>
+          <SceneProvider>
+            <TourProvider>
+              {children}
+              <ProductTour />
+            </TourProvider>
+          </SceneProvider>
         </ThemeProvider>
       </body>
     </html>
