@@ -35,11 +35,31 @@ describe("YouTube URL parsing", () => {
   it.each([
     video,
     `https://youtu.be/${video}`,
-    `https://www.youtube.com/watch?v=${video}&t=18`,
     `https://youtube.com/shorts/${video}`,
   ])("parses %s", (value) =>
     expect(parseYouTube(value)).toEqual({ type: "video", id: video }),
   );
+  it("parses video URLs with timestamp parameters", () => {
+    expect(
+      parseYouTube(`https://www.youtube.com/watch?v=${video}&t=18`),
+    ).toEqual({
+      type: "video",
+      id: video,
+      startSeconds: 18,
+    });
+    expect(parseYouTube(`https://youtu.be/${video}?t=2m15s`)).toEqual({
+      type: "video",
+      id: video,
+      startSeconds: 135,
+    });
+    expect(
+      parseYouTube(`https://www.youtube.com/watch?v=${video}&t=1h2m30s`),
+    ).toEqual({
+      type: "video",
+      id: video,
+      startSeconds: 3750,
+    });
+  });
   it("prefers playlist IDs in a watch URL", () =>
     expect(
       parseYouTube(`https://youtube.com/watch?v=${video}&list=${playlist}`)
@@ -237,6 +257,30 @@ describe("Timezone streaks", () => {
         "Asia/Kolkata",
       ),
     ).toBe(2);
+  });
+  it("bridges weekends when weekend rest is enabled", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-19T10:00:00.000Z")); // Monday
+    const activity = [
+      {
+        day: "2026-10-16", // Friday
+        active_seconds: 60,
+        videos_completed: 1,
+        practice_completed: 0,
+        courses_completed: 0,
+      },
+      {
+        day: "2026-10-15", // Thursday
+        active_seconds: 60,
+        videos_completed: 1,
+        practice_completed: 0,
+        courses_completed: 0,
+      },
+    ];
+    // Without weekend rest, streak is 0 because yesterday (Sunday) was missed
+    expect(streak(activity, "UTC", false)).toBe(0);
+    // With weekend rest enabled, streak bridges over Sat/Sun to Fri/Thu
+    expect(streak(activity, "UTC", true)).toBe(2);
   });
 });
 describe("YouTube service", () => {
