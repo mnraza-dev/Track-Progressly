@@ -2,7 +2,7 @@
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
@@ -28,6 +28,7 @@ import {
   ArrowRight,
   PanelLeftClose,
   PanelLeftOpen,
+  Trophy,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
@@ -37,6 +38,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useTour } from "@/components/tour/tour-context";
+import { getGamificationStats } from "@/lib/gamification";
+import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My courses", href: "/courses", icon: BookOpen },
@@ -68,6 +71,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const { startTour } = useTour();
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const stats = useMemo(() => getGamificationStats(data), [data]);
   useEffect(() => {
     void load();
     const handler = (e: KeyboardEvent) => {
@@ -251,6 +256,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <kbd>⌘ K</kbd>
             </button>
             <button
+              className="level-badge-button"
+              onClick={() => setAchievementsOpen(true)}
+              aria-label={`Level ${stats.levelInfo.level}: ${stats.levelInfo.title}, ${stats.levelInfo.totalXP} XP`}
+              title={`Level ${stats.levelInfo.level}: ${stats.levelInfo.title} (${stats.levelInfo.totalXP} XP)`}
+            >
+              <span className="level-badge-trophy">
+                <Trophy size={13} />
+              </span>
+              <span className="level-badge-pill">Lv. {stats.levelInfo.level}</span>
+              <span className="level-badge-xp">{stats.levelInfo.totalXP} XP</span>
+            </button>
+            <button
               className="tour-topbar-button"
               onClick={startTour}
               aria-label="Take interactive product tour"
@@ -394,6 +411,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Button>
         </div>
       </Dialog>
+      <AchievementsDialog
+        open={achievementsOpen}
+        onOpenChange={setAchievementsOpen}
+        stats={stats}
+      />
     </div>
   );
 }
