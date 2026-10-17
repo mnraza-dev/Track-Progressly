@@ -46,7 +46,6 @@ import { fireConfetti } from "@/lib/confetti";
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My courses", href: "/courses", icon: BookOpen },
-  { label: "Continue learning", href: "/continue", icon: Play },
   { label: "My notes", href: "/notes", icon: StickyNote },
   { label: "Analytics", href: "/analytics", icon: ChartNoAxesCombined },
   { label: "Learning goals", href: "/goals", icon: Target },
@@ -449,10 +448,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Button
             onClick={() => {
               setNotifications(false);
-              router.push("/continue");
+              router.push("/courses");
             }}
           >
-            Continue learning <ArrowRight size={16} />
+            Explore courses <ArrowRight size={16} />
           </Button>
         </div>
       </Dialog>

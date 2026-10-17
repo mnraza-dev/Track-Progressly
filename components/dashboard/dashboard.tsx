@@ -26,6 +26,7 @@ import {
   Trophy,
   ShieldCheck,
   Target,
+  ChartNoAxesCombined,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useWorkspace } from "@/stores/workspace";
@@ -50,8 +51,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CourseCard } from "@/components/courses/course-card";
 import { ActivityChart } from "@/components/analytics/activity-chart";
-import { LearningLandscape } from "@/components/analytics/learning-landscape";
-import { LearningMix } from "@/components/analytics/progress-charts";
 import { dailySeries } from "@/lib/analytics";
 import { isConnected } from "@/lib/supabase/client";
 import { SceneArtwork } from "@/components/three/scene-provider";
@@ -592,7 +591,11 @@ export function Dashboard() {
               Your progress, notes, and practice. Together.
             </p>
             <Button asChild>
-              <Link href={active.length ? "/continue" : "/courses/new"}>
+              <Link
+                href={
+                  active.length ? `/courses/${active[0].id}` : "/courses/new"
+                }
+              >
                 {active.length ? (
                   <Play size={15} fill="currentColor" />
                 ) : (
@@ -1200,11 +1203,41 @@ export function Dashboard() {
         </section>
       </div>
 
-      {/* Perspective Charts */}
-      <div className="learning-perspective-grid">
-        <LearningLandscape activity={activity} timezone={profile.timezone} />
-        <LearningMix courses={courses} />
-      </div>
+      {/* Deep Analytics Discovery Spotlight */}
+      <section className="panel dashboard-analytics-spotlight">
+        <div className="analytics-spotlight-left">
+          <div className="analytics-spotlight-kicker">
+            <ChartNoAxesCombined size={15} />
+            <span>DEEP STUDY DIAGNOSTICS</span>
+          </div>
+          <h3>Curious about your pace, retention, and topic mastery?</h3>
+          <p>
+            Explore circadian rhythm analysis, active vs. passive learning ratios, course completion forecasts, and category breakdowns in your dedicated analytics space.
+          </p>
+          <div className="analytics-spotlight-metrics">
+            <div className="spotlight-metric-pill">
+              <strong>{duration(seconds)}</strong>
+              <span>all-time focus</span>
+            </div>
+            <div className="spotlight-metric-pill">
+              <strong>{courses.flatMap((c) => c.videos.flatMap((v) => v.notes)).length}</strong>
+              <span>notes written</span>
+            </div>
+            <div className="spotlight-metric-pill">
+              <strong>{days}d</strong>
+              <span>streak momentum</span>
+            </div>
+          </div>
+        </div>
+        <div className="analytics-spotlight-right">
+          <Button asChild className="explore-analytics-btn">
+            <Link href="/analytics">
+              Open Full Analytics Hub
+              <ArrowRight size={15} />
+            </Link>
+          </Button>
+        </div>
+      </section>
 
       {!isConnected && (
         <div className="local-mode-banner">
