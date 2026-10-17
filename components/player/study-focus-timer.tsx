@@ -23,19 +23,17 @@ import { useWorkspace } from "@/stores/workspace";
 import { duration, localDay, cn } from "@/lib/utils";
 import type { PlayerHandle } from "./youtube-player";
 
+import {
+  useFocusTimerStore,
+  TIMER_PRESETS,
+} from "@/stores/focus-timer";
+
 type StudyFocusTimerProps = {
   isVideoPlaying: boolean;
   playerRef: React.RefObject<PlayerHandle | null>;
   className?: string;
   defaultOpen?: boolean;
 };
-
-const TIMER_PRESETS = [
-  { label: "5 min", seconds: 5 * 60 },
-  { label: "15 min", seconds: 15 * 60 },
-  { label: "30 min", seconds: 30 * 60 },
-  { label: "1 hr", seconds: 60 * 60 },
-];
 
 function playCompletionChime() {
   if (typeof window === "undefined") return;
@@ -93,51 +91,34 @@ export function StudyFocusTimer({
   defaultOpen = true,
 }: StudyFocusTimerProps) {
   const { data, notify } = useWorkspace();
+  const [mounted, setMounted] = useState(false);
 
-  // Selected Target Duration (defaults to 30 min)
-  const [targetSeconds, setTargetSeconds] = useState<number>(() => {
-    if (typeof window === "undefined") return 30 * 60;
-    try {
-      const saved = localStorage.getItem("progressly_focus_target_seconds");
-      return saved ? parseInt(saved, 10) : 30 * 60;
-    } catch {
-      return 30 * 60;
-    }
-  });
+  // Persistent Zustand Store
+  const {
+    targetSeconds,
+    remainingSeconds,
+    sessionFocusSeconds,
+    isCompleted,
+    soundEnabled,
+    isExpanded,
+    selectPreset: setTargetPreset,
+    tickSecond,
+    resetTimer,
+    addFiveMinutes,
+    toggleSound,
+    toggleExpanded,
+    setCompleted,
+  } = useFocusTimerStore();
 
-  // Remaining countdown seconds
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(() => {
-    if (typeof window === "undefined") return 30 * 60;
-    try {
-      const saved = localStorage.getItem("progressly_focus_target_seconds");
-      return saved ? parseInt(saved, 10) : 30 * 60;
-    } catch {
-      return 30 * 60;
-    }
-  });
-
-  // Total seconds spent learning in this session
-  const [sessionFocusSeconds, setSessionFocusSeconds] = useState<number>(0);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Tab visibility state
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => {
     if (typeof document === "undefined") return true;
     return document.visibilityState === "visible";
   });
-
-  // UI state
-  const [isExpanded, setIsExpanded] = useState<boolean>(() => {
-    if (typeof window === "undefined") return defaultOpen;
-    try {
-      const saved = localStorage.getItem("progressly_focus_timer_expanded");
-      return saved !== null ? saved === "true" : defaultOpen;
-    } catch {
-      return defaultOpen;
-    }
-  });
-
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isCompleted, setIsCompleted] = useState(false);
 
   // Today's total logged study time
   const todayDay = localDay(new Date(), data.profile.timezone);
@@ -170,7 +151,7 @@ export function StudyFocusTimer({
     isVideoPlaying && isTabVisible && remainingSeconds > 0 && !isCompleted;
 
   const handleTimerComplete = useCallback(() => {
-    setIsCompleted(true);
+    setCompleted(true);
     fireConfetti();
     if (soundEnabled) {
       playCompletionChime();
@@ -178,37 +159,25 @@ export function StudyFocusTimer({
     notify(
       `🎉 Focus sprint completed! You logged a focused ${Math.round(targetSeconds / 60)}m study session!`,
     );
-  }, [soundEnabled, targetSeconds, notify]);
+  }, [soundEnabled, targetSeconds, notify, setCompleted]);
 
   useEffect(() => {
     if (!isTimerRunning) return;
 
     const interval = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          handleTimerComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-      setSessionFocusSeconds((prev) => prev + 1);
+      const completed = tickSecond();
+      if (completed) {
+        clearInterval(interval);
+        handleTimerComplete();
+      }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isTimerRunning, handleTimerComplete]);
+  }, [isTimerRunning, tickSecond, handleTimerComplete]);
 
   // Set target preset
   const selectPreset = (seconds: number) => {
-    setTargetSeconds(seconds);
-    setRemainingSeconds(seconds);
-    setIsCompleted(false);
-    try {
-      localStorage.setItem(
-        "progressly_focus_target_seconds",
-        seconds.toString(),
-      );
-    } catch {}
+    setTargetPreset(seconds);
     notify(
       `Focus target set to ${seconds >= 3600 ? `${seconds / 3600} hr` : `${seconds / 60} min`}`,
     );
@@ -216,16 +185,13 @@ export function StudyFocusTimer({
 
   // Reset timer
   const handleReset = () => {
-    setRemainingSeconds(targetSeconds);
-    setIsCompleted(false);
+    resetTimer();
     notify("Timer reset to target.");
   };
 
   // Add 5 min
   const handleAddFiveMinutes = () => {
-    setTargetSeconds((prev) => prev + 300);
-    setRemainingSeconds((prev) => prev + 300);
-    setIsCompleted(false);
+    addFiveMinutes();
     notify("+5 minutes added to study session.");
   };
 
@@ -238,15 +204,9 @@ export function StudyFocusTimer({
     }
   };
 
-  const toggleExpanded = () => {
-    setIsExpanded((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem("progressly_focus_timer_expanded", String(next));
-      } catch {}
-      return next;
-    });
-  };
+  // Check if timer is mid-session paused (e.g. 13m remaining out of 15m)
+  const isPausedMidSession =
+    !isVideoPlaying && remainingSeconds < targetSeconds && remainingSeconds > 0 && !isCompleted;
 
   // Circular progress math
   const RADIUS = 62;
@@ -309,10 +269,15 @@ export function StudyFocusTimer({
                 <EyeOff size={12} />
                 Paused (tab inactive)
               </span>
-            ) : !isVideoPlaying ? (
+            ) : isPausedMidSession ? (
               <span className="timer-status-badge paused">
                 <Pause size={12} />
-                Paused (video paused)
+                Paused ({formatTimeRemaining(remainingSeconds)} remaining)
+              </span>
+            ) : !isVideoPlaying ? (
+              <span className="timer-status-badge ready">
+                <Zap size={12} />
+                Ready to study
               </span>
             ) : (
               <span className="timer-status-badge ready">
@@ -327,7 +292,7 @@ export function StudyFocusTimer({
           <button
             type="button"
             className="icon-button focus-timer-sound-btn"
-            onClick={() => setSoundEnabled((v) => !v)}
+            onClick={toggleSound}
             title={soundEnabled ? "Mute chime sound" : "Enable completion chime"}
             aria-label={soundEnabled ? "Mute chime sound" : "Enable completion chime"}
           >
@@ -411,7 +376,9 @@ export function StudyFocusTimer({
                     ? "Time counting"
                     : !isTabVisible
                       ? "Return to tab"
-                      : "Hit play on video"}
+                      : isPausedMidSession
+                        ? "Hit resume to continue"
+                        : "Hit play on video"}
               </span>
             </div>
           </div>
@@ -450,6 +417,11 @@ export function StudyFocusTimer({
                   <>
                     <Pause size={14} />
                     <span>Pause video</span>
+                  </>
+                ) : isPausedMidSession ? (
+                  <>
+                    <Play size={14} fill="currentColor" />
+                    <span>Resume video</span>
                   </>
                 ) : (
                   <>
@@ -515,7 +487,13 @@ export function StudyFocusTimer({
               type="button"
               className="icon-button"
               onClick={handleTogglePlayPause}
-              title={isVideoPlaying ? "Pause video" : "Play video"}
+              title={
+                isVideoPlaying
+                  ? "Pause video"
+                  : isPausedMidSession
+                    ? "Resume video"
+                    : "Play video"
+              }
             >
               {isVideoPlaying ? (
                 <Pause size={14} />

@@ -78,3 +78,76 @@ describe("Study Focus Timer logic & presets", () => {
     expect(formatTimeRemaining(9)).toBe("00:09");
   });
 });
+
+import { useFocusTimerStore } from "@/stores/focus-timer";
+
+describe("Study Focus Timer Zustand store & persistence", () => {
+  it("sets preset durations and updates target and remaining seconds", () => {
+    const store = useFocusTimerStore.getState();
+    store.selectPreset(15 * 60);
+    expect(useFocusTimerStore.getState().targetSeconds).toBe(900);
+    expect(useFocusTimerStore.getState().remainingSeconds).toBe(900);
+    expect(useFocusTimerStore.getState().isCompleted).toBe(false);
+  });
+
+  it("persists remaining seconds when pausing mid-sprint at 13 minutes and supports resuming", () => {
+    const store = useFocusTimerStore.getState();
+    store.selectPreset(15 * 60); // 15 min = 900s
+
+    // Simulate ticking for 2 minutes (120 seconds)
+    for (let i = 0; i < 120; i++) {
+      useFocusTimerStore.getState().tickSecond();
+    }
+
+    // Now remaining time is 13 minutes (780 seconds)
+    expect(useFocusTimerStore.getState().remainingSeconds).toBe(780);
+    expect(useFocusTimerStore.getState().sessionFocusSeconds).toBe(120);
+    expect(useFocusTimerStore.getState().isCompleted).toBe(false);
+
+    // Mid-session pause condition: remaining < target and remaining > 0
+    const state = useFocusTimerStore.getState();
+    const isPausedMidSession =
+      state.remainingSeconds < state.targetSeconds && state.remainingSeconds > 0;
+    expect(isPausedMidSession).toBe(true);
+
+    // Simulate resuming from 13 minutes and ticking for another 60 seconds
+    for (let i = 0; i < 60; i++) {
+      useFocusTimerStore.getState().tickSecond();
+    }
+    expect(useFocusTimerStore.getState().remainingSeconds).toBe(720); // 12 min
+    expect(useFocusTimerStore.getState().sessionFocusSeconds).toBe(180);
+  });
+
+  it("resets timer back to target duration", () => {
+    const store = useFocusTimerStore.getState();
+    store.selectPreset(15 * 60);
+    store.tickSecond();
+    store.tickSecond();
+    expect(useFocusTimerStore.getState().remainingSeconds).toBe(898);
+
+    store.resetTimer();
+    expect(useFocusTimerStore.getState().remainingSeconds).toBe(900);
+    expect(useFocusTimerStore.getState().isCompleted).toBe(false);
+  });
+
+  it("adds 5 minutes (+300s) to active timer", () => {
+    const store = useFocusTimerStore.getState();
+    store.selectPreset(15 * 60); // 900s
+    store.addFiveMinutes();
+    expect(useFocusTimerStore.getState().targetSeconds).toBe(1200); // 20 min
+    expect(useFocusTimerStore.getState().remainingSeconds).toBe(1200);
+  });
+
+  it("marks timer as completed when countdown reaches 0", () => {
+    useFocusTimerStore.setState({
+      targetSeconds: 10,
+      remainingSeconds: 2,
+      isCompleted: false,
+    });
+    const store = useFocusTimerStore.getState();
+    expect(store.tickSecond()).toBe(false); // 1s left
+    expect(store.tickSecond()).toBe(true); // 0s left -> completed!
+    expect(useFocusTimerStore.getState().remainingSeconds).toBe(0);
+    expect(useFocusTimerStore.getState().isCompleted).toBe(true);
+  });
+});

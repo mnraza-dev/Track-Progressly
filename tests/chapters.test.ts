@@ -108,5 +108,61 @@ describe("Creator video timestamps", () => {
       chapterProgressPercent(chapters, 0, 600, false, new Set([1, 2])),
     ).toBe(50);
   });
+
+  it("handles real-world range timestamps with titles", () => {
+    const desc = "00:00 - 05:20 Introduction\n05:20 - 12:00 Setting Up Next.js\n12:00 - 25:00 Building Components";
+    const chapters = parseVideoChapters(desc, 1800);
+    expect(chapters).toEqual([
+      { title: "Introduction", start_seconds: 0, end_seconds: 320 },
+      { title: "Setting Up Next.js", start_seconds: 320, end_seconds: 720 },
+      { title: "Building Components", start_seconds: 720, end_seconds: 1800 },
+    ]);
+  });
+
+  it("extracts chapters from lines containing URLs and github links", () => {
+    const desc = "01:20 Repo: https://github.com/foo/bar - Setup project\n05:00 Check docs at https://nextjs.org for details - Routing";
+    const chapters = parseVideoChapters(desc, 600);
+    expect(chapters).toHaveLength(2);
+    expect(chapters[0].title).toBe("Repo: - Setup project");
+    expect(chapters[1].title).toBe("Check docs at for details - Routing");
+  });
+
+  it("supports multiple chapters on a single line separated by pipes, bullets, or slashes", () => {
+    const desc = "00:00 Intro | 02:00 Setup | 05:00 Code";
+    const chapters = parseVideoChapters(desc, 600);
+    expect(chapters).toHaveLength(3);
+    expect(chapters.map((c) => [c.start_seconds, c.title])).toEqual([
+      [0, "Intro"],
+      [120, "Setup"],
+      [300, "Code"],
+    ]);
+
+    const descSlash = "00:00 Intro / 03:00 Deep Dive";
+    const chaptersSlash = parseVideoChapters(descSlash, 600);
+    expect(chaptersSlash).toHaveLength(2);
+    expect(chaptersSlash[0].title).toBe("Intro");
+    expect(chaptersSlash[1].title).toBe("Deep Dive");
+  });
+
+  it("supports Asian full-width colons and Japanese unicode brackets", () => {
+    const desc = "【00：00】 イントロ\n【03：30】 ハンズオン";
+    const chapters = parseVideoChapters(desc, 600);
+    expect(chapters).toHaveLength(2);
+    expect(chapters[0].start_seconds).toBe(0);
+    expect(chapters[0].title).toBe("イントロ");
+    expect(chapters[1].start_seconds).toBe(210);
+    expect(chapters[1].title).toBe("ハンズオン");
+  });
+
+  it("supports dot-separated timestamps and leading bullet points or numbered lists", () => {
+    const desc = "• 00.00 Getting Started\n1. 02.30 Architecture Overview\nChapter 3: 05.00 Writing Code";
+    const chapters = parseVideoChapters(desc, 600);
+    expect(chapters).toHaveLength(3);
+    expect(chapters.map((c) => [c.start_seconds, c.title])).toEqual([
+      [0, "Getting Started"],
+      [150, "Architecture Overview"],
+      [300, "Writing Code"],
+    ]);
+  });
 });
 

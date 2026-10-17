@@ -841,6 +841,175 @@
     padding: 9px 12px;
     font-size: 13px;
   }
+  .chapter-empty-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--primary) 10%, var(--card));
+    color: var(--primary);
+  }
+  .chapter-empty-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--foreground) !important;
+    margin: 0;
+  }
+  .chapter-empty-desc {
+    font-size: 12px !important;
+    color: var(--muted-foreground);
+    line-height: 1.5 !important;
+    margin: 0;
+    max-width: 280px;
+  }
+  .chapter-empty-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .chapter-action-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px !important;
+    font-weight: 500;
+    padding: 7px 12px !important;
+    border-radius: 6px;
+    border: 1px solid var(--border) !important;
+    background: var(--card);
+    color: var(--foreground) !important;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .chapter-action-btn:hover {
+    background: var(--accent);
+    color: var(--accent-foreground) !important;
+  }
+  .chapter-action-btn-primary {
+    background: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    border-color: var(--primary) !important;
+  }
+  .chapter-action-btn-primary:hover {
+    opacity: 0.92;
+    background: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+  }
+  .chapter-custom-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--primary) 15%, var(--card));
+    color: var(--primary);
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .chapter-paste-panel {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+  .chapter-paste-label {
+    font-size: 11px;
+    font-weight: 550;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .chapter-paste-textarea {
+    width: 100%;
+    min-height: 90px;
+    font-family: var(--font-mono, monospace);
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--foreground);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .chapter-paste-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+  .chapter-paste-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .chapter-paste-apply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 550;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--primary);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    cursor: pointer;
+  }
+  .chapter-paste-apply-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .chapter-paste-cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+  }
+  .chapter-paste-cancel-btn:hover {
+    color: var(--foreground);
+    background: var(--accent);
+  }
+  .chapter-footer-paste-btn,
+  .chapter-footer-reset-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--primary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  .chapter-footer-paste-btn:hover,
+  .chapter-footer-reset-btn:hover {
+    text-decoration: underline;
+  }
 
   /* ==========================================================================
      PRODUCT TOUR SYSTEM (SPOTLIGHT, TOOLTIP CARD, STEP CONTROLS)

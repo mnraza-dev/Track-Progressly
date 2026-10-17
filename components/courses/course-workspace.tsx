@@ -110,6 +110,9 @@ export function CourseWorkspace({
     chapters,
     loading: chaptersLoading,
     error: chaptersError,
+    hasCustomChapters,
+    saveCustomChapters,
+    clearCustomChapters,
     retry: retryChapters,
   } = useVideoChapters(lesson);
   if (!course)
@@ -431,6 +434,9 @@ export function CourseWorkspace({
                 error={chaptersError}
                 onRetry={retryChapters}
                 onSeek={(seconds) => player.current?.seek(seconds)}
+                hasCustomChapters={hasCustomChapters}
+                onSaveCustomChapters={saveCustomChapters}
+                onClearCustomChapters={clearCustomChapters}
               />
             ) : (
               <>

@@ -1,13 +1,14 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import type { Lesson } from "@/types";
-import { parseVideoChapters } from "@/lib/youtube/chapters";
+import { parseVideoChapters, type VideoChapter } from "@/lib/youtube/chapters";
 
 type Metadata = { description: string; duration: number };
 const lookups = new Map<
   string,
   { expires: number; request: Promise<Metadata> }
 >();
+
 function lookup(videoId: string) {
   const cached = lookups.get(videoId);
   if (cached && cached.expires > Date.now()) return cached.request;
@@ -43,7 +44,41 @@ export function useVideoChapters(lesson?: Lesson) {
     metadata?: Metadata;
     error?: boolean;
   } | null>(null);
-  const needsLookup = available && Boolean(videoId) && !description.trim();
+
+  const storageKey = lesson?.id
+    ? `progressly_custom_chapters_${lesson.id}`
+    : videoId
+      ? `progressly_custom_chapters_${videoId}`
+      : "";
+
+  const [customText, setCustomText] = useState<string>("");
+
+  useEffect(() => {
+    if (!storageKey || typeof window === "undefined") {
+      setCustomText("");
+      return;
+    }
+    try {
+      const saved = localStorage.getItem(storageKey);
+      setCustomText(saved || "");
+    } catch {
+      setCustomText("");
+    }
+  }, [storageKey]);
+
+  // Check if the local lesson description actually contains chapters
+  const localChapters = useMemo(
+    () =>
+      available && description.trim()
+        ? parseVideoChapters(description, lesson?.duration_seconds || 0)
+        : [],
+    [available, description, lesson?.duration_seconds],
+  );
+
+  // If local description has no chapters and no custom text is set, fetch remote YouTube metadata
+  const needsLookup =
+    available && Boolean(videoId) && localChapters.length === 0 && !customText.trim();
+
   useEffect(() => {
     if (!needsLookup) return;
     let cancelled = false;
@@ -58,23 +93,68 @@ export function useVideoChapters(lesson?: Lesson) {
       cancelled = true;
     };
   }, [needsLookup, videoId, attempt]);
+
   const current =
     remote?.videoId === videoId && remote.attempt === attempt ? remote : null;
-  const text = description.trim()
-    ? description
-    : current?.metadata?.description || "";
+
+  // Prefer custom text -> local description (if it has chapters) -> remote description
+  const text = useMemo(() => {
+    if (customText.trim()) return customText;
+    if (localChapters.length > 0) return description;
+    if (current?.metadata?.description) return current.metadata.description;
+    return description;
+  }, [
+    customText,
+    localChapters.length,
+    description,
+    current?.metadata?.description,
+  ]);
+
   const duration = lesson?.duration_seconds || current?.metadata?.duration || 0;
-  const chapters = useMemo(
+  const chapters: VideoChapter[] = useMemo(
     () => (available ? parseVideoChapters(text, duration) : []),
     [available, text, duration],
   );
+
+  const saveCustomChapters = useCallback(
+    (newText: string) => {
+      setCustomText(newText);
+      if (storageKey && typeof window !== "undefined") {
+        try {
+          if (newText.trim()) {
+            localStorage.setItem(storageKey, newText.trim());
+          } else {
+            localStorage.removeItem(storageKey);
+          }
+        } catch {}
+      }
+    },
+    [storageKey],
+  );
+
+  const clearCustomChapters = useCallback(() => {
+    setCustomText("");
+    if (storageKey && typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(storageKey);
+      } catch {}
+    }
+  }, [storageKey]);
+
+  const retry = useCallback(() => {
+    if (videoId) {
+      lookups.delete(videoId);
+    }
+    setAttempt((value) => value + 1);
+  }, [videoId]);
+
   return {
     chapters,
-    loading: needsLookup && !current,
+    loading: needsLookup && !current && !customText.trim(),
     error: needsLookup && Boolean(current?.error),
-    retry: () => {
-      lookups.delete(videoId);
-      setAttempt((value) => value + 1);
-    },
+    hasCustomChapters: Boolean(customText.trim()),
+    saveCustomChapters,
+    clearCustomChapters,
+    retry,
   };
 }
