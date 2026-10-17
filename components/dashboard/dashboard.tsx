@@ -107,7 +107,7 @@ export function Dashboard() {
   );
 
   const seconds = activity.reduce((n, a) => n + a.active_seconds, 0);
-  const days = streak(activity, profile.timezone);
+  const days = streak(activity, profile.timezone, profile.weekend_rest);
   const bestStreak = longestStreak(activity);
 
   const today = activity.find(

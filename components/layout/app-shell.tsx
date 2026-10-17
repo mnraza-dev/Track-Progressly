@@ -2,7 +2,7 @@
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
@@ -29,6 +29,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Trophy,
+  Keyboard,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
@@ -40,6 +41,8 @@ import { cn } from "@/lib/utils";
 import { useTour } from "@/components/tour/tour-context";
 import { getGamificationStats } from "@/lib/gamification";
 import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
+import { ShortcutsDialog } from "@/components/layout/shortcuts-dialog";
+import { fireConfetti } from "@/lib/confetti";
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My courses", href: "/courses", icon: BookOpen },
@@ -72,13 +75,42 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const { startTour } = useTour();
   const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const prevLevelRef = useRef<number | null>(null);
   const stats = useMemo(() => getGamificationStats(data), [data]);
+
+  // Celebratory Toast & Confetti on Level Up
+  useEffect(() => {
+    if (
+      loaded &&
+      prevLevelRef.current !== null &&
+      stats.levelInfo.level > prevLevelRef.current
+    ) {
+      fireConfetti();
+      useWorkspace.setState({
+        toast: `🎉 Level Up! You reached Level ${stats.levelInfo.level}: ${stats.levelInfo.title}!`,
+      });
+    }
+    if (loaded) {
+      prevLevelRef.current = stats.levelInfo.level;
+    }
+  }, [stats.levelInfo.level, stats.levelInfo.title, loaded]);
+
   useEffect(() => {
     void load();
     const handler = (e: KeyboardEvent) => {
+      const isEditing = ["INPUT", "TEXTAREA", "SELECT"].includes(
+        (e.target as HTMLElement)?.tagName || "",
+      );
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setSearch((v) => !v);
+      } else if (!isEditing && (e.key === "?" || (e.shiftKey && e.key === "/"))) {
+        e.preventDefault();
+        setShortcutsOpen((v) => !v);
+      } else if (!isEditing && e.key === "[" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setDesktopCollapsed((prev) => !prev);
       }
     };
     window.addEventListener("keydown", handler);
@@ -318,9 +350,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
         <footer className="page-footer">
           <span>PROGRESSLY / YOUR LEARNING STUDIO</span>
-          <span>
-            Keep making. <Sparkles size={13} />
-          </span>
+          <div className="footer-links-group">
+            <button
+              type="button"
+              className="shortcuts-footer-btn"
+              onClick={() => setShortcutsOpen(true)}
+              aria-label="Keyboard shortcuts"
+              title="Open keyboard shortcuts cheat sheet (?)"
+            >
+              <Keyboard size={13} />
+              <span>Shortcuts</span>
+              <kbd>?</kbd>
+            </button>
+            <span>
+              Keep making. <Sparkles size={13} />
+            </span>
+          </div>
         </footer>
       </div>
       {toast && (
@@ -415,6 +460,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         open={achievementsOpen}
         onOpenChange={setAchievementsOpen}
         stats={stats}
+      />
+      <ShortcutsDialog
+        open={shortcutsOpen}
+        onOpenChange={setShortcutsOpen}
       />
     </div>
   );

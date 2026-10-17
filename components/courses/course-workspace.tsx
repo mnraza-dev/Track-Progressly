@@ -3,9 +3,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   Play,
   Search,
   Check,
@@ -25,6 +26,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Sparkles,
+  Gauge,
+  X,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { completion, duration, timestamp, cn } from "@/lib/utils";
@@ -191,6 +194,52 @@ export function CourseWorkspace({
   const next = course.videos
     .slice(currentIndex + 1)
     .find((v) => v.availability_status === "available");
+
+  const [speed, setSpeed] = useState<number>(() => {
+    if (typeof window === "undefined") return 1;
+    try {
+      const saved = localStorage.getItem("progressly_playback_speed");
+      return saved ? parseFloat(saved) : 1;
+    } catch {
+      return 1;
+    }
+  });
+
+  const handleSpeedChange = (newSpeed: number) => {
+    setSpeed(newSpeed);
+    player.current?.setSpeed(newSpeed);
+    notify(`Playback speed set to ${newSpeed}x`);
+  };
+
+  const [upNextActive, setUpNextActive] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const triggerUpNext = () => {
+    if (!next) return;
+    setUpNextActive(true);
+    setCountdown(5);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current!);
+          setUpNextActive(false);
+          router.push(`/courses/${course.id}/learn/${next.id}`);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  useEffect(() => {
+    setUpNextActive(false);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [lesson?.id]);
   return (
     <>
       <Link href="/courses" className="back-link">
@@ -535,6 +584,7 @@ export function CourseWorkspace({
                   key={`player:${lesson.id}`}
                   ref={player}
                   lesson={lesson}
+                  onEnded={triggerUpNext}
                   onPositionChange={(seconds) =>
                     setPlayback((current) =>
                       current?.lessonId === lesson.id &&
@@ -584,13 +634,16 @@ export function CourseWorkspace({
                           player.current?.position() ||
                           lesson.progress.last_position_seconds,
                         active_seconds: 0,
-                      }).then(() =>
+                      }).then(() => {
                         notify(
                           lesson.progress.is_completed
                             ? "Lesson marked in progress."
                             : "One more step forward. Lesson completed!",
-                        ),
-                      )
+                        );
+                        if (!lesson.progress.is_completed && next) {
+                          triggerUpNext();
+                        }
+                      })
                     }
                   >
                     <Check size={16} />
@@ -605,6 +658,24 @@ export function CourseWorkspace({
                     <Save size={15} />
                     Save progress
                   </Button>
+                  <div className="playback-speed-control" title="Playback speed">
+                    <Gauge size={14} />
+                    <select
+                      className="playback-speed-select"
+                      aria-label="Playback speed"
+                      value={speed}
+                      onChange={(e) =>
+                        handleSpeedChange(parseFloat(e.target.value))
+                      }
+                    >
+                      <option value="0.75">0.75x</option>
+                      <option value="1">1.0x</option>
+                      <option value="1.25">1.25x</option>
+                      <option value="1.5">1.5x</option>
+                      <option value="1.75">1.75x</option>
+                      <option value="2">2.0x</option>
+                    </select>
+                  </div>
                   <select
                     className="lesson-status-select"
                     aria-label="Lesson status"
@@ -617,6 +688,7 @@ export function CourseWorkspace({
                       const newStatus = e.target.value as typeof lesson.progress.status;
                       if (newStatus === "completed") {
                         fireConfetti();
+                        if (next) triggerUpNext();
                       }
                       void mutate({
                         op: "progress",
@@ -686,6 +758,52 @@ export function CourseWorkspace({
                   </Link>
                 )}
               </div>
+              {upNextActive && next && (
+                <div className="up-next-drawer" role="alert" aria-live="polite">
+                  <div className="up-next-countdown-track">
+                    <div
+                      className="up-next-countdown-fill"
+                      style={{ width: `${(countdown / 5) * 100}%` }}
+                    />
+                  </div>
+                  <div className="up-next-inner">
+                    <div className="up-next-info">
+                      <span className="up-next-badge">
+                        Up next in {countdown}s
+                      </span>
+                      <strong className="up-next-title">{next.title}</strong>
+                    </div>
+                    <div className="up-next-buttons">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (countdownRef.current) {
+                            clearInterval(countdownRef.current);
+                          }
+                          setUpNextActive(false);
+                          router.push(`/courses/${course.id}/learn/${next.id}`);
+                        }}
+                      >
+                        Play now
+                        <ArrowRight size={14} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (countdownRef.current) {
+                            clearInterval(countdownRef.current);
+                          }
+                          setUpNextActive(false);
+                        }}
+                        aria-label="Cancel auto advance"
+                      >
+                        <X size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               {course.description && (
                 <details className="course-description">
                   <summary>About this course</summary>

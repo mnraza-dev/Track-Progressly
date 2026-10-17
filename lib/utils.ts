@@ -49,7 +49,11 @@ export function localDay(date = new Date(), timezone = "UTC") {
     day: "2-digit",
   }).format(date);
 }
-export function streak(activity: Activity[], timezone: string) {
+export function streak(
+  activity: Activity[],
+  timezone: string,
+  allowWeekendRest = false,
+) {
   const days = new Set(
     activity
       .filter((a) => a.active_seconds > 0 || a.videos_completed > 0)
@@ -57,11 +61,31 @@ export function streak(activity: Activity[], timezone: string) {
   );
   const today = localDay(new Date(), timezone);
   let cursor = new Date(`${today}T12:00:00Z`);
-  if (!days.has(today)) cursor = subDays(cursor, 1);
-  let count = 0;
-  while (days.has(format(cursor, "yyyy-MM-dd"))) {
-    count++;
+  if (!days.has(today)) {
     cursor = subDays(cursor, 1);
+    if (allowWeekendRest) {
+      while (
+        (cursor.getUTCDay() === 0 || cursor.getUTCDay() === 6) &&
+        !days.has(format(cursor, "yyyy-MM-dd"))
+      ) {
+        cursor = subDays(cursor, 1);
+      }
+    }
+  }
+  let count = 0;
+  while (true) {
+    const dayStr = format(cursor, "yyyy-MM-dd");
+    if (days.has(dayStr)) {
+      count++;
+      cursor = subDays(cursor, 1);
+    } else if (
+      allowWeekendRest &&
+      (cursor.getUTCDay() === 0 || cursor.getUTCDay() === 6)
+    ) {
+      cursor = subDays(cursor, 1);
+    } else {
+      break;
+    }
   }
   return count;
 }

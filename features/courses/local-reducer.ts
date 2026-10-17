@@ -188,6 +188,7 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
         timezone: mutation.timezone,
         daily_minutes: mutation.daily_minutes,
         auto_complete: mutation.auto_complete,
+        weekend_rest: mutation.weekend_rest,
       };
       break;
     case "refresh_course":

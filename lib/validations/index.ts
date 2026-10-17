@@ -92,6 +92,7 @@ export const mutationSchema = z.discriminatedUnion("op", [
     }, "Choose a valid timezone."),
     daily_minutes: z.number().int().min(1).max(1440),
     auto_complete: z.boolean(),
+    weekend_rest: z.boolean().optional(),
   }),
 ]);
 export type Mutation = z.infer<typeof mutationSchema>;

@@ -98,7 +98,7 @@ export function getGamificationStats(workspace: Workspace) {
   ).length;
 
   // 6. Streak & Active time
-  const currentStreak = streak(activity, profile.timezone);
+  const currentStreak = streak(activity, profile.timezone, profile.weekend_rest);
   const totalSeconds = activity.reduce((sum, a) => sum + (a.active_seconds || 0), 0);
   const totalMinutes = Math.floor(totalSeconds / 60);
 

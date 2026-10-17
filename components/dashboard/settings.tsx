@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,8 @@ import {
   LogOut,
   Play,
   Download,
+  Upload,
+  FileJson,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
@@ -27,6 +29,9 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { downloadText } from "@/lib/utils";
+import { fireConfetti } from "@/lib/confetti";
+import { format } from "date-fns";
+
 export function Settings() {
   const router = useRouter();
   const { data, mutate, notify } = useWorkspace();
@@ -34,7 +39,9 @@ export function Settings() {
   const [timezone, setTimezone] = useState(data.profile.timezone);
   const [minutes, setMinutes] = useState(data.profile.daily_minutes);
   const [auto, setAuto] = useState(data.profile.auto_complete);
+  const [weekendRest, setWeekendRest] = useState(data.profile.weekend_rest ?? false);
   const [busy, setBusy] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { theme, setTheme } = useTheme();
   return (
     <>
@@ -56,6 +63,7 @@ export function Settings() {
               timezone,
               daily_minutes: minutes,
               auto_complete: auto,
+              weekend_rest: weekendRest,
             })
               .then(() => notify("Your preferences are saved."))
               .finally(() => setBusy(false));
@@ -157,6 +165,19 @@ export function Settings() {
                 onCheckedChange={setAuto}
               />
             </div>
+            <div className="toggle-setting">
+              <div>
+                <strong>Weekend Rest (Mon–Fri momentum)</strong>
+                <p>
+                  Preserve your study streak over Saturdays and Sundays without breaking momentum.
+                </p>
+              </div>
+              <Switch
+                checked={weekendRest}
+                aria-label="Weekend rest"
+                onCheckedChange={setWeekendRest}
+              />
+            </div>
           </section>
           <Button type="submit" disabled={busy}>
             <Save size={16} />
@@ -250,6 +271,80 @@ export function Settings() {
               <Shield size={13} />
               No paid tools. No AI required.
             </span>
+          </section>
+          <section className="panel settings-panel">
+            <h2>Workspace Backup & Restore</h2>
+            <p className="settings-help">
+              Download a complete JSON snapshot of all your courses, lessons, notes, and activity, or restore from a previous backup file.
+            </p>
+            <div className="backup-actions-row">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const payload = {
+                    version: 1,
+                    app: "progressly",
+                    exported_at: new Date().toISOString(),
+                    workspace: data,
+                  };
+                  downloadText(
+                    JSON.stringify(payload, null, 2),
+                    `progressly-workspace-${format(new Date(), "yyyy-MM-dd")}.json`,
+                  );
+                  notify("Complete workspace snapshot exported.");
+                }}
+              >
+                <Download size={15} />
+                Export JSON backup
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload size={15} />
+                Restore from file
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".json,application/json"
+                style={{ display: "none" }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    const text = await file.text();
+                    const parsed = JSON.parse(text);
+                    const workspaceData = parsed.workspace || parsed;
+                    if (
+                      !workspaceData.courses ||
+                      !Array.isArray(workspaceData.courses)
+                    ) {
+                      throw new Error(
+                        "Invalid Progressly backup file structure.",
+                      );
+                    }
+                    useWorkspace.setState({ data: workspaceData });
+                    try {
+                      localStorage.setItem(
+                        "progressly_workspace_v1",
+                        JSON.stringify(workspaceData),
+                      );
+                    } catch {}
+                    fireConfetti();
+                    notify("Workspace successfully restored from backup!");
+                    router.refresh();
+                  } catch (err: any) {
+                    notify(
+                      err?.message ||
+                        "Could not restore backup. Please verify file format.",
+                    );
+                  } finally {
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }
+                }}
+              />
+            </div>
           </section>
         </aside>
       </div>

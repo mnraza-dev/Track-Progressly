@@ -17,6 +17,9 @@ type Player = {
   getPlayerState: () => number;
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
   playVideo: () => void;
+  pauseVideo: () => void;
+  setPlaybackRate: (rate: number) => void;
+  getPlaybackRate: () => number;
   destroy: () => void;
 };
 type YTNamespace = {
@@ -71,11 +74,19 @@ export type PlayerHandle = {
   seek: (seconds: number) => void;
   position: () => number;
   save: () => void;
+  setSpeed: (rate: number) => void;
+  getSpeed: () => number;
+  play: () => void;
+  pause: () => void;
 };
 export const YouTubePlayer = forwardRef<
   PlayerHandle,
-  { lesson: Lesson; onPositionChange?: (seconds: number) => void }
->(({ lesson, onPositionChange }, ref) => {
+  {
+    lesson: Lesson;
+    onPositionChange?: (seconds: number) => void;
+    onEnded?: () => void;
+  }
+>(({ lesson, onPositionChange, onEnded }, ref) => {
   const container = useRef<HTMLDivElement>(null);
   const player = useRef<Player | null>(null);
   const [ready, setReady] = useState(false);
@@ -116,6 +127,17 @@ export const YouTubePlayer = forwardRef<
         ),
       );
     },
+    setSpeed: (rate: number) => {
+      if (player.current?.setPlaybackRate) {
+        player.current.setPlaybackRate(rate);
+      }
+      try {
+        localStorage.setItem("progressly_playback_speed", String(rate));
+      } catch {}
+    },
+    getSpeed: () => player.current?.getPlaybackRate?.() ?? 1,
+    play: () => player.current?.playVideo?.(),
+    pause: () => player.current?.pauseVideo?.(),
   }));
   async function save(final = false) {
     const seconds = active.current;
@@ -176,11 +198,22 @@ export const YouTubePlayer = forwardRef<
                 latest.current = pendingSeek.current;
                 pendingSeek.current = null;
               }
+              try {
+                const savedSpeed = parseFloat(
+                  localStorage.getItem("progressly_playback_speed") || "1",
+                );
+                if (savedSpeed && savedSpeed !== 1) {
+                  player.current?.setPlaybackRate?.(savedSpeed);
+                }
+              } catch {}
               reportPosition.current?.(
                 player.current?.getCurrentTime() ?? latest.current,
               );
             },
             onStateChange: (e) => {
+              if (e.data === 0) {
+                onEnded?.();
+              }
               if (e.data === 2 || e.data === 0) {
                 const pos =
                   player.current?.getCurrentTime?.() ?? latest.current;

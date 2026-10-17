@@ -35,7 +35,11 @@ export function Goals() {
     (a) =>
       a.day >= format(subDays(new Date(`${today}T12:00:00Z`), 6), "yyyy-MM-dd"),
   );
-  const currentStreak = streak(data.activity, data.profile.timezone);
+  const currentStreak = streak(
+    data.activity,
+    data.profile.timezone,
+    data.profile.weekend_rest,
+  );
   const weekMinutes = Math.floor(
     week
       .filter((row) => row.day <= today)

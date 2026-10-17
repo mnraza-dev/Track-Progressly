@@ -70,6 +70,7 @@ export type Profile = {
   timezone: string;
   daily_minutes: number;
   auto_complete: boolean;
+  weekend_rest?: boolean;
 };
 export type Workspace = {
   courses: Course[];
