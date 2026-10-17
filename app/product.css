@@ -4105,4 +4105,344 @@
   align-items: center;
 }
 
+/* ==========================================================================
+   Study Focus Timer Component (Circular Graph & Synchronized Pacing)
+   ========================================================================== */
+.study-focus-timer-card {
+  padding: 18px 22px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card) 95%, var(--primary));
+  border: 1px solid var(--border);
+  transition: all 0.25s ease;
+  margin: 18px 0;
+}
+
+.study-focus-timer-card.is-running {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.study-focus-timer-card.is-away {
+  border-color: color-mix(in srgb, #f59e0b 35%, var(--border));
+}
+
+.study-focus-timer-card.is-completed {
+  border-color: color-mix(in srgb, #10b981 45%, var(--border));
+  background: color-mix(in srgb, #10b981 4%, var(--card));
+}
+
+.focus-timer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.focus-timer-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.focus-timer-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+}
+
+.focus-timer-status-row {
+  display: flex;
+  align-items: center;
+}
+
+.timer-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.timer-status-badge.active {
+  background: color-mix(in srgb, #10b981 14%, transparent);
+  color: #10b981;
+  border: 1px solid color-mix(in srgb, #10b981 25%, transparent);
+}
+
+.timer-status-badge.paused {
+  background: color-mix(in srgb, #f59e0b 14%, transparent);
+  color: #f59e0b;
+  border: 1px solid color-mix(in srgb, #f59e0b 25%, transparent);
+}
+
+.timer-status-badge.away {
+  background: color-mix(in srgb, var(--muted) 80%, transparent);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+}
+
+.timer-status-badge.completed {
+  background: color-mix(in srgb, #10b981 18%, transparent);
+  color: #10b981;
+  border: 1px solid color-mix(in srgb, #10b981 35%, transparent);
+}
+
+.timer-status-badge.ready {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.timer-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: pulseDot 1.5s infinite;
+}
+
+.focus-timer-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.focus-timer-sound-btn,
+.focus-timer-toggle-btn {
+  color: var(--muted-foreground);
+}
+
+.focus-timer-body {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-top: 16px;
+  flex-wrap: wrap;
+}
+
+/* Circular Graph SVG */
+.focus-timer-circular-wrap {
+  position: relative;
+  width: 156px;
+  height: 156px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+.focus-timer-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(0deg);
+}
+
+.focus-ring-track {
+  stroke: color-mix(in srgb, var(--primary) 12%, var(--muted));
+}
+
+.focus-ring-fill {
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.focus-timer-circle-inner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.focus-timer-countdown {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 25px;
+  font-weight: 800;
+  color: var(--foreground);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.focus-timer-target-tag {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  margin-top: 3px;
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.focus-timer-micro-state {
+  font-size: 9.5px;
+  color: var(--muted-foreground);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Details Column */
+.focus-timer-details-col {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.focus-timer-presets-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.presets-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  letter-spacing: 0.04em;
+}
+
+.presets-buttons-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.preset-pill-btn {
+  border: 1px solid var(--border);
+  background: var(--background);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.preset-pill-btn:hover {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--background));
+}
+
+.preset-pill-btn.selected {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 15%, var(--card));
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.focus-timer-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timer-play-btn {
+  gap: 6px;
+  font-weight: 600;
+}
+
+.focus-timer-metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--muted) 28%, var(--card));
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 500px) {
+  .focus-timer-metrics-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.focus-metric-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.focus-metric-label {
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.focus-metric-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--foreground);
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.goal-ref {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+
+/* Collapsed Row */
+.focus-timer-collapsed-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 2px 0;
+  flex-wrap: wrap;
+}
+
+.collapsed-countdown-group {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.collapsed-time {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.collapsed-target {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.collapsed-session-stat {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.collapsed-session-stat strong {
+  color: var(--foreground);
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.collapsed-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 

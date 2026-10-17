@@ -43,6 +43,7 @@ import {
   YouTubePlayer,
   type PlayerHandle,
 } from "@/components/player/youtube-player";
+import { StudyFocusTimer } from "@/components/player/study-focus-timer";
 import { LessonNotes } from "@/components/notes/lesson-notes";
 import { VideoChapters } from "@/components/player/video-chapters";
 import { useVideoChapters } from "@/components/player/use-video-chapters";
@@ -211,6 +212,7 @@ export function CourseWorkspace({
     notify(`Playback speed set to ${newSpeed}x`);
   };
 
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [upNextActive, setUpNextActive] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -234,6 +236,7 @@ export function CourseWorkspace({
   };
 
   useEffect(() => {
+    setIsVideoPlaying(false);
     setUpNextActive(false);
     if (countdownRef.current) clearInterval(countdownRef.current);
     return () => {
@@ -585,6 +588,7 @@ export function CourseWorkspace({
                   ref={player}
                   lesson={lesson}
                   onEnded={triggerUpNext}
+                  onPlayStateChange={setIsVideoPlaying}
                   onPositionChange={(seconds) =>
                     setPlayback((current) =>
                       current?.lessonId === lesson.id &&
@@ -713,6 +717,10 @@ export function CourseWorkspace({
                   </a>
                 </div>
               </div>
+              <StudyFocusTimer
+                isVideoPlaying={isVideoPlaying}
+                playerRef={player}
+              />
               <LessonNotes
                 key={`notes:${lesson.id}`}
                 lesson={lesson}

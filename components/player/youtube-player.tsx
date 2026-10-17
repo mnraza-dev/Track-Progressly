@@ -78,6 +78,7 @@ export type PlayerHandle = {
   getSpeed: () => number;
   play: () => void;
   pause: () => void;
+  isPlaying: () => boolean;
 };
 export const YouTubePlayer = forwardRef<
   PlayerHandle,
@@ -85,8 +86,9 @@ export const YouTubePlayer = forwardRef<
     lesson: Lesson;
     onPositionChange?: (seconds: number) => void;
     onEnded?: () => void;
+    onPlayStateChange?: (playing: boolean) => void;
   }
->(({ lesson, onPositionChange, onEnded }, ref) => {
+>(({ lesson, onPositionChange, onEnded, onPlayStateChange }, ref) => {
   const container = useRef<HTMLDivElement>(null);
   const player = useRef<Player | null>(null);
   const [ready, setReady] = useState(false);
@@ -96,9 +98,13 @@ export const YouTubePlayer = forwardRef<
   const readyRef = useRef(false);
   const pendingSeek = useRef<number | null>(null);
   const reportPosition = useRef(onPositionChange);
+  const reportPlayState = useRef(onPlayStateChange);
   useEffect(() => {
     reportPosition.current = onPositionChange;
   }, [onPositionChange]);
+  useEffect(() => {
+    reportPlayState.current = onPlayStateChange;
+  }, [onPlayStateChange]);
   const { mutate, notify, data } = useWorkspace();
   const auto = useRef(data.profile.auto_complete);
   const complete = useRef(lesson.progress.is_completed);
@@ -138,6 +144,7 @@ export const YouTubePlayer = forwardRef<
     getSpeed: () => player.current?.getPlaybackRate?.() ?? 1,
     play: () => player.current?.playVideo?.(),
     pause: () => player.current?.pauseVideo?.(),
+    isPlaying: () => player.current?.getPlayerState?.() === 1,
   }));
   async function save(final = false) {
     const seconds = active.current;
@@ -209,8 +216,12 @@ export const YouTubePlayer = forwardRef<
               reportPosition.current?.(
                 player.current?.getCurrentTime() ?? latest.current,
               );
+              reportPlayState.current?.(
+                player.current?.getPlayerState?.() === 1,
+              );
             },
             onStateChange: (e) => {
+              reportPlayState.current?.(e.data === 1);
               if (e.data === 0) {
                 onEnded?.();
               }
@@ -310,6 +321,7 @@ export const YouTubePlayer = forwardRef<
     return () => {
       disposed = true;
       readyRef.current = false;
+      reportPlayState.current?.(false);
       clearInterval(tick);
       window.removeEventListener("pagehide", flush);
       if (player.current) {
