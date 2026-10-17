@@ -27,7 +27,7 @@ export const DEFAULT_TOUR_STEPS: TourStep[] = [
       "Pick up your latest course instantly. Progressly tracks your exact video timestamp, active chapter, and lesson status so you never lose your place.",
     icon: "play",
     placement: "bottom",
-    badge: "01 / 06",
+    badge: "01 / 07",
   },
   {
     id: "stats-grid",
@@ -37,7 +37,17 @@ export const DEFAULT_TOUR_STEPS: TourStep[] = [
       "Stay on top of your courses in progress, completed lessons and chapters, hands-on practice tasks, and continuous learning streak.",
     icon: "sparkles",
     placement: "bottom",
-    badge: "02 / 06",
+    badge: "02 / 07",
+  },
+  {
+    id: "gamification-quests",
+    target: '[data-tour="gamification-quests"]',
+    title: "Mastery Tiers & Daily Quests",
+    description:
+      "Level up your craft as you study. Earn XP for lessons, chapters, and practice, track daily discipline quests, and unlock 10 collectible learning badges.",
+    icon: "sparkles",
+    placement: "bottom",
+    badge: "03 / 07",
   },
   {
     id: "weekly-consistency",
@@ -47,7 +57,7 @@ export const DEFAULT_TOUR_STEPS: TourStep[] = [
       "Consistency beats intensity. Check your daily learning momentum across all 7 days of the week and stay committed to your daily intention.",
     icon: "target",
     placement: "bottom",
-    badge: "03 / 06",
+    badge: "04 / 07",
   },
   {
     id: "practice-queue",
@@ -57,7 +67,7 @@ export const DEFAULT_TOUR_STEPS: TourStep[] = [
       "Turn tutorials into real skills. Check off practice exercises and projects directly from your dashboard without digging through lessons.",
     icon: "check",
     placement: "top",
-    badge: "04 / 06",
+    badge: "05 / 07",
   },
   {
     id: "revision-queue",
@@ -67,7 +77,7 @@ export const DEFAULT_TOUR_STEPS: TourStep[] = [
       "Never forget key insights. Review notes flagged for revision and jump directly to the exact video timestamp with a single click.",
     icon: "rotate",
     placement: "top",
-    badge: "05 / 06",
+    badge: "06 / 07",
   },
   {
     id: "sidebar-nav",
@@ -77,7 +87,7 @@ export const DEFAULT_TOUR_STEPS: TourStep[] = [
       "Navigate your library, search notes and courses with ⌘K, or collapse the sidebar for a clean, distraction-free study space.",
     icon: "compass",
     placement: "right",
-    badge: "06 / 06",
+    badge: "07 / 07",
   },
 ];
 

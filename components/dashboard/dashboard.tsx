@@ -23,9 +23,14 @@ import {
   Calendar,
   Layers,
   Circle,
+  Trophy,
+  ShieldCheck,
+  Target,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useWorkspace } from "@/stores/workspace";
+import { getGamificationStats } from "@/lib/gamification";
+import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
 import {
   completion,
   duration,
@@ -43,7 +48,7 @@ import {
 import { useTour } from "@/components/tour/tour-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CourseCard, CourseArtwork } from "@/components/courses/course-card";
+import { CourseCard } from "@/components/courses/course-card";
 import { ActivityChart } from "@/components/analytics/activity-chart";
 import { LearningLandscape } from "@/components/analytics/learning-landscape";
 import { LearningMix } from "@/components/analytics/progress-charts";
@@ -62,6 +67,8 @@ export function Dashboard() {
   const [link, setLink] = useState("");
   const [taskFilter, setTaskFilter] = useState<"pending" | "all">("pending");
   const [hero3dMode, setHero3dMode] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const gamificationStats = useMemo(() => getGamificationStats(data), [data]);
 
   const { courses, activity, profile } = data;
 
@@ -678,6 +685,133 @@ export function Dashboard() {
           index="04"
         />
       </section>
+      {/* Gamification: Level Mastery & Daily Quests */}
+      <section
+        className="panel dashboard-gamification-panel"
+        data-tour="gamification-quests"
+      >
+        <div className="gamification-hero-split">
+          {/* Left Column: 3D Trophy & Rank Progress */}
+          <div className="gamification-trophy-side">
+            <div className="gamification-trophy-stage">
+              <SceneArtwork
+                kind="trophy"
+                progress={gamificationStats.levelInfo.levelProgressPercent / 100}
+                interactive
+                label={`Level ${gamificationStats.levelInfo.level} Trophy: ${gamificationStats.levelInfo.title}`}
+              />
+            </div>
+            <div className="gamification-trophy-details">
+              <div className="gamification-rank-kicker">
+                <span className="section-index">STUDIO MASTERY</span>
+                <span className="gamification-tier-pill">
+                  TIER {gamificationStats.levelInfo.level} OF 8
+                </span>
+              </div>
+              <h3 className="gamification-rank-title">
+                {gamificationStats.levelInfo.title}
+              </h3>
+              <div className="gamification-xp-row">
+                <span className="gamification-total-xp">
+                  <strong>{gamificationStats.levelInfo.totalXP.toLocaleString()}</strong> XP
+                </span>
+                <span className="gamification-next-xp">
+                  {gamificationStats.levelInfo.isMaxLevel ? (
+                    "Maximum Level Reached"
+                  ) : (
+                    <>
+                      {gamificationStats.levelInfo.currentLevelXP} /{" "}
+                      {gamificationStats.levelInfo.xpNeededForNext} XP to Level{" "}
+                      {gamificationStats.levelInfo.level + 1}
+                    </>
+                  )}
+                </span>
+              </div>
+              <div className="gamification-progress-bar">
+                <div
+                  className="gamification-progress-fill"
+                  style={{
+                    width: `${gamificationStats.levelInfo.levelProgressPercent}%`,
+                  }}
+                />
+              </div>
+              <div className="gamification-actions">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="view-achievements-btn"
+                  onClick={() => setAchievementsOpen(true)}
+                >
+                  <Trophy size={14} className="text-yellow-500" />
+                  <span>
+                    Achievements & Badges ({gamificationStats.unlockedAchievementsCount}/{gamificationStats.totalAchievementsCount})
+                  </span>
+                  <ArrowRight size={13} />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Today's Daily Quests */}
+          <div className="gamification-quests-side">
+            <div className="quests-side-header">
+              <div>
+                <span className="section-index">DAILY DISCIPLINE</span>
+                <h3>Today’s Focus Quests</h3>
+              </div>
+              <span className="quests-reset-tag">Daily reset</span>
+            </div>
+
+            <div className="quests-cards-list">
+              {gamificationStats.dailyQuests.map((quest) => (
+                <div
+                  key={quest.id}
+                  className={cn(
+                    "dashboard-quest-card",
+                    quest.completed && "quest-done",
+                  )}
+                >
+                  <div className="dashboard-quest-icon">
+                    {quest.completed ? (
+                      <CheckCircle2 size={16} className="text-emerald-500" />
+                    ) : quest.id === "quest_focus" ? (
+                      <Target size={15} />
+                    ) : quest.id === "quest_lesson" ? (
+                      <Play size={14} fill="currentColor" />
+                    ) : (
+                      <CheckCircle2 size={15} />
+                    )}
+                  </div>
+                  <div className="dashboard-quest-info">
+                    <div className="dashboard-quest-title-row">
+                      <strong>{quest.title}</strong>
+                      <span className="dashboard-quest-xp">
+                        +{quest.xpReward} XP
+                      </span>
+                    </div>
+                    <p>{quest.description}</p>
+                    <div className="dashboard-quest-meter">
+                      <div className="dashboard-quest-meter-track">
+                        <div
+                          className="dashboard-quest-meter-fill"
+                          style={{
+                            width: `${Math.min(100, Math.round((quest.current / quest.target) * 100))}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="dashboard-quest-progress-num">
+                        {quest.completed
+                          ? "Completed"
+                          : `${quest.current}/${quest.target}`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Weekly Consistency Tracker */}
       <section className="panel weekly-consistency-panel" data-tour="weekly-consistency">
@@ -1072,61 +1206,6 @@ export function Dashboard() {
         <LearningMix courses={courses} />
       </div>
 
-      {/* Follow your curiosity */}
-      <div className="section-heading explore-heading">
-        <div>
-          <span className="section-index">ROOM FOR SOMETHING NEW</span>
-          <h2>
-            Follow your curiosity<span className="serif-arrow">↗</span>
-          </h2>
-          <p>Three directions. Endless things to make.</p>
-        </div>
-        <span className="explore-label">LEARNING HAS NO FINISH LINE.</span>
-      </div>
-      <div className="inspiration-grid">
-        {[
-          {
-            category: "Development",
-            title: "Build for the web.",
-            subtitle: "Interfaces, components, and ideas that work.",
-            path: "Development",
-            number: "01",
-          },
-          {
-            category: "Data & Python",
-            title: "Think in possibilities.",
-            subtitle: "Patterns to discover. Problems to solve.",
-            path: "Data & Python",
-            number: "02",
-          },
-          {
-            category: "Design",
-            title: "Make it mean something.",
-            subtitle: "Shape, form, and a different point of view.",
-            path: "Design",
-            number: "03",
-          },
-        ].map((c) => (
-          <Link
-            key={c.category}
-            href={`/courses/new?category=${encodeURIComponent(c.path)}`}
-            className="inspiration-card"
-          >
-            <CourseArtwork category={c.category} />
-            <div>
-              <span className="tiny-label">
-                {c.number} / {c.category}
-              </span>
-              <h3>{c.title}</h3>
-              <p>{c.subtitle}</p>
-              <span className="inspiration-arrow">
-                <ArrowUpRight size={19} />
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
-
       {!isConnected && (
         <div className="local-mode-banner">
           <span className="local-dot" />
@@ -1144,6 +1223,12 @@ export function Dashboard() {
       <div className="dashboard-bottom-note">
         <span className="little-star">✳</span>Less collecting. More completing.
       </div>
+
+      <AchievementsDialog
+        open={achievementsOpen}
+        onOpenChange={setAchievementsOpen}
+        stats={gamificationStats}
+      />
     </div>
   );
 }
