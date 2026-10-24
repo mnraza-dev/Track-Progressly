@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useSyncExternalStore } from "react";
 import type { Lesson } from "@/types";
 import { parseVideoChapters, type VideoChapter } from "@/lib/youtube/chapters";
 
@@ -33,6 +33,26 @@ function lookup(videoId: string) {
   return request;
 }
 
+const customOverrides = new Map<string, string>();
+const customListeners = new Set<() => void>();
+function subscribeCustom(listener: () => void) {
+  customListeners.add(listener);
+  const changed = (event: StorageEvent) => { if (event.key) customOverrides.delete(event.key); else customOverrides.clear(); listener(); };
+  window.addEventListener("storage", changed);
+  return () => { customListeners.delete(listener); window.removeEventListener("storage", changed); };
+}
+function customSnapshot(key: string) {
+  if (!key) return "";
+  if (customOverrides.has(key)) return customOverrides.get(key)!;
+  try { return localStorage.getItem(key) || ""; } catch { return ""; }
+}
+function writeCustom(key: string, text: string) {
+  if (!key) return;
+  customOverrides.set(key, text);
+  try { if (text) localStorage.setItem(key, text); else localStorage.removeItem(key); } catch {}
+  customListeners.forEach((listener) => listener());
+}
+
 export function useVideoChapters(lesson?: Lesson) {
   const videoId = lesson?.youtube_video_id || "";
   const description = lesson?.description || "";
@@ -51,20 +71,7 @@ export function useVideoChapters(lesson?: Lesson) {
       ? `progressly_custom_chapters_${videoId}`
       : "";
 
-  const [customText, setCustomText] = useState<string>("");
-
-  useEffect(() => {
-    if (!storageKey || typeof window === "undefined") {
-      setCustomText("");
-      return;
-    }
-    try {
-      const saved = localStorage.getItem(storageKey);
-      setCustomText(saved || "");
-    } catch {
-      setCustomText("");
-    }
-  }, [storageKey]);
+  const customText = useSyncExternalStore(subscribeCustom, () => customSnapshot(storageKey), () => "");
 
   // Check if the local lesson description actually contains chapters
   const localChapters = useMemo(
@@ -116,30 +123,8 @@ export function useVideoChapters(lesson?: Lesson) {
     [available, text, duration],
   );
 
-  const saveCustomChapters = useCallback(
-    (newText: string) => {
-      setCustomText(newText);
-      if (storageKey && typeof window !== "undefined") {
-        try {
-          if (newText.trim()) {
-            localStorage.setItem(storageKey, newText.trim());
-          } else {
-            localStorage.removeItem(storageKey);
-          }
-        } catch {}
-      }
-    },
-    [storageKey],
-  );
-
-  const clearCustomChapters = useCallback(() => {
-    setCustomText("");
-    if (storageKey && typeof window !== "undefined") {
-      try {
-        localStorage.removeItem(storageKey);
-      } catch {}
-    }
-  }, [storageKey]);
+  const saveCustomChapters = useCallback((text: string) => writeCustom(storageKey, text.trim()), [storageKey]);
+  const clearCustomChapters = useCallback(() => writeCustom(storageKey, ""), [storageKey]);
 
   const retry = useCallback(() => {
     if (videoId) {

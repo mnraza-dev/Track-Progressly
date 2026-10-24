@@ -6,7 +6,6 @@ import ReactMarkdown from "react-markdown";
 import {
   Search,
   Download,
-  StickyNote,
   ArrowUpRight,
   Clock,
   RotateCcw,

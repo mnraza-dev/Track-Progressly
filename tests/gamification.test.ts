@@ -81,14 +81,7 @@ describe("Gamification Engine - Stats & Progression", () => {
 
     const stats = getGamificationStats(ws);
 
-    // 1 completed video = 50 XP
-    // 5 finished chapters = 5 * 15 = 75 XP
-    // 1 completed course (1 video total, 100% done) = 200 XP
-    // Achievements unlocked:
-    // - first_step: +50 XP
-    // - chapter_cadence (5 chapters): +100 XP
-    // - the_finisher (1 completed course): +200 XP
-    // Total XP = 50 + 75 + 200 + 50 + 100 + 200 = 675 XP -> Level 3 (minXP 400, nextXP 800)
+    // Chapter navigation carries no XP; lesson, course, and one-time milestones do.
     expect(stats.completedVideos).toBe(1);
     expect(stats.totalChaptersCompleted).toBe(5);
     expect(stats.completedCourses).toBe(1);
@@ -96,15 +89,12 @@ describe("Gamification Engine - Stats & Progression", () => {
     const firstStep = stats.achievements.find((a) => a.id === "first_step");
     expect(firstStep?.unlocked).toBe(true);
 
-    const chapterCadence = stats.achievements.find((a) => a.id === "chapter_cadence");
-    expect(chapterCadence?.unlocked).toBe(true);
-
     const theFinisher = stats.achievements.find((a) => a.id === "the_finisher");
     expect(theFinisher?.unlocked).toBe(true);
 
     expect(stats.levelInfo.level).toBe(3);
     expect(stats.levelInfo.title).toBe("Consistent Learner");
-    expect(stats.levelInfo.totalXP).toBe(675);
+    expect(stats.levelInfo.totalXP).toBe(500);
   });
 
   it("calculates practice tasks and notes achievements", () => {
@@ -160,13 +150,13 @@ describe("Gamification Engine - Stats & Progression", () => {
     const stats = getGamificationStats(ws);
 
     expect(stats.completedTasks).toBe(3);
-    expect(stats.notesCount).toBe(5);
+    expect(stats.notesCount).toBe(0);
 
     const makerMindset = stats.achievements.find((a) => a.id === "maker_mindset");
     expect(makerMindset?.unlocked).toBe(true);
 
     const archivist = stats.achievements.find((a) => a.id === "the_archivist");
-    expect(archivist?.unlocked).toBe(true);
+    expect(archivist?.unlocked).toBe(false);
   });
 
   it("evaluates daily quests based on today's activity row", () => {

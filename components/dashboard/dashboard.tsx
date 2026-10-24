@@ -1,5 +1,6 @@
 "use client";
 
+import { LevelBadge } from "@/components/gamification/level-badge";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState, useMemo } from "react";
@@ -11,20 +12,16 @@ import {
   BookOpen,
   CircleCheck,
   CheckCircle2,
-  Clock3,
   Flame,
   ChevronDown,
   Play,
   Link2,
   Check,
   Sparkles,
-  RotateCcw,
   ListTodo,
   Calendar,
-  Layers,
   Circle,
   Trophy,
-  ShieldCheck,
   Target,
   ChartNoAxesCombined,
 } from "lucide-react";
@@ -118,7 +115,7 @@ export function Dashboard() {
     profile.daily_minutes;
 
   // 1. Chapters aggregation across library
-  const { totalCompletedChapters, totalChaptersCount } = useMemo(() => {
+  const { totalCompletedChapters } = useMemo(() => {
     let completed = 0;
     let total = 0;
     courses
@@ -697,12 +694,7 @@ export function Dashboard() {
           {/* Left Column: 3D Trophy & Rank Progress */}
           <div className="gamification-trophy-side">
             <div className="gamification-trophy-stage">
-              <SceneArtwork
-                kind="trophy"
-                progress={gamificationStats.levelInfo.levelProgressPercent / 100}
-                interactive
-                label={`Level ${gamificationStats.levelInfo.level} Trophy: ${gamificationStats.levelInfo.title}`}
-              />
+              <LevelBadge level={gamificationStats.levelInfo.level} />
             </div>
             <div className="gamification-trophy-details">
               <div className="gamification-rank-kicker">

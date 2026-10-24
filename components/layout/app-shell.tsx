@@ -1,9 +1,10 @@
 "use client";
 import { ExportDialog } from "@/components/exports/export-dialog";
+import { RewardFeedback } from "@/components/gamification/reward-feedback";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
@@ -41,7 +42,6 @@ import { useTour } from "@/components/tour/tour-context";
 import { getGamificationStats } from "@/lib/gamification";
 import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
 import { ShortcutsDialog } from "@/components/layout/shortcuts-dialog";
-import { fireConfetti } from "@/lib/confetti";
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My courses", href: "/courses", icon: BookOpen },
@@ -74,25 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { startTour } = useTour();
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const prevLevelRef = useRef<number | null>(null);
   const stats = useMemo(() => getGamificationStats(data), [data]);
-
-  // Celebratory Toast & Confetti on Level Up
-  useEffect(() => {
-    if (
-      loaded &&
-      prevLevelRef.current !== null &&
-      stats.levelInfo.level > prevLevelRef.current
-    ) {
-      fireConfetti();
-      useWorkspace.setState({
-        toast: `🎉 Level Up! You reached Level ${stats.levelInfo.level}: ${stats.levelInfo.title}!`,
-      });
-    }
-    if (loaded) {
-      prevLevelRef.current = stats.levelInfo.level;
-    }
-  }, [stats.levelInfo.level, stats.levelInfo.title, loaded]);
 
   useEffect(() => {
     void load();
@@ -370,6 +352,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </footer>
       </div>
+      <RewardFeedback onViewCollection={() => setAchievementsOpen(true)} />
       {toast && (
         <div className="toast" role="status">
           <CheckCircle2 size={19} />

@@ -13,7 +13,6 @@ import {
   RotateCcw,
   FileText,
   Pencil,
-  X,
 } from "lucide-react";
 import {
   chapterAt,

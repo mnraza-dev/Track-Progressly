@@ -1,4 +1,6 @@
 "use client";
+import type { Course } from "@/types";
+import { useFeedback } from "@/stores/feedback";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -49,16 +51,26 @@ import { VideoChapters } from "@/components/player/video-chapters";
 import { useVideoChapters } from "@/components/player/use-video-chapters";
 import { SceneArtwork } from "@/components/three/scene-provider";
 import { fireConfetti } from "@/lib/confetti";
-export function CourseWorkspace({
-  courseId,
-  videoId,
-}: {
-  courseId: string;
-  videoId?: string;
-}) {
+export function CourseWorkspace({ courseId, videoId }: { courseId: string; videoId?: string }) {
+  const course = useWorkspace((state) => state.data.courses.find((item) => item.id === courseId));
+  if (!course)
+    return (
+      <div className="large-empty">
+        <ListVideo size={35} />
+        <h2>Course not found</h2>
+        <p>
+          This course may have been deleted, or belongs to another workspace.
+        </p>
+        <Button asChild>
+          <Link href="/courses">Back to courses</Link>
+        </Button>
+      </div>
+    );
+  return <CourseWorkspaceContent key={`${courseId}:${videoId || "overview"}`} course={course} videoId={videoId} />;
+}
+function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?: string }) {
   const router = useRouter();
-  const { data, mutate, notify } = useWorkspace();
-  const course = data.courses.find((c) => c.id === courseId);
+  const { mutate, notify } = useWorkspace();
   const [query, setQuery] = useState("");
   const [selectedId] = useState(
     () =>
@@ -115,19 +127,6 @@ export function CourseWorkspace({
     clearCustomChapters,
     retry: retryChapters,
   } = useVideoChapters(lesson);
-  if (!course)
-    return (
-      <div className="large-empty">
-        <ListVideo size={35} />
-        <h2>Course not found</h2>
-        <p>
-          This course may have been deleted, or belongs to another workspace.
-        </p>
-        <Button asChild>
-          <Link href="/courses">Back to courses</Link>
-        </Button>
-      </div>
-    );
   const isSingleLessonWithChapters =
     course.videos.length === 1 && chapters.length > 0;
   const [manualChapters, setManualChapters] = useState<Set<number>>(() => {
@@ -239,10 +238,9 @@ export function CourseWorkspace({
   };
 
   useEffect(() => {
-    setIsVideoPlaying(false);
-    setUpNextActive(false);
     if (countdownRef.current) clearInterval(countdownRef.current);
     return () => {
+      useFeedback.getState().setVideoPlaying(false);
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, [lesson?.id]);
@@ -594,7 +592,7 @@ export function CourseWorkspace({
                   ref={player}
                   lesson={lesson}
                   onEnded={triggerUpNext}
-                  onPlayStateChange={setIsVideoPlaying}
+                  onPlayStateChange={(playing) => { setIsVideoPlaying(playing); useFeedback.getState().setVideoPlaying(playing); }}
                   onPositionChange={(seconds) =>
                     setPlayback((current) =>
                       current?.lessonId === lesson.id &&

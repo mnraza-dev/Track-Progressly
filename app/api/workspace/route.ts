@@ -65,6 +65,7 @@ export async function GET() {
       goals,
       profile,
       activity,
+      rewards,
     ] = await Promise.all([
       allRows(db, "courses", "updated_at"),
       allRows(db, "course_videos", "position"),
@@ -75,9 +76,11 @@ export async function GET() {
       allRows(db, "learning_goals"),
       db.from("profiles").select("*").eq("id", user.id).single(),
       db.rpc("learning_analytics"),
+      db.rpc("sync_learning_rewards"),
     ]);
     if (profile.error) throw profile.error;
     if (activity.error) throw activity.error;
+    if (rewards.error) throw rewards.error;
     return Response.json(
       {
         courses: courses
@@ -99,6 +102,7 @@ export async function GET() {
         goals,
         profile: profile.data,
         activity: activity.data,
+        rewards: rewards.data,
       },
       { headers: { "Cache-Control": "private, no-store" } },
     );
@@ -120,6 +124,8 @@ export async function POST(request: Request) {
   try {
     const { db, user } = await authenticated();
     const m = mutationSchema.parse(await request.json());
+    const baselineRewards = await db.rpc("sync_learning_rewards");
+    if (baselineRewards.error) throw baselineRewards.error;
     let result;
     switch (m.op) {
       case "create_course":
@@ -247,6 +253,7 @@ export async function POST(request: Request) {
           timezone: m.timezone,
           daily_minutes: m.daily_minutes,
           auto_complete: m.auto_complete,
+          weekend_rest: m.weekend_rest ?? false,
         };
         result = await db
           .from("profiles")
@@ -256,8 +263,10 @@ export async function POST(request: Request) {
       }
     }
     if (result?.error) throw result.error;
+    const rewards = await db.rpc("sync_learning_rewards");
+    if (rewards.error) throw rewards.error;
     return Response.json(
-      { ok: true },
+      { ok: true, rewards: rewards.data },
       { headers: { "Cache-Control": "private, no-store" } },
     );
   } catch (error) {

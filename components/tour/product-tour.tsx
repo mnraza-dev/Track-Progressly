@@ -78,7 +78,7 @@ export function ProductTour() {
 
       // Scroll into view if out of viewport
       if (b.top < 0 || b.bottom > window.innerHeight) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
       }
 
       // Compute card position
@@ -139,7 +139,7 @@ export function ProductTour() {
   useEffect(() => {
     if (!isOpen) return;
 
-    updatePosition();
+    const frame = requestAnimationFrame(updatePosition);
 
     const handleResize = () => updatePosition();
     const handleScroll = () => updatePosition();
@@ -163,6 +163,7 @@ export function ProductTour() {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll, true);
       window.removeEventListener("keydown", handleKeyDown);

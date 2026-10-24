@@ -1,16 +1,17 @@
 "use client";
+import { useFeedback } from "@/stores/feedback";
 
 // High-performance canvas confetti particle system with zero external dependencies.
 // Designed with Progressly's artisanal color palette.
 
 const PALETTE = [
-  "#378f80", // teal
+  "#e39a55", // teal
   "#c47a50", // copper
-  "#a8b991", // sage
+  "#d9bc8e", // sage
   "#10b981", // emerald
   "#f59e0b", // amber
   "#e8ccab", // cream
-  "#7da5aa", // slate
+  "#c4b2ea", // slate
 ];
 
 type Particle = {
@@ -28,7 +29,7 @@ type Particle = {
 
 let activeCanvas: HTMLCanvasElement | null = null;
 let activeCtx: CanvasRenderingContext2D | null = null;
-let particles: Particle[] = [];
+const particles: Particle[] = [];
 let animFrame = 0;
 
 function ensureCanvas(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null {
@@ -65,7 +66,7 @@ function ensureCanvas(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContex
 }
 
 export function fireConfetti(origin?: { x: number; y: number }) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !useFeedback.getState().celebrationsEnabled) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   const instance = ensureCanvas();

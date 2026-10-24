@@ -7,26 +7,18 @@ import { Button } from "@/components/ui/button";
 import {
   ChartNoAxesCombined,
   Clock3,
-  CircleCheck,
   BookOpen,
-  Code2,
   TrendingUp,
   Brain,
-  Calendar,
   Sparkles,
   Download,
   Flame,
-  CheckCircle2,
   ArrowRight,
   ArrowUpRight,
   Layers,
   Sun,
   Moon,
   Zap,
-  Target,
-  FileText,
-  Activity as ActivityIcon,
-  Check,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import {
@@ -35,15 +27,12 @@ import {
   completion,
   streak,
   longestStreak,
-  timestamp,
-  cn,
 } from "@/lib/utils";
 import { format, subDays } from "date-fns";
 import { ActivityChart } from "./activity-chart";
 import { LearningLandscape } from "./learning-landscape";
 import {
   LearningMix,
-  CourseComparison,
   WeekdayRhythm,
 } from "./progress-charts";
 import { weekdayData } from "@/lib/analytics";
@@ -111,7 +100,7 @@ export function Analytics() {
     (n) => n.timestamp_seconds > 0,
   ).length;
   const reviewedNotes = allNotes.filter(
-    (n) => (n as any).needs_revision === false,
+    (n) => !n.is_revision_required,
   ).length;
 
   // 3. Active vs. Passive Learning Balance

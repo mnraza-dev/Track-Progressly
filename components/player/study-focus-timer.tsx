@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Clock,
   Play,
@@ -9,18 +9,18 @@ import {
   Plus,
   Volume2,
   VolumeX,
-  Sparkles,
   ChevronUp,
   ChevronDown,
-  Flame,
   CheckCircle2,
   EyeOff,
   Zap,
 } from "lucide-react";
+import { useFeedback } from "@/stores/feedback";
+import { unlockAudio, playFeedbackSound } from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { fireConfetti } from "@/lib/confetti";
 import { useWorkspace } from "@/stores/workspace";
-import { duration, localDay, cn } from "@/lib/utils";
+import { localDay, cn } from "@/lib/utils";
 import type { PlayerHandle } from "./youtube-player";
 
 import {
@@ -35,63 +35,14 @@ type StudyFocusTimerProps = {
   defaultOpen?: boolean;
 };
 
-function playCompletionChime() {
-  if (typeof window === "undefined") return;
-  try {
-    const AudioCtx =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    const now = ctx.currentTime;
-
-    // Chime note 1 (E5 - 659.25Hz)
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = "sine";
-    osc1.frequency.setValueAtTime(659.25, now);
-    gain1.gain.setValueAtTime(0.18, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.6);
-
-    // Chime note 2 (G#5 - 830.61Hz)
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = "sine";
-    osc2.frequency.setValueAtTime(830.61, now + 0.18);
-    gain2.gain.setValueAtTime(0.2, now + 0.18);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.start(now + 0.18);
-    osc2.stop(now + 0.9);
-
-    // Chime note 3 (B5 - 987.77Hz)
-    const osc3 = ctx.createOscillator();
-    const gain3 = ctx.createGain();
-    osc3.type = "sine";
-    osc3.frequency.setValueAtTime(987.77, now + 0.38);
-    gain3.gain.setValueAtTime(0.22, now + 0.38);
-    gain3.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-    osc3.connect(gain3);
-    gain3.connect(ctx.destination);
-    osc3.start(now + 0.38);
-    osc3.stop(now + 1.4);
-  } catch {}
-}
-
 export function StudyFocusTimer({
   isVideoPlaying,
   playerRef,
   className,
-  defaultOpen = true,
 }: StudyFocusTimerProps) {
   const { data, notify } = useWorkspace();
-  const [mounted, setMounted] = useState(false);
+  const { soundEnabled, setSoundEnabled } = useFeedback();
+  const toggleSound = () => { setSoundEnabled(!soundEnabled); if (!soundEnabled) void unlockAudio(); };
 
   // Persistent Zustand Store
   const {
@@ -99,20 +50,14 @@ export function StudyFocusTimer({
     remainingSeconds,
     sessionFocusSeconds,
     isCompleted,
-    soundEnabled,
     isExpanded,
     selectPreset: setTargetPreset,
     tickSecond,
     resetTimer,
     addFiveMinutes,
-    toggleSound,
     toggleExpanded,
     setCompleted,
   } = useFocusTimerStore();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Tab visibility state
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => {
@@ -154,7 +99,7 @@ export function StudyFocusTimer({
     setCompleted(true);
     fireConfetti();
     if (soundEnabled) {
-      playCompletionChime();
+      playFeedbackSound("focus", true);
     }
     notify(
       `🎉 Focus sprint completed! You logged a focused ${Math.round(targetSeconds / 60)}m study session!`,
