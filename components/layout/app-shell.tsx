@@ -1,6 +1,8 @@
 "use client";
+
 import { ExportDialog } from "@/components/exports/export-dialog";
 import { RewardFeedback } from "@/components/gamification/reward-feedback";
+import { AppLoader } from "@/components/ui/app-loader";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -301,17 +303,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Button onClick={() => void load()}>Try again</Button>
             </div>
           ) : !loaded ? (
-            <div className="page-skeleton">
-              <div />
-              <div />
-              <section>
-                <div />
-                <div />
-                <div />
-                <div />
-              </section>
-              <div />
-            </div>
+            <AppLoader message="Opening your learning studio..." />
           ) : (
             children
           )}
