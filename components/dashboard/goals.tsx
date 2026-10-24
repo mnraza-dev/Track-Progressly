@@ -144,9 +144,9 @@ export function Goals() {
                 <div className="panel-heading">
                   <span className="goal-icon">
                     {g.goal_type === "daily_videos" ? (
-                      <Play size={21} />
+                      <Play size={28} fill="currentColor" />
                     ) : (
-                      <Target size={21} />
+                      <Target size={28} />
                     )}
                   </span>
                   <button
@@ -298,7 +298,7 @@ export function Goals() {
               className="panel milestone"
             >
               <span className="goal-icon">
-                <Target size={19} />
+                <Target size={28} />
               </span>
               <div>
                 <h3>{c.title}</h3>
