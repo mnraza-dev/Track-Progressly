@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useId,
+  type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
 import type { SceneKind, SceneOptions, SceneRegistration } from "./types";
@@ -99,6 +100,7 @@ export function SceneArtwork({
   selected,
   className,
   label,
+  fallback,
 }: {
   kind: SceneKind;
   progress?: number;
@@ -107,6 +109,7 @@ export function SceneArtwork({
   selected?: number;
   className?: string;
   label: string;
+  fallback?: ReactNode;
 }) {
   const context = useContext(SceneContext);
   const element = useRef<HTMLDivElement>(null);
@@ -140,9 +143,13 @@ export function SceneArtwork({
       }}
     >
       <div className="scene-fallback" aria-hidden="true">
-        <span />
-        <span />
-        <span />
+        {fallback ?? (
+          <>
+            <span />
+            <span />
+            <span />
+          </>
+        )}
       </div>
       {interactive && (
         <button

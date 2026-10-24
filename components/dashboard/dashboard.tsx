@@ -10,10 +10,7 @@ import {
   ArrowUpRight,
   ArrowRight,
   BookOpen,
-  Clock3,
-  CircleCheck,
   CheckCircle2,
-  Flame,
   Play,
   Link2,
   Check,
@@ -45,6 +42,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CourseCard } from "@/components/courses/course-card";
 import { MomentumHeatmap } from "@/components/dashboard/momentum-heatmap";
+import {
+  StudyIllustration,
+  type StudyIllustrationKind,
+} from "@/components/dashboard/study-illustration";
 import { LearningOverview } from "@/components/analytics/learning-overview";
 import { isConnected } from "@/lib/supabase/client";
 import { SceneArtwork } from "@/components/three/scene-provider";
@@ -338,10 +339,9 @@ export function Dashboard() {
       {/* Enriched Stats Grid */}
       <section className="stats-grid" data-tour="stats-grid">
         <Stat
-          icon={<Clock3 size={18} />}
+          illustration="focus"
           label="Learning today"
           value={learningTime(todayMinutes, true)}
-          color="orange"
           detail={
             todayMinutes >= dailyGoal
               ? "Daily goal reached"
@@ -350,10 +350,9 @@ export function Dashboard() {
           index="01"
         />
         <Stat
-          icon={<CircleCheck size={18} />}
+          illustration="lessons"
           label="Lessons & Chapters"
           value={videoCount}
-          color="green"
           detail={
             totalCompletedChapters > 0
               ? `${totalCompletedChapters} chapters finished`
@@ -362,14 +361,13 @@ export function Dashboard() {
           index="02"
         />
         <Stat
-          icon={<CheckCircle2 size={18} />}
+          illustration="practice"
           label="Practice tasks done"
           value={
             allPracticeTasks.length
               ? `${completedTasksCount} / ${allPracticeTasks.length}`
               : "0"
           }
-          color="blue"
           detail={
             pendingTasks.length
               ? `${pendingTasks.length} pending action items`
@@ -378,7 +376,7 @@ export function Dashboard() {
           index="03"
         />
         <Stat
-          icon={<Flame size={18} />}
+          illustration="streak"
           label="Current streak"
           value={
             <>
@@ -386,7 +384,6 @@ export function Dashboard() {
               <small>{days === 1 ? "day" : "days"}</small>
             </>
           }
-          color="orange"
           detail={
             bestStreak > days
               ? `Best streak: ${bestStreak} days`
@@ -842,10 +839,13 @@ export function Dashboard() {
 
             {allPracticeTasks.length === 0 && (
               <div className="practice-empty-state">
-                <ListTodo size={28} className="empty-state-icon" />
+                <StudyIllustration
+                  kind="practice"
+                  className="empty-study-illustration"
+                />
                 <p>
-                  <strong>No practice tasks yet.</strong> Add hands-on exercises
-                  while watching lessons to turn tutorials into real skills.
+                  <strong>No practice tasks yet.</strong> Add an exercise from
+                  any lesson.
                 </p>
                 <Link href="/courses" className="text-link">
                   Open a course to start
@@ -858,11 +858,12 @@ export function Dashboard() {
               pendingTasks.length === 0 &&
               taskFilter === "pending" && (
                 <div className="practice-celebrate-state">
-                  <CheckCircle2 size={32} className="celebrate-icon" />
+                  <StudyIllustration
+                    kind="streak"
+                    className="empty-study-illustration"
+                  />
                   <p>
                     <strong>All practice tasks completed!</strong>
-                    <br />
-                    Outstanding work following through on your exercises.
                   </p>
                   <button
                     onClick={() => setTaskFilter("all")}
@@ -928,12 +929,14 @@ export function Dashboard() {
 
             {revisionNotes.length === 0 && (
               <div className="revision-empty-state">
-                <Sparkles size={28} className="empty-state-icon" />
+                <StudyIllustration
+                  kind="lessons"
+                  className="empty-study-illustration"
+                />
                 <p>
-                  <strong>All caught up on revisions!</strong>
+                  <strong>No notes to review.</strong>
                   <br />
-                  Flag notes with the revision tag during study to revisit
-                  critical concepts here.
+                  Flag a note while studying to review it here.
                 </p>
                 <Link href="/notes" className="text-link">
                   Browse your notes library
@@ -1080,25 +1083,23 @@ export function Dashboard() {
 }
 
 function Stat({
-  icon,
+  illustration,
   label,
   value,
-  color,
   detail,
   index,
 }: {
-  icon: React.ReactNode;
+  illustration: StudyIllustrationKind;
   label: string;
   value: React.ReactNode;
-  color: string;
   detail: string;
   index: string;
 }) {
   return (
-    <Card className="stat-card gap-0">
+    <Card className="stat-card stat-card-illustrated gap-0">
       <div className="stat-top">
         <span>{label}</span>
-        <span className={`stat-icon ${color}`}>{icon}</span>
+        <StudyIllustration kind={illustration} className="stat-illustration" />
       </div>
       <div className="stat-value">{value}</div>
       <div className="stat-bottom">

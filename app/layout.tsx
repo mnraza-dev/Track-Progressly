@@ -7,6 +7,7 @@ import "./product.css";
 import "./chai.css";
 import "./rewards.css";
 import "./quiz.css";
+import "./illustrations.css";
 import { SceneProvider } from "@/components/three/scene-provider";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { TourProvider } from "@/components/tour/tour-context";

@@ -1,0 +1,59 @@
+@layer components {
+  .study-illustration {
+    position: relative;
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+  .study-illustration::before {
+    content: "";
+    position: absolute;
+    inset: 12%;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse,
+      color-mix(in srgb, var(--brand-accent) 14%, transparent),
+      transparent 72%
+    );
+  }
+  .study-illustration-fallback {
+    width: 52%;
+    height: 52%;
+    color: var(--brand-accent);
+  }
+  .stat-card-illustrated .stat-top {
+    min-height: 48px;
+    gap: 8px;
+  }
+  .stat-card-illustrated .stat-top > span {
+    min-width: 0;
+    line-height: 1.4;
+  }
+  .stat-illustration {
+    width: 76px;
+    height: 68px;
+    margin: -10px -10px -10px 0;
+  }
+  .stat-card-illustrated .stat-value {
+    margin: 10px 0 12px;
+  }
+  .empty-study-illustration {
+    width: 112px;
+    height: 84px;
+  }
+  .practice-empty-state,
+  .revision-empty-state,
+  .practice-celebrate-state {
+    padding: 20px 16px;
+    gap: 8px;
+  }
+  @media (max-width: 760px) {
+    .stat-illustration {
+      width: 58px;
+      height: 58px;
+      margin: -6px -6px -6px 0;
+    }
+    .stat-card-illustrated .stat-top {
+      font-size: 12px;
+    }
+  }
+}
