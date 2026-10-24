@@ -781,24 +781,25 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
     pointer-events: none;
     z-index: 3;
   }
   .goal-ring-value strong {
     color: var(--foreground);
-    font-size: 35px;
+    font-size: 32px;
     font-weight: 550;
     letter-spacing: -1px;
+    line-height: 1.15;
+    white-space: nowrap;
   }
-  .goal-ring-value strong > span {
-    font-size: 15px;
+  .goal-ring-value > span {
+    font-size: 13px;
     color: var(--muted-foreground);
     letter-spacing: 0;
-  }
-  .goal-ring-value small {
-    font-size: 12px;
-    color: var(--muted-foreground);
-    margin-top: 3px;
+    line-height: 1.4;
   }
   .goal-encouragement {
     text-align: center;

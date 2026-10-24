@@ -283,7 +283,7 @@ export function Landing() {
                 <Check size={15} /> Practice tracked alongside watching
               </li>
             </ul>
-            <Link href="/analytics" className="product-quiet-link">
+            <Link href="/dashboard#learning-overview" className="product-quiet-link">
               Find your rhythm <ArrowUpRight size={16} />
             </Link>
           </div>

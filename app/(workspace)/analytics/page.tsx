@@ -1,6 +1,5 @@
-import { Analytics } from "@/components/analytics/analytics";
-// Workspace data is loaded in the browser; navigation waits for its private state.
-export const instant = false;
+import { redirect } from "next/navigation";
+
 export default function Page() {
-  return <Analytics />;
+  redirect("/dashboard#learning-overview");
 }

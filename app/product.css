@@ -3700,112 +3700,66 @@
   flex-wrap: wrap;
 }
 
-/* ==========================================================================
-   Dashboard Analytics Spotlight Card
-   ========================================================================== */
-.dashboard-analytics-spotlight {
+/* Dashboard learning overview */
+.learning-overview {
+  margin-top: 28px;
+  scroll-margin-top: 90px;
+}
+
+.learning-overview-heading {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 24px 28px;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--primary) 10%, var(--card)),
-    var(--card)
-  );
-  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--border));
-  border-radius: 14px;
-  margin: 24px 0 16px;
-  flex-wrap: wrap;
-}
-
-.analytics-spotlight-left {
-  flex: 1;
-  min-width: 280px;
-}
-
-.analytics-spotlight-kicker {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-family: var(--font-geist-mono), monospace;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--primary);
-  margin-bottom: 6px;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
-.dashboard-analytics-spotlight h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--foreground);
-  margin: 0 0 6px;
+.learning-overview-heading h2 {
+  font-size: 22px;
+  font-weight: 550;
+  letter-spacing: -0.5px;
 }
 
-.dashboard-analytics-spotlight p {
+.learning-overview-heading p {
+  color: var(--muted-foreground);
   font-size: 13px;
-  color: var(--muted-foreground);
-  max-width: 620px;
-  margin: 0 0 16px;
-  line-height: 1.5;
+  margin-top: 5px;
 }
 
-.analytics-spotlight-metrics {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+.learning-overview > .dashboard-panels {
+  margin-top: 0;
+  align-items: start;
 }
 
-.spotlight-metric-pill {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  background: color-mix(in srgb, var(--muted) 40%, var(--card));
-  border: 1px solid var(--border);
-  padding: 4px 10px;
-  border-radius: 6px;
+.learning-overview .analytics-main-chart > .tabs {
+  max-width: 100%;
 }
 
-.spotlight-metric-pill strong {
+.learning-overview-details {
+  margin-top: 20px;
+}
+
+.learning-overview-details > summary {
+  width: fit-content;
+  min-height: 44px;
+  padding: 12px 0;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--foreground);
+  cursor: pointer;
 }
 
-.spotlight-metric-pill span {
-  font-size: 11px;
-  color: var(--muted-foreground);
+.learning-overview-details > summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
-.analytics-spotlight-right {
-  display: flex;
-  align-items: center;
-}
-
-.explore-analytics-btn {
-  gap: 8px;
-  font-weight: 600;
-}
-
-/* ==========================================================================
-   Analytics & Diagnostics Studio Page
-   ========================================================================== */
-.analytics-page-root {
-  display: flex;
-  flex-direction: column;
+.learning-overview-breakdowns {
+  display: grid;
   gap: 20px;
-  padding-bottom: 40px;
-}
-
-.analytics-page-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  flex-wrap: wrap;
+  padding-top: 12px;
 }
 
 .analytics-header-actions {
@@ -3834,221 +3788,10 @@
   }
 }
 
-/* Velocity & Forecast Card */
-.velocity-forecast-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.velocity-tag-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: var(--font-geist-mono), monospace;
-  background: color-mix(in srgb, var(--primary) 12%, transparent);
-  color: var(--primary);
-  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
-  padding: 3px 8px;
-  border-radius: 5px;
-}
-
-.velocity-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 10px;
-}
-
-.velocity-metrics-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-@media (max-width: 600px) {
-  .velocity-metrics-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-.velocity-metric-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--muted) 28%, var(--card));
-  border: 1px solid var(--border);
-}
-
-.velocity-metric-label {
-  font-size: 11px;
-  color: var(--muted-foreground);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.velocity-metric-val {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--foreground);
-  display: flex;
-  flex-direction: column;
-}
-
-.velocity-metric-val span {
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--muted-foreground);
-}
-
-.forecast-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--primary) 7%, var(--card));
-  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
-}
-
-.forecast-banner strong {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--foreground);
-  margin-bottom: 2px;
-}
-
-.forecast-banner p {
-  font-size: 12px;
-  color: var(--muted-foreground);
-  margin: 0;
-  line-height: 1.45;
-}
-
-/* Retention & Cognitive Engagement Card */
-.retention-balance-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.retention-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 10px;
-}
-
-.retention-score-strip {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.retention-score-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--foreground);
-}
-
-.retention-score-label strong {
-  font-size: 15px;
-  color: var(--primary);
-  font-family: var(--font-geist-mono), monospace;
-}
-
-.retention-progress-bar {
-  height: 8px;
-  width: 100%;
-  border-radius: 999px;
-  background: var(--muted);
-  overflow: hidden;
-}
-
-.retention-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #f97316, var(--primary), #10b981);
-  transition: width 0.4s ease;
-}
-
-.retention-breakdown-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-@media (max-width: 600px) {
-  .retention-breakdown-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.retention-breakdown-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--muted) 28%, var(--card));
-  border: 1px solid var(--border);
-}
-
-.retention-item-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.retention-item-dot.watch {
-  background: #a855f7;
-}
-
-.retention-item-dot.practice {
-  background: #3b82f6;
-}
-
-.retention-item-dot.notes {
-  background: #f97316;
-}
-
-.retention-breakdown-item div {
-  display: flex;
-  flex-direction: column;
-}
-
-.retention-breakdown-item strong {
-  font-size: 13px;
-  color: var(--foreground);
-}
-
-.retention-breakdown-item span {
-  font-size: 11px;
-  color: var(--muted-foreground);
-}
-
-.retention-insight-box {
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--muted) 40%, var(--card));
-  border: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--muted-foreground);
-  line-height: 1.45;
-}
-
 /* Category Mastery Matrix */
 .category-mastery-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: 14px;
   margin-top: 14px;
 }
@@ -4120,47 +3863,6 @@
   text-transform: uppercase;
 }
 
-/* Circadian & Rhythm Extra */
-.rhythm-container-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.rhythm-extra-summary {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.rhythm-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--muted-foreground);
-  background: color-mix(in srgb, var(--muted) 40%, var(--card));
-  border: 1px solid var(--border);
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-
-.rhythm-pill strong {
-  color: var(--foreground);
-}
-
-.rhythm-pill.highlight {
-  border-color: color-mix(in srgb, #f97316 35%, var(--border));
-  background: color-mix(in srgb, #f97316 8%, var(--card));
-}
-
-.learning-landscape-analytics-container {
-  width: 100%;
-}
-
 /* Course Diagnostics Matrix */
 .course-diagnostics-panel {
   display: flex;
@@ -4192,8 +3894,8 @@
 }
 
 .course-diag-main {
-  flex: 1;
-  min-width: 240px;
+  flex: 1 1 240px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;

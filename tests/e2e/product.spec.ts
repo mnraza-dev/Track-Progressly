@@ -98,12 +98,12 @@ test("product tour uses isolated data and keeps both themes readable", async ({
       quality: 90,
       animations: "disabled",
     });
-    await page.goto("/analytics");
+    await page.goto("/dashboard#learning-overview");
     await page.addStyleTag({
       content: "nextjs-portal { visibility: hidden !important; }",
     });
     await page
-      .getByRole("combobox", { name: "Analytics period" })
+      .getByRole("combobox", { name: "Learning period" })
       .selectOption("7");
     await expect(page.locator(".recharts-area")).toBeVisible();
     await page.screenshot({

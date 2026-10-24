@@ -10,10 +10,8 @@ import {
   LayoutDashboard,
   BookOpen,
   StickyNote,
-  ChartNoAxesCombined,
   Target,
   Settings,
-  ArrowUpRight,
   Plus,
   Search,
   ChevronDown,
@@ -46,7 +44,6 @@ const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My courses", href: "/courses", icon: BookOpen },
   { label: "My notes", href: "/notes", icon: StickyNote },
-  { label: "Analytics", href: "/analytics", icon: ChartNoAxesCombined },
   { label: "Learning goals", href: "/goals", icon: Target },
 ];
 export function Logo() {
@@ -171,19 +168,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="sidebar-inspiration">
-            <span className="inspiration-icon">
-              <Sparkles size={19} />
-            </span>
-            <strong>
-              A daily practice.
-              <br />A different perspective.
-            </strong>
-            <p>Make time for one good lesson.</p>
-            <Link href="/goals">
-              Set a learning goal <ArrowUpRight size={15} />
-            </Link>
-          </div>
           <Link
             href="/settings"
             className={cn("nav-item", pathname === "/settings" && "active")}

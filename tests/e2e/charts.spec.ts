@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { chartWorkspace } from "../fixtures/workspace";
 
-test("real activity powers chart views, lesson segments, and the interactive 3D timeline", async ({
+test("dashboard learning overview shows real activity, lesson status, and course progress", async ({
   page,
 }, testInfo) => {
   const errors: string[] = [];
@@ -12,8 +12,9 @@ test("real activity powers chart views, lesson segments, and the interactive 3D 
     chartWorkspace(),
   );
   await page.goto("/analytics");
+  await expect(page).toHaveURL(/\/dashboard#learning-overview$/);
   await page
-    .getByRole("combobox", { name: "Analytics period" })
+    .getByRole("combobox", { name: "Learning period" })
     .selectOption("7");
   const activity = page.locator('[data-chart="activity"]');
   await expect(activity.locator(".recharts-area")).toBeVisible();
@@ -35,12 +36,14 @@ test("real activity powers chart views, lesson segments, and the interactive 3D 
     path: `test-results/charts-analytics-${testInfo.project.name}.png`,
     animations: "disabled",
   });
-  await expect(page.locator('[data-chart="course-comparison"]')).toBeVisible();
-  await expect(page.locator(".course-chart-links")).toContainText("33%");
-  await expect(page.locator(".course-chart-links")).toContainText("25%");
-  await expect(page.locator(".course-chart-links")).not.toContainText(
-    "Archived course",
-  );
+  await expect(
+    page.getByRole("link", { name: "Analytics", exact: true }),
+  ).toHaveCount(0);
+  await page.getByText("More insights", { exact: true }).click();
+  const courses = page.locator(".course-diag-cards-list");
+  await expect(courses).toContainText("33%");
+  await expect(courses).toContainText("25%");
+  await expect(courses).not.toContainText("Archived course");
   const mix = page.locator(".learning-mix-panel");
   await mix.scrollIntoViewIfNeeded();
   await expect(mix.locator(".donut-center strong")).toHaveText("10");
@@ -49,30 +52,10 @@ test("real activity powers chart views, lesson segments, and the interactive 3D 
     .click();
   await expect(mix.locator(".donut-center strong")).toHaveText("3");
   await expect(mix.locator(".donut-center span")).toHaveText("Completed");
-  const landscape = page.locator(".landscape-panel");
-  await landscape.scrollIntoViewIfNeeded();
-  await expect(
-    landscape.locator('[data-three-scene="timeline"]'),
-  ).toHaveAttribute("data-three-state", "ready", { timeout: 20000 });
-  await expect(landscape.locator(".landscape-copy > strong")).toContainText(
-    "1h 50m",
-  );
-  await landscape.getByRole("button", { name: /45 Minutes$/ }).click();
-  await expect(landscape.locator(".landscape-footer strong")).toHaveText(
-    "45 Minutes",
-  );
-  await landscape.getByRole("button", { name: "Lessons", exact: true }).click();
-  await expect(landscape.locator(".landscape-copy > strong")).toContainText(
-    "5",
-  );
-  await expect(landscape.locator(".landscape-footer strong")).toHaveText(
-    "2 lessons",
-  );
-  await landscape.locator('[data-three-scene="timeline"]').focus();
-  await page.keyboard.press("ArrowRight");
-  await landscape.getByRole("button", { name: "Reset 3D view" }).click();
+  await page.getByText("View weekday data", { exact: true }).click();
+  await expect(page.locator(".rhythm-panel table")).toContainText("45 Minutes");
   await page.screenshot({
-    path: `test-results/charts-dimension-${testInfo.project.name}.png`,
+    path: `test-results/dashboard-insights-${testInfo.project.name}.png`,
     animations: "disabled",
   });
   expect(
@@ -127,15 +110,12 @@ test("empty charts keep their real zero values when WebGL is unavailable", async
     "fallback",
     { timeout: 20000 },
   );
-  const landscape = page.locator(".landscape-panel");
-  await landscape.scrollIntoViewIfNeeded();
-  await expect(landscape.locator(".scene-fallback")).toBeVisible();
-  await expect(landscape.locator(".landscape-copy > strong")).toContainText(
-    "0",
+  await expect(page.locator(".goal-ring-value strong")).toHaveText("0m");
+  await expect(page.locator(".goal-ring-value > span")).toHaveText(
+    "of 30m goal",
   );
-  await landscape.getByRole("button", { name: "Lessons", exact: true }).click();
-  await expect(landscape.locator(".landscape-footer strong")).toHaveText(
-    "0 lessons",
-  );
+  await page.getByText("More insights", { exact: true }).click();
   await expect(page.locator(".donut-center strong")).toHaveText("0");
+  await page.getByText("View weekday data", { exact: true }).click();
+  await expect(page.locator(".rhythm-panel table")).toContainText("0 Minutes");
 });

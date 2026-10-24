@@ -242,10 +242,4 @@
   .quiz-actions button {
     flex-grow: 1;
   }
-  .goal-ring-value strong {
-    font-size: 20px;
-  }
-  .goal-ring-value strong span {
-    font-size: 14px;
-  }
 }

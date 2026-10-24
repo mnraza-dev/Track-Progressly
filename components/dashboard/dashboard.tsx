@@ -13,7 +13,6 @@ import {
   CircleCheck,
   CheckCircle2,
   Flame,
-  ChevronDown,
   Play,
   Link2,
   Check,
@@ -23,7 +22,6 @@ import {
   Circle,
   Trophy,
   Target,
-  ChartNoAxesCombined,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useWorkspace } from "@/stores/workspace";
@@ -48,8 +46,7 @@ import { useTour } from "@/components/tour/tour-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CourseCard } from "@/components/courses/course-card";
-import { ActivityChart } from "@/components/analytics/activity-chart";
-import { dailySeries } from "@/lib/analytics";
+import { LearningOverview } from "@/components/analytics/learning-overview";
 import { isConnected } from "@/lib/supabase/client";
 import { SceneArtwork } from "@/components/three/scene-provider";
 import { ProductStage } from "@/components/three/product-stage";
@@ -59,7 +56,6 @@ export function Dashboard() {
   const { data, mutate, notify } = useWorkspace();
   const { startTour } = useTour();
   const router = useRouter();
-  const [period, setPeriod] = useState(7);
   const [now] = useState(() => new Date());
   const [link, setLink] = useState("");
   const [taskFilter, setTaskFilter] = useState<"pending" | "all">("pending");
@@ -103,7 +99,6 @@ export function Dashboard() {
     0,
   );
 
-  const seconds = activity.reduce((n, a) => n + a.active_seconds, 0);
   const days = streak(activity, profile.timezone, profile.weekend_rest);
   const bestStreak = longestStreak(activity);
 
@@ -362,7 +357,6 @@ export function Dashboard() {
               : "A good day to learn"}
             <span className="heading-period">.</span>
           </h1>
-          <p>Everything you’re learning, practicing, and remembering.</p>
         </div>
         <div className="heading-actions">
           <Button
@@ -1121,151 +1115,47 @@ export function Dashboard() {
         </div>
       )}
 
-      {/* Analytics & Intention Panels */}
-      <div className="dashboard-panels">
-        <section className="panel activity-panel">
-          <div className="panel-heading">
-            <div>
-              <span className="section-index">SHOWING UP, OVER TIME</span>
-              <h2>Learning activity</h2>
+      <LearningOverview
+        dailyIntention={
+          <section
+            className="panel daily-goal-panel"
+            aria-labelledby="daily-intention-title"
+          >
+            <div className="panel-heading">
+              <div>
+                <h2 id="daily-intention-title">Your daily intention</h2>
+              </div>
+              <span className="goal-day-tag">TODAY</span>
             </div>
-            <label className="compact-select">
-              <select
-                aria-label="Activity period"
-                value={period}
-                onChange={(e) => setPeriod(Number(e.target.value))}
-              >
-                <option value={7}>This week</option>
-                <option value={30}>Last 30 days</option>
-              </select>
-              <ChevronDown size={13} />
-            </label>
-          </div>
-          <div className="activity-summary">
-            <strong>
-              {learningTime(
-                Math.round(
-                  dailySeries(
-                    activity,
-                    localDay(now, profile.timezone),
-                    period,
-                  ).reduce((n, day) => n + day.minutes, 0),
-                ),
-                true,
-              )}
-              <span>of focus</span>
-            </strong>
-            <span className="activity-summary-caption">
-              <span className="legend-dot" />
-              Learning time
-            </span>
-          </div>
-          <ActivityChart
-            activity={activity}
-            timezone={profile.timezone}
-            days={period}
-          />
-          {!activity.length && (
-            <div className="chart-empty-caption">
-              Your first session will bring this chart to life.
+            <div className="goal-ring">
+              <SceneArtwork
+                kind="goal"
+                progress={Math.min(1, todayMinutes / dailyGoal)}
+                label={`Daily learning goal: ${learningTime(todayMinutes)} of ${learningTime(dailyGoal)} completed`}
+              />
+              <div className="goal-ring-value">
+                <strong>{learningTime(todayMinutes, true)}</strong>
+                <span>of {learningTime(dailyGoal, true)} goal</span>
+              </div>
             </div>
-          )}
-        </section>
-
-        <section className="panel daily-goal-panel">
-          <div className="panel-heading">
-            <div>
-              <span className="section-index">A LITTLE, EVERY DAY</span>
-              <h2>Your daily intention</h2>
-            </div>
-            <span className="goal-day-tag">TODAY</span>
-          </div>
-          <div className="goal-ring">
-            <SceneArtwork
-              kind="goal"
-              progress={Math.min(1, todayMinutes / dailyGoal)}
-              label={`Daily learning goal: ${learningTime(todayMinutes)} of ${learningTime(dailyGoal)} completed`}
-            />
-            <div className="goal-ring-value">
-              <strong>
-                {learningTime(todayMinutes)}
-                <span> / {learningTime(dailyGoal)}</span>
-              </strong>
-              <small>today</small>
-            </div>
-          </div>
-          <div className="goal-encouragement">
-            {todayMinutes >= dailyGoal
-              ? "You made the time. Well done."
-              : "A small commitment. A real difference."}
-          </div>
-          <Link href="/goals" className="goal-edit-link">
-            {data.goals.length ? "Adjust your goals" : "Set your intention"}
-            <ArrowUpRight size={15} />
-          </Link>
-        </section>
-      </div>
-
-      {/* Deep Analytics Discovery Spotlight */}
-      <section className="panel dashboard-analytics-spotlight">
-        <div className="analytics-spotlight-left">
-          <div className="analytics-spotlight-kicker">
-            <ChartNoAxesCombined size={15} />
-            <span>DEEP STUDY DIAGNOSTICS</span>
-          </div>
-          <h3>Curious about your pace, practice, and course progress?</h3>
-          <p>
-            Explore circadian rhythm analysis, active vs. passive learning
-            ratios, course completion forecasts, and category breakdowns in your
-            dedicated analytics space.
-          </p>
-          <div className="analytics-spotlight-metrics">
-            <div className="spotlight-metric-pill">
-              <strong>{duration(seconds)}</strong>
-              <span>all-time focus</span>
-            </div>
-            <div className="spotlight-metric-pill">
-              <strong>
-                {
-                  courses.flatMap((c) => c.videos.flatMap((v) => v.notes))
-                    .length
-                }
-              </strong>
-              <span>notes written</span>
-            </div>
-            <div className="spotlight-metric-pill">
-              <strong>{days}d</strong>
-              <span>streak momentum</span>
-            </div>
-          </div>
-        </div>
-        <div className="analytics-spotlight-right">
-          <Button asChild className="explore-analytics-btn">
-            <Link href="/analytics">
-              Open Full Analytics Hub
-              <ArrowRight size={15} />
+            <Link href="/goals" className="goal-edit-link">
+              {data.goals.length ? "Adjust your goals" : "Set your intention"}
+              <ArrowUpRight size={15} />
             </Link>
-          </Button>
-        </div>
-      </section>
+          </section>
+        }
+      />
 
       {!isConnected && (
         <div className="local-mode-banner">
           <span className="local-dot" />
-          <span>
-            <strong>Personal. Local. Yours.</strong> Your work is saved in this
-            browser. Come back here to pick up where you left off.
-          </span>
+          <span>Saved in this browser.</span>
           <Link href="/settings">
             Workspace settings
             <ArrowUpRight size={14} />
           </Link>
         </div>
       )}
-
-      <div className="dashboard-bottom-note">
-        <span className="little-star">✳</span>Less collecting. More completing.
-      </div>
 
       <AchievementsDialog
         open={achievementsOpen}

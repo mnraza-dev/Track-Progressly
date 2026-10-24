@@ -73,7 +73,8 @@ test("manual course, completion, notes, practice and reload persistence", async 
   await expect(
     page.getByRole("heading", { name: "Daily learning time" }),
   ).toBeVisible();
-  await page.goto("/analytics");
+  await page.goto("/dashboard#learning-overview");
+  await page.getByText("More insights", { exact: true }).click();
   await expect(
     page
       .locator(".course-diag-card")

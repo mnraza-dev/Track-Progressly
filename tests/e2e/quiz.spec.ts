@@ -189,5 +189,7 @@ test("authors a custom quiz, validates options, edits version and keeps responsi
     ),
   ).toBe(false);
   await page.goto("/dashboard");
-  await expect(page.locator(".goal-ring-value")).toContainText("1 Hour");
+  await expect(page.locator(".goal-ring-value > span")).toHaveText(
+    "of 1h goal",
+  );
 });
