@@ -1042,11 +1042,36 @@ export function Dashboard() {
               <span className="goal-day-tag">TODAY</span>
             </div>
             <div className="goal-ring">
-              <SceneArtwork
-                kind="goal"
-                progress={Math.min(1, todayMinutes / dailyGoal)}
-                label={`Daily learning goal: ${learningTime(todayMinutes)} of ${learningTime(dailyGoal)} completed`}
-              />
+              <svg
+                className="daily-intention-ring"
+                viewBox="0 0 200 200"
+                role="img"
+                aria-label={`Daily learning goal: ${learningTime(todayMinutes)} of ${learningTime(dailyGoal)} completed`}
+              >
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="76"
+                  fill="none"
+                  stroke="var(--border)"
+                  strokeWidth="8"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="76"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  pathLength="100"
+                  strokeDasharray="100"
+                  strokeDashoffset={
+                    100 * (1 - Math.min(1, todayMinutes / dailyGoal))
+                  }
+                  transform="rotate(-90 100 100)"
+                />
+              </svg>
               <div className="goal-ring-value">
                 <strong>{learningTime(todayMinutes, true)}</strong>
                 <span>of {learningTime(dailyGoal, true)} goal</span>

@@ -2,7 +2,11 @@
   .study-illustration {
     --illustration-ink: var(--brand-accent);
     --illustration-paper: var(--card);
-    --illustration-tint: color-mix(in srgb, var(--brand-accent) 14%, var(--card));
+    --illustration-tint: color-mix(
+      in srgb,
+      var(--brand-accent) 14%,
+      var(--card)
+    );
     position: relative;
     flex-shrink: 0;
     pointer-events: none;
@@ -18,8 +22,11 @@
     border-radius: 18px;
     padding: 22px;
     background: var(--card);
+    box-shadow: none;
     border-color: color-mix(in srgb, var(--brand-accent) 12%, var(--border));
-    transition: border-color 180ms ease, background-color 180ms ease;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease;
   }
   .stat-card-illustrated:first-child {
     background: color-mix(in srgb, var(--brand-accent) 5%, var(--card));
@@ -29,7 +36,11 @@
     color: var(--brand-accent);
   }
   .stat-card-illustrated:first-child .study-illustration {
-    --illustration-paper: color-mix(in srgb, var(--brand-accent) 5%, var(--card));
+    --illustration-paper: color-mix(
+      in srgb,
+      var(--brand-accent) 5%,
+      var(--card)
+    );
   }
   .stat-card-illustrated:hover {
     transform: none;
@@ -56,7 +67,8 @@
   }
   .stat-card-illustrated .stat-bottom {
     padding-top: 12px;
-    border-top: 1px solid color-mix(in srgb, var(--brand-accent) 10%, var(--border));
+    border-top: 1px solid
+      color-mix(in srgb, var(--brand-accent) 10%, var(--border));
   }
   .stat-card-illustrated .stat-bottom p {
     font-size: 11px;
@@ -65,6 +77,17 @@
   .practice-queue-panel,
   .revision-queue-panel {
     border-radius: 18px;
+  }
+  .daily-intention-ring {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: var(--brand-accent);
+  }
+  .momentum-future {
+    background: transparent;
+    border-color: var(--border);
+    opacity: 0.45;
   }
   .practice-queue-panel > .panel-heading,
   .revision-queue-panel > .panel-heading {

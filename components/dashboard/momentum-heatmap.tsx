@@ -66,7 +66,16 @@ export function MomentumHeatmap({
                   ? 2
                   : 1;
           if (available && active) activeDays++;
-          return { date, key, available, future: time > end && time <= calendarEnd, seconds, lessons, practice, level };
+          return {
+            date,
+            key,
+            available,
+            future: time > end && time <= calendarEnd,
+            seconds,
+            lessons,
+            practice,
+            level,
+          };
         });
       },
     );
@@ -80,7 +89,11 @@ export function MomentumHeatmap({
   useEffect(() => {
     const button = buttons.current.get(today);
     const container = scroll.current;
-    if (button && container) container.scrollLeft = Math.max(0, button.offsetLeft - container.clientWidth + 48);
+    if (button && container)
+      container.scrollLeft = Math.max(
+        0,
+        button.offsetLeft - container.clientWidth + 48,
+      );
   }, [today]);
 
   const current = weeks
@@ -108,19 +121,25 @@ export function MomentumHeatmap({
           <thead>
             <tr>
               <td />
-              {weeks.map((week, index) => (
-                <th key={week[0].key} className="momentum-month" scope="col">
-                  <span>
-                    {(index === 0
-                      ? true
-                      : week[0].date.getUTCMonth() !==
-                        weeks[index - 1][0].date.getUTCMonth()) &&
-                    index < weeks.length - 1
-                      ? monthFormat.format(index === 0 ? new Date(`${MOMENTUM_START}T12:00:00Z`) : week[0].date)
-                      : ""}
-                  </span>
-                </th>
-              ))}
+              {weeks.map((week, index) => {
+                const month =
+                  index === 0
+                    ? new Date(`${MOMENTUM_START}T12:00:00Z`)
+                    : week[0].date;
+                const previousMonth =
+                  index === 1
+                    ? 9
+                    : weeks[Math.max(0, index - 1)][0].date.getUTCMonth();
+                const showMonth =
+                  index === 0 ||
+                  (month.getUTCMonth() !== previousMonth &&
+                    index < weeks.length - 1);
+                return (
+                  <th key={week[0].key} className="momentum-month" scope="col">
+                    <span>{showMonth ? monthFormat.format(month) : ""}</span>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -187,7 +206,12 @@ export function MomentumHeatmap({
                           }}
                         />
                       )}
-                      {day.future && <span className="momentum-cell momentum-future" aria-hidden="true" />}
+                      {day.future && (
+                        <span
+                          className="momentum-cell momentum-future"
+                          aria-hidden="true"
+                        />
+                      )}
                     </td>
                   );
                 })}
