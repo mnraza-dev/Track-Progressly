@@ -774,9 +774,8 @@ export function Dashboard() {
         >
           <div className="panel-heading">
             <div>
-              <span className="section-index">HANDS-ON LEARNING</span>
               <h2>
-                Practice Checklist
+                Practice
                 <span className="count-pill">{pendingTasks.length}</span>
               </h2>
             </div>
@@ -883,9 +882,8 @@ export function Dashboard() {
         >
           <div className="panel-heading">
             <div>
-              <span className="section-index">KNOWLEDGE RETENTION</span>
               <h2>
-                Notes to Review
+                Notes to review
                 <span className="count-pill">{revisionNotes.length}</span>
               </h2>
             </div>

@@ -5,6 +5,7 @@ import { learningTime, localDay } from "@/lib/utils";
 import type { Activity } from "@/types";
 
 const DAY = 86_400_000;
+const MOMENTUM_START = "2026-10-01";
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const monthFormat = new Intl.DateTimeFormat("en", {
   month: "short",
@@ -32,12 +33,13 @@ export function MomentumHeatmap({
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   const { weeks, firstDay, activeDays } = useMemo(() => {
     const end = new Date(`${today}T12:00:00Z`).getTime();
-    const first = end - 364 * DAY;
+    const first = new Date(`${MOMENTUM_START}T12:00:00Z`).getTime();
     const start = first - new Date(first).getUTCDay() * DAY;
+    const calendarEnd = Math.max(end, Date.UTC(2027, 8, 30, 12));
     const byDay = new Map(activity.map((row) => [row.day, row]));
     let activeDays = 0;
     const weeks = Array.from(
-      { length: Math.floor((end - start) / (7 * DAY)) + 1 },
+      { length: Math.floor((calendarEnd - start) / (7 * DAY)) + 1 },
       (_, week) => {
         return weekdays.map((_, day) => {
           const time = start + (week * 7 + day) * DAY;
@@ -64,7 +66,7 @@ export function MomentumHeatmap({
                   ? 2
                   : 1;
           if (available && active) activeDays++;
-          return { date, key, available, seconds, lessons, practice, level };
+          return { date, key, available, future: time > end && time <= calendarEnd, seconds, lessons, practice, level };
         });
       },
     );
@@ -76,8 +78,10 @@ export function MomentumHeatmap({
   }, [activity, today, dailyGoal]);
 
   useEffect(() => {
-    if (scroll.current) scroll.current.scrollLeft = scroll.current.scrollWidth;
-  }, []);
+    const button = buttons.current.get(today);
+    const container = scroll.current;
+    if (button && container) container.scrollLeft = Math.max(0, button.offsetLeft - container.clientWidth + 48);
+  }, [today]);
 
   const current = weeks
     .flat()
@@ -94,12 +98,12 @@ export function MomentumHeatmap({
     >
       <div className="momentum-heading">
         <h2 id="momentum-title">Learning momentum</h2>
-        <span>{activeDays} active days · past year</span>
+        <span>{activeDays} active days · since Oct 2026</span>
       </div>
       <div className="momentum-scroll" ref={scroll}>
         <table
           className="momentum-grid"
-          aria-label="Daily learning activity over the past year"
+          aria-label="Daily learning activity since October 2026"
         >
           <thead>
             <tr>
@@ -108,12 +112,11 @@ export function MomentumHeatmap({
                 <th key={week[0].key} className="momentum-month" scope="col">
                   <span>
                     {(index === 0
-                      ? weeks[1]?.[0].date.getUTCMonth() ===
-                        week[0].date.getUTCMonth()
+                      ? true
                       : week[0].date.getUTCMonth() !==
                         weeks[index - 1][0].date.getUTCMonth()) &&
                     index < weeks.length - 1
-                      ? monthFormat.format(week[0].date)
+                      ? monthFormat.format(index === 0 ? new Date(`${MOMENTUM_START}T12:00:00Z`) : week[0].date)
                       : ""}
                   </span>
                 </th>
@@ -184,6 +187,7 @@ export function MomentumHeatmap({
                           }}
                         />
                       )}
+                      {day.future && <span className="momentum-cell momentum-future" aria-hidden="true" />}
                     </td>
                   );
                 })}

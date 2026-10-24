@@ -49,7 +49,7 @@ export const DEFAULT_TOUR_STEPS: TourStep[] = [
     target: '[data-tour="weekly-consistency"]',
     title: "Your Learning Momentum",
     description:
-      "Explore your learning activity across the past year. Select a day or use the arrow keys to see its focus time, lessons, and practice.",
+      "Explore your learning activity since October 2026. Select a day or use the arrow keys to see its focus time, lessons, and practice.",
     icon: "target",
     placement: "bottom",
     badge: "04 / 07",

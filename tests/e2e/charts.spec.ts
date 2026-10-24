@@ -58,7 +58,8 @@ test("dashboard learning overview shows real activity, lesson status, and course
   await expect(mix.locator(".donut-center span")).toHaveText("Completed");
   await expect(page.locator(".rhythm-panel")).toHaveCount(0);
   const momentum = page.getByRole("region", { name: "Learning momentum" });
-  await expect(momentum.getByRole("button")).toHaveCount(365);
+  await expect(momentum.getByRole("button", { name: /^October 1, 2026:/ })).toHaveCount(1);
+  await expect(momentum.getByRole("button", { name: /^September .*2026:/ })).toHaveCount(0);
   await expect(momentum).toContainText("5 active days");
   const today = momentum.locator('[aria-current="date"]');
   await today.focus();
