@@ -36,13 +36,23 @@ type Rect = {
 };
 
 export function ProductTour() {
-  const { isOpen, currentStep, steps, nextStep, prevStep, goToStep, closeTour } =
-    useTour();
+  const {
+    isOpen,
+    currentStep,
+    steps,
+    nextStep,
+    prevStep,
+    goToStep,
+    closeTour,
+  } = useTour();
 
   const [rect, setRect] = useState<Rect | null>(null);
   const [targetFound, setTargetFound] = useState(true);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [cardPosition, setCardPosition] = useState<{ top: number; left: number }>({
+  const [cardPosition, setCardPosition] = useState<{
+    top: number;
+    left: number;
+  }>({
     top: 0,
     left: 0,
   });
@@ -57,9 +67,12 @@ export function ProductTour() {
     // Fallbacks if target element is hidden (e.g. sidebar collapsed or not present)
     if (!el) {
       if (step.id === "sidebar-nav") {
-        el = document.querySelector(".topbar") || document.querySelector("header");
+        el =
+          document.querySelector(".topbar") || document.querySelector("header");
       } else if (step.id === "resume-hero") {
-        el = document.querySelector(".dashboard-hero") || document.querySelector(".page-heading");
+        el =
+          document.querySelector(".dashboard-hero") ||
+          document.querySelector(".page-heading");
       }
     }
 
@@ -78,7 +91,13 @@ export function ProductTour() {
 
       // Scroll into view if out of viewport
       if (b.top < 0 || b.bottom > window.innerHeight) {
-        el.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+        el.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+          block: "center",
+        });
       }
 
       // Compute card position
@@ -117,7 +136,10 @@ export function ProductTour() {
       );
 
       // Fallback flip if bottom overflows viewport
-      if (placement === "bottom" && top + cardHeight > window.innerHeight - viewportPadding) {
+      if (
+        placement === "bottom" &&
+        top + cardHeight > window.innerHeight - viewportPadding
+      ) {
         top = Math.max(viewportPadding, targetRect.top - cardHeight - margin);
       }
 
@@ -177,7 +199,12 @@ export function ProductTour() {
   const progressPercent = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className="product-tour-root" role="dialog" aria-modal="true" aria-label="Product tour">
+    <div
+      className="product-tour-root"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Product tour"
+    >
       {/* Backdrop overlay */}
       <div className="tour-backdrop" onClick={closeTour} />
 
@@ -217,7 +244,8 @@ export function ProductTour() {
         <div className="tour-card-header">
           <div className="tour-badge-row">
             <span className="tour-step-badge">
-              STEP {String(currentStep + 1).padStart(2, "0")} OF {String(steps.length).padStart(2, "0")}
+              STEP {String(currentStep + 1).padStart(2, "0")} OF{" "}
+              {String(steps.length).padStart(2, "0")}
             </span>
             <span className="tour-feature-pill">TOUR</span>
           </div>
@@ -262,11 +290,7 @@ export function ProductTour() {
           </div>
 
           <div className="tour-actions">
-            <button
-              type="button"
-              className="tour-skip-btn"
-              onClick={closeTour}
-            >
+            <button type="button" className="tour-skip-btn" onClick={closeTour}>
               Skip tour
             </button>
 

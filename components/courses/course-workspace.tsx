@@ -51,8 +51,16 @@ import { VideoChapters } from "@/components/player/video-chapters";
 import { useVideoChapters } from "@/components/player/use-video-chapters";
 import { SceneArtwork } from "@/components/three/scene-provider";
 import { fireConfetti } from "@/lib/confetti";
-export function CourseWorkspace({ courseId, videoId }: { courseId: string; videoId?: string }) {
-  const course = useWorkspace((state) => state.data.courses.find((item) => item.id === courseId));
+export function CourseWorkspace({
+  courseId,
+  videoId,
+}: {
+  courseId: string;
+  videoId?: string;
+}) {
+  const course = useWorkspace((state) =>
+    state.data.courses.find((item) => item.id === courseId),
+  );
   if (!course)
     return (
       <div className="large-empty">
@@ -66,9 +74,21 @@ export function CourseWorkspace({ courseId, videoId }: { courseId: string; video
         </Button>
       </div>
     );
-  return <CourseWorkspaceContent key={`${courseId}:${videoId || "overview"}`} course={course} videoId={videoId} />;
+  return (
+    <CourseWorkspaceContent
+      key={`${courseId}:${videoId || "overview"}`}
+      course={course}
+      videoId={videoId}
+    />
+  );
 }
-function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?: string }) {
+function CourseWorkspaceContent({
+  course,
+  videoId,
+}: {
+  course: Course;
+  videoId?: string;
+}) {
   const router = useRouter();
   const { mutate, notify } = useWorkspace();
   const [query, setQuery] = useState("");
@@ -404,7 +424,8 @@ function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?:
                     aria-pressed={showChapters}
                     onClick={() => setSidebarView("chapters")}
                   >
-                    Chapters <span>{chaptersLoading ? "…" : chapters.length}</span>
+                    Chapters{" "}
+                    <span>{chaptersLoading ? "…" : chapters.length}</span>
                   </button>
                 </div>
               ) : (
@@ -447,9 +468,11 @@ function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?:
                   <p>
                     {isSingleLessonWithChapters ? (
                       <>
-                        {completedChapters} completed · {remainingChapters} to go
+                        {completedChapters} completed · {remainingChapters} to
+                        go
                         <span className="chapter-count-tag">
-                          {" "}({chapters.length} chapters)
+                          {" "}
+                          ({chapters.length} chapters)
                         </span>
                       </>
                     ) : (
@@ -579,7 +602,8 @@ function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?:
               </Button>
               {isSingleLessonWithChapters && (
                 <span className="sidebar-open-progress">
-                  {percent}% completed · {completedChapters} of {chapters.length} chapters
+                  {percent}% completed · {completedChapters} of{" "}
+                  {chapters.length} chapters
                 </span>
               )}
             </div>
@@ -592,7 +616,10 @@ function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?:
                   ref={player}
                   lesson={lesson}
                   onEnded={triggerUpNext}
-                  onPlayStateChange={(playing) => { setIsVideoPlaying(playing); useFeedback.getState().setVideoPlaying(playing); }}
+                  onPlayStateChange={(playing) => {
+                    setIsVideoPlaying(playing);
+                    useFeedback.getState().setVideoPlaying(playing);
+                  }}
                   onPositionChange={(seconds) =>
                     setPlayback((current) =>
                       current?.lessonId === lesson.id &&
@@ -616,8 +643,8 @@ function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?:
                 <span className="eyebrow">
                   {isSingleLessonWithChapters ? (
                     <>
-                      CHAPTER {Math.max(1, chapterAt(chapters, position) + 1)} OF{" "}
-                      {chapters.length} · LESSON 1 OF 1
+                      CHAPTER {Math.max(1, chapterAt(chapters, position) + 1)}{" "}
+                      OF {chapters.length} · LESSON 1 OF 1
                     </>
                   ) : (
                     <>
@@ -666,7 +693,10 @@ function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?:
                     <Save size={15} />
                     Save progress
                   </Button>
-                  <div className="playback-speed-control" title="Playback speed">
+                  <div
+                    className="playback-speed-control"
+                    title="Playback speed"
+                  >
                     <Gauge size={14} />
                     <select
                       className="playback-speed-select"
@@ -693,7 +723,8 @@ function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?:
                         : lesson.progress.status
                     }
                     onChange={(e) => {
-                      const newStatus = e.target.value as typeof lesson.progress.status;
+                      const newStatus = e.target
+                        .value as typeof lesson.progress.status;
                       if (newStatus === "completed") {
                         fireConfetti();
                         if (next) triggerUpNext();
@@ -746,7 +777,8 @@ function CourseWorkspaceContent({ course, videoId }: { course: Course; videoId?:
                     </span>
                     <h2>You finished this course!</h2>
                     <p>
-                      Every lesson and exercise completed. Your momentum is extraordinary.
+                      Every lesson and exercise completed. Your momentum is
+                      extraordinary.
                     </p>
                     <div className="trophy-actions">
                       <Button asChild size="sm" variant="outline">

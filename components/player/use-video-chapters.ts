@@ -1,5 +1,11 @@
 "use client";
-import { useEffect, useMemo, useState, useCallback, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 import type { Lesson } from "@/types";
 import { parseVideoChapters, type VideoChapter } from "@/lib/youtube/chapters";
 
@@ -37,19 +43,33 @@ const customOverrides = new Map<string, string>();
 const customListeners = new Set<() => void>();
 function subscribeCustom(listener: () => void) {
   customListeners.add(listener);
-  const changed = (event: StorageEvent) => { if (event.key) customOverrides.delete(event.key); else customOverrides.clear(); listener(); };
+  const changed = (event: StorageEvent) => {
+    if (event.key) customOverrides.delete(event.key);
+    else customOverrides.clear();
+    listener();
+  };
   window.addEventListener("storage", changed);
-  return () => { customListeners.delete(listener); window.removeEventListener("storage", changed); };
+  return () => {
+    customListeners.delete(listener);
+    window.removeEventListener("storage", changed);
+  };
 }
 function customSnapshot(key: string) {
   if (!key) return "";
   if (customOverrides.has(key)) return customOverrides.get(key)!;
-  try { return localStorage.getItem(key) || ""; } catch { return ""; }
+  try {
+    return localStorage.getItem(key) || "";
+  } catch {
+    return "";
+  }
 }
 function writeCustom(key: string, text: string) {
   if (!key) return;
   customOverrides.set(key, text);
-  try { if (text) localStorage.setItem(key, text); else localStorage.removeItem(key); } catch {}
+  try {
+    if (text) localStorage.setItem(key, text);
+    else localStorage.removeItem(key);
+  } catch {}
   customListeners.forEach((listener) => listener());
 }
 
@@ -71,7 +91,11 @@ export function useVideoChapters(lesson?: Lesson) {
       ? `progressly_custom_chapters_${videoId}`
       : "";
 
-  const customText = useSyncExternalStore(subscribeCustom, () => customSnapshot(storageKey), () => "");
+  const customText = useSyncExternalStore(
+    subscribeCustom,
+    () => customSnapshot(storageKey),
+    () => "",
+  );
 
   // Check if the local lesson description actually contains chapters
   const localChapters = useMemo(
@@ -84,7 +108,10 @@ export function useVideoChapters(lesson?: Lesson) {
 
   // If local description has no chapters and no custom text is set, fetch remote YouTube metadata
   const needsLookup =
-    available && Boolean(videoId) && localChapters.length === 0 && !customText.trim();
+    available &&
+    Boolean(videoId) &&
+    localChapters.length === 0 &&
+    !customText.trim();
 
   useEffect(() => {
     if (!needsLookup) return;
@@ -123,8 +150,14 @@ export function useVideoChapters(lesson?: Lesson) {
     [available, text, duration],
   );
 
-  const saveCustomChapters = useCallback((text: string) => writeCustom(storageKey, text.trim()), [storageKey]);
-  const clearCustomChapters = useCallback(() => writeCustom(storageKey, ""), [storageKey]);
+  const saveCustomChapters = useCallback(
+    (text: string) => writeCustom(storageKey, text.trim()),
+    [storageKey],
+  );
+  const clearCustomChapters = useCallback(
+    () => writeCustom(storageKey, ""),
+    [storageKey],
+  );
 
   const retry = useCallback(() => {
     if (videoId) {

@@ -58,7 +58,8 @@ describe("Gamification Engine - Stats & Progression", () => {
             id: "v1",
             youtube_video_id: "three123",
             title: "Lesson 1: Shaders & Meshes",
-            description: "00:00 Intro\n02:00 Geometries\n05:00 Materials\n07:00 Lighting\n09:00 Shaders",
+            description:
+              "00:00 Intro\n02:00 Geometries\n05:00 Materials\n07:00 Lighting\n09:00 Shaders",
             thumbnail_url: "",
             duration_seconds: 600,
             position: 0,
@@ -126,16 +127,61 @@ describe("Gamification Engine - Stats & Progression", () => {
             availability_status: "available",
             bookmarks: [],
             notes: [
-              { id: "n1", content: "Note 1", timestamp_seconds: 10, is_revision_required: false, updated_at: "2026-10-17T09:00:00Z" },
-              { id: "n2", content: "Note 2", timestamp_seconds: 20, is_revision_required: false, updated_at: "2026-10-17T09:00:00Z" },
-              { id: "n3", content: "Note 3", timestamp_seconds: 30, is_revision_required: false, updated_at: "2026-10-17T09:00:00Z" },
-              { id: "n4", content: "Note 4", timestamp_seconds: 40, is_revision_required: false, updated_at: "2026-10-17T09:00:00Z" },
-              { id: "n5", content: "Note 5", timestamp_seconds: 50, is_revision_required: false, updated_at: "2026-10-17T09:00:00Z" },
+              {
+                id: "n1",
+                content: "Note 1",
+                timestamp_seconds: 10,
+                is_revision_required: false,
+                updated_at: "2026-10-17T09:00:00Z",
+              },
+              {
+                id: "n2",
+                content: "Note 2",
+                timestamp_seconds: 20,
+                is_revision_required: false,
+                updated_at: "2026-10-17T09:00:00Z",
+              },
+              {
+                id: "n3",
+                content: "Note 3",
+                timestamp_seconds: 30,
+                is_revision_required: false,
+                updated_at: "2026-10-17T09:00:00Z",
+              },
+              {
+                id: "n4",
+                content: "Note 4",
+                timestamp_seconds: 40,
+                is_revision_required: false,
+                updated_at: "2026-10-17T09:00:00Z",
+              },
+              {
+                id: "n5",
+                content: "Note 5",
+                timestamp_seconds: 50,
+                is_revision_required: false,
+                updated_at: "2026-10-17T09:00:00Z",
+              },
             ],
             tasks: [
-              { id: "t1", title: "Task 1", is_completed: true, completed_at: "2026-10-17T09:00:00Z" },
-              { id: "t2", title: "Task 2", is_completed: true, completed_at: "2026-10-17T09:00:00Z" },
-              { id: "t3", title: "Task 3", is_completed: true, completed_at: "2026-10-17T09:00:00Z" },
+              {
+                id: "t1",
+                title: "Task 1",
+                is_completed: true,
+                completed_at: "2026-10-17T09:00:00Z",
+              },
+              {
+                id: "t2",
+                title: "Task 2",
+                is_completed: true,
+                completed_at: "2026-10-17T09:00:00Z",
+              },
+              {
+                id: "t3",
+                title: "Task 3",
+                is_completed: true,
+                completed_at: "2026-10-17T09:00:00Z",
+              },
             ],
             progress: {
               ...emptyProgress,
@@ -152,7 +198,9 @@ describe("Gamification Engine - Stats & Progression", () => {
     expect(stats.completedTasks).toBe(3);
     expect(stats.notesCount).toBe(0);
 
-    const makerMindset = stats.achievements.find((a) => a.id === "maker_mindset");
+    const makerMindset = stats.achievements.find(
+      (a) => a.id === "maker_mindset",
+    );
     expect(makerMindset?.unlocked).toBe(true);
 
     const archivist = stats.achievements.find((a) => a.id === "the_archivist");
@@ -166,7 +214,7 @@ describe("Gamification Engine - Stats & Progression", () => {
       {
         day: todayStr,
         active_seconds: 1200, // 20 minutes (> 15m target)
-        videos_completed: 1,  // 1 lesson
+        videos_completed: 1, // 1 lesson
         practice_completed: 1, // 1 practice task
         courses_completed: 0,
       },
@@ -182,7 +230,9 @@ describe("Gamification Engine - Stats & Progression", () => {
     expect(lessonQuest?.completed).toBe(true);
     expect(lessonQuest?.current).toBe(1);
 
-    const practiceQuest = stats.dailyQuests.find((q) => q.id === "quest_practice");
+    const practiceQuest = stats.dailyQuests.find(
+      (q) => q.id === "quest_practice",
+    );
     expect(practiceQuest?.completed).toBe(true);
     expect(practiceQuest?.current).toBe(1);
   });

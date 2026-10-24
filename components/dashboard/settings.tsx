@@ -255,7 +255,9 @@ export function Settings() {
               </TabsList>
             </Tabs>
           </Card>
-          <section className="panel settings-panel"><FeedbackControls /></section>
+          <section className="panel settings-panel">
+            <FeedbackControls />
+          </section>
           <section className="panel settings-panel">
             <span className="eyebrow">TAKE YOUR PROGRESS WITH YOU</span>
             <h2>Your knowledge, yours to keep.</h2>

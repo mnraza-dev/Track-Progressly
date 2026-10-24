@@ -32,7 +32,10 @@ let activeCtx: CanvasRenderingContext2D | null = null;
 const particles: Particle[] = [];
 let animFrame = 0;
 
-function ensureCanvas(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null {
+function ensureCanvas(): {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+} | null {
   if (typeof window === "undefined") return null;
 
   if (!activeCanvas) {
@@ -66,7 +69,11 @@ function ensureCanvas(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContex
 }
 
 export function fireConfetti(origin?: { x: number; y: number }) {
-  if (typeof window === "undefined" || !useFeedback.getState().celebrationsEnabled) return;
+  if (
+    typeof window === "undefined" ||
+    !useFeedback.getState().celebrationsEnabled
+  )
+    return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   const instance = ensureCanvas();

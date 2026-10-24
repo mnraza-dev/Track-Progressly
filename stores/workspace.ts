@@ -42,7 +42,9 @@ export const useWorkspace = create<State>((set, get) => ({
         set({ data, loaded: true, error: null });
       } else {
         const stored = localStorage.getItem(storageKey);
-        const data = stored ? parseWorkspaceBackup(stored) : structuredClone(emptyWorkspace);
+        const data = stored
+          ? parseWorkspaceBackup(stored)
+          : structuredClone(emptyWorkspace);
         data.rewards = reconcileRewards(data);
         localStorage.setItem(storageKey, JSON.stringify(data));
         set({

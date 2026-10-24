@@ -88,7 +88,10 @@ export function VideoChapters({
           <h3>
             In this lesson <span>{chapters.length} chapters</span>
             {hasCustomChapters && (
-              <span className="chapter-custom-tag" title="Custom timestamps applied">
+              <span
+                className="chapter-custom-tag"
+                title="Custom timestamps applied"
+              >
                 Custom
               </span>
             )}
@@ -105,7 +108,8 @@ export function VideoChapters({
         <div className="chapter-progress-box">
           <Progress value={percent} />
           <p>
-            {completedCount} of {chapters.length} chapters completed ({percent}%)
+            {completedCount} of {chapters.length} chapters completed ({percent}
+            %)
           </p>
         </div>
       )}
@@ -129,7 +133,8 @@ export function VideoChapters({
           </div>
           <p className="chapter-empty-title">No chapter timestamps found</p>
           <p className="chapter-empty-desc">
-            We couldn’t find timestamps in this video’s description. You can re-scan YouTube or paste timestamps manually.
+            We couldn’t find timestamps in this video’s description. You can
+            re-scan YouTube or paste timestamps manually.
           </p>
           <div className="chapter-empty-actions">
             {onRetry && (
@@ -153,14 +158,19 @@ export function VideoChapters({
           </div>
           {isEditorOpen && (
             <div className="chapter-paste-panel">
-              <label htmlFor="chapter-paste-textarea" className="chapter-paste-label">
+              <label
+                htmlFor="chapter-paste-textarea"
+                className="chapter-paste-label"
+              >
                 Paste timestamps from description or comments:
               </label>
               <textarea
                 id="chapter-paste-textarea"
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
-                placeholder={"00:00 Introduction\n02:15 Project Setup\n06:40 Coding Components\n15:00 Wrap up"}
+                placeholder={
+                  "00:00 Introduction\n02:15 Project Setup\n06:40 Coding Components\n15:00 Wrap up"
+                }
                 rows={5}
                 className="chapter-paste-textarea"
               />
@@ -341,14 +351,19 @@ export function VideoChapters({
           </div>
           {isEditorOpen && (
             <div className="chapter-paste-panel">
-              <label htmlFor="chapter-paste-textarea-active" className="chapter-paste-label">
+              <label
+                htmlFor="chapter-paste-textarea-active"
+                className="chapter-paste-label"
+              >
                 Paste or edit timestamps:
               </label>
               <textarea
                 id="chapter-paste-textarea-active"
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
-                placeholder={"00:00 Introduction\n02:15 Project Setup\n06:40 Coding Components\n15:00 Wrap up"}
+                placeholder={
+                  "00:00 Introduction\n02:15 Project Setup\n06:40 Coding Components\n15:00 Wrap up"
+                }
                 rows={5}
                 className="chapter-paste-textarea"
               />

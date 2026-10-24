@@ -1,112 +1,591 @@
 @layer components {
-  .level-art-badge { display: inline-block; width: 144px; aspect-ratio: 1; flex-shrink: 0; background-image: url('/badges/level-collection.png'); background-size: 400% 200%; background-repeat: no-repeat; filter: drop-shadow(0 8px 18px #b86d2520); }
-  .level-art-locked { filter: grayscale(.9) brightness(.65); opacity: .65; }
-  .gamification-trophy-stage { display: grid; place-items: center; min-width: 138px; }
-  .gamification-trophy-stage .level-art-badge { width: 148px; }
-  .rewards-dialog { width: min(1000px, calc(100vw - 32px)); max-width: none; max-height: 90dvh; overflow: auto; padding: 32px; gap: 24px; border-radius: 20px; background: radial-gradient(ellipse at 0% 0%, var(--brand-glow), transparent 65%), var(--card); }
-  .rewards-dialog [data-slot='dialog-header'] { text-align: left; padding-right: 24px; }
-  .rewards-dialog [data-slot='dialog-title'] { font-size: clamp(25px, 3vw, 34px); font-weight: 550; letter-spacing: -1px; }
-  .rewards-dialog [data-slot='dialog-close'] { width: 40px; height: 40px; display: grid; place-items: center; }
-  .rewards-hero { display: flex; gap: 30px; align-items: center; padding: 24px; background: color-mix(in srgb, var(--background) 75%, transparent); border: 1px solid var(--border); border-radius: 16px; }
-  .rewards-hero-art { position: relative; width: 170px; height: 170px; display: grid; place-items: center; }
-  .rewards-hero-art .level-art-badge { width: 170px; position: relative; z-index: 1; }
-  .rewards-orbit { position: absolute; inset: -2px; border: 1px solid color-mix(in srgb, var(--brand-accent) 22%, transparent); border-radius: 50%; transform: rotateX(55deg) rotate(-25deg); }
-  .rewards-hero-copy { flex: 1; min-width: 0; }
-  .rewards-rank-label { color: var(--brand-accent); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; }
-  .rewards-hero-copy h2 { font-size: clamp(23px, 3vw, 34px); letter-spacing: -1px; margin: 9px 0 12px; }
-  .rewards-hero-copy p { display: flex; gap: 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; font-size: 13px; color: var(--muted-foreground); }
-  .rewards-hero-copy p strong { color: var(--foreground); font-size: 22px; font-weight: 500; }
-  .rewards-hero-copy > small { display: block; color: var(--muted-foreground); font-size: 12px; line-height: 1.6; margin-top: 10px; }
-  .rewards-meter { height: 5px; border-radius: 100px; background: var(--muted); overflow: hidden; margin: 13px 0; }
-  .rewards-meter i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #b9753b, var(--brand-accent)); transition: width 400ms ease; }
-  .rewards-tabs > [data-slot='tabs-list'] { width: 100%; height: auto; min-height: 44px; justify-content: flex-start; padding: 4px; gap: 4px; }
-  .rewards-tabs [data-slot='tabs-trigger'] { min-height: 40px; padding-inline: 16px; gap: 8px; }
-  .rewards-tabs [data-slot='tabs-trigger'] > span { font-size: 11px; color: var(--muted-foreground); }
-  .level-collection { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
-  .level-collectible { display: flex; flex-direction: column; align-items: center; min-width: 0; border: 1px solid var(--border); border-radius: 14px; background: var(--background); padding: 12px 14px 18px; text-align: center; transition: border-color 180ms, background 180ms; }
-  .level-collectible:hover { background: var(--muted); }
-  .level-collectible.selected { border-color: var(--brand-accent); background: color-mix(in srgb, var(--accent) 40%, var(--background)); }
-  .level-collectible-top { align-self: stretch; display: flex; align-items: center; justify-content: space-between; color: var(--muted-foreground); font: 10px var(--font-geist-mono), monospace; letter-spacing: 1px; }
-  .level-collectible.earned .level-collectible-top { color: var(--brand-accent); }
-  .level-collectible .level-art-badge { width: min(135px, 100%); margin: 10px 0; }
-  .level-collectible > strong { font-size: 12px; font-weight: 500; line-height: 1.5; }
-  .level-collectible > small { font-size: 11px; color: var(--muted-foreground); margin-top: 5px; }
-  .level-detail { display: flex; gap: 18px; align-items: center; border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-top: 18px; }
-  .level-detail .level-art-badge { width: 80px; }
-  .level-detail > div { flex: 1; }
-  .level-detail h3 { font-size: 18px; margin: 6px 0; }
-  .level-detail p, .level-detail small { color: var(--muted-foreground); font-size: 12px; }
-  .level-detail small { display: block; margin-top: 6px; }
-  .level-detail .eyebrow { font-size: 9px; letter-spacing: 1px; }
-  .rewards-filter { display: flex; gap: 6px; margin: 18px 0; }
-  .rewards-filter button { min-height: 40px; padding: 8px 15px; border: 1px solid var(--border); border-radius: 100px; font-size: 12px; }
-  .rewards-filter button[aria-pressed='true'] { border-color: var(--brand-accent); color: var(--accent-foreground); background: var(--accent); }
-  .milestone-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .milestone-card { border: 1px solid var(--border); background: var(--background); border-radius: 14px; padding: 20px; }
-  .milestone-earned { border-color: color-mix(in srgb, var(--brand-accent) 45%, var(--border)); }
-  .milestone-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: var(--muted-foreground); font-size: 11px; }
-  .milestone-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: var(--muted); }
-  .milestone-earned .milestone-icon { color: var(--brand-accent); background: var(--accent); }
-  .milestone-card h3 { font-size: 15px; }
-  .milestone-card p { color: var(--muted-foreground); font-size: 12px; min-height: 38px; margin-top: 6px; }
-  .milestone-card footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11px; }
-  .milestone-card footer > span { display: inline-flex; align-items: center; gap: 5px; }
-  .milestone-card footer small { color: var(--muted-foreground); font-size: 10px; }
-  .rewards-guide { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; margin-top: 20px; }
-  .rewards-guide h3 { font-size: 17px; margin-bottom: 10px; }
-  .rewards-guide p { color: var(--muted-foreground); font-size: 12px; line-height: 1.75; }
-  .xp-rules { margin: 15px 0 22px; }
-  .xp-rules > div { display: flex; justify-content: space-between; gap: 20px; padding-block: 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
-  .xp-rules dd { white-space: nowrap; color: var(--brand-accent); }
-  .rewards-rule-note { margin-bottom: 24px; }
-  .feedback-control-heading { display: flex; gap: 12px; color: var(--brand-accent); align-items: flex-start; }
-  .feedback-control-heading svg { margin-top: 2px; flex-shrink: 0; }
-  .feedback-control-heading h3 { font-size: 16px; margin-bottom: 6px; }
-  .feedback-control-heading p { font-size: 12px; line-height: 1.65; color: var(--muted-foreground); }
-  .feedback-toggle { display: flex; gap: 20px; justify-content: space-between; align-items: center; padding-block: 18px; border-bottom: 1px solid var(--border); }
-  .feedback-toggle strong { display: block; font-size: 13px; font-weight: 500; }
-  .feedback-toggle small { display: block; margin-top: 5px; color: var(--muted-foreground); font-size: 12px; line-height: 1.6; }
-  .feedback-volume { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; margin: 18px 0; }
-  .feedback-volume span { margin-left: auto; color: var(--muted-foreground); }
-  .feedback-volume input { width: 100%; min-height: 28px; accent-color: var(--brand-accent); }
-  .feedback-status { display: flex; gap: 6px; align-items: flex-start; color: var(--muted-foreground); font-size: 11px; line-height: 1.6; margin-top: 15px; }
-  .feedback-status svg { flex-shrink: 0; margin-top: 2px; }
-  .rewards-dialog-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 11px; }
-  .rewards-dialog-footer > span, .rewards-dialog-footer button { display: inline-flex; gap: 7px; align-items: center; }
-  .rewards-dialog-footer button { min-height: 44px; }
-  .rewards-empty { color: var(--muted-foreground); padding: 30px; text-align: center; }
-  .reward-toast { position: fixed; right: 24px; bottom: 24px; z-index: 80; width: min(380px, calc(100vw - 32px)); border: 1px solid color-mix(in srgb, var(--brand-accent) 70%, var(--border)); border-radius: 16px; background: radial-gradient(ellipse at 0% 0%, var(--brand-glow), transparent 80%), var(--popover); box-shadow: 0 20px 60px #0004; padding: 22px 18px 0; animation: reward-enter 300ms ease-out; }
-  .reward-toast-content { display: flex; align-items: center; gap: 10px; }
-  .reward-toast-content .level-art-badge { width: 86px; }
-  .reward-eyebrow { display: inline-flex; gap: 5px; align-items: center; color: var(--brand-accent); font-size: 10px; letter-spacing: 1px; }
-  .reward-toast h2 { font-size: 19px; margin-top: 6px; letter-spacing: -.6px; }
-  .reward-toast p, .reward-toast small { color: var(--muted-foreground); font-size: 12px; line-height: 1.6; margin-top: 6px; }
-  .reward-close { position: absolute; right: 5px; top: 5px; width: 32px; height: 32px; }
-  .reward-view { display: flex; width: 100%; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); min-height: 44px; font-size: 12px; margin-top: 16px; }
-  @keyframes reward-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  @media (max-width: 760px) {
-    .rewards-dialog { padding: 24px 16px; gap: 18px; }
-    .rewards-hero { gap: 12px; padding: 14px; }
-    .rewards-hero-art, .rewards-hero-art .level-art-badge { width: 90px; height: 90px; }
-    .rewards-hero-copy p { gap: 6px; }
-    .rewards-hero-copy p strong { font-size: 20px; }
-    .rewards-hero-copy p > span { font-size: 11px; }
-    .rewards-hero-copy h2 { font-size: 20px; }
-    .rewards-rank-label { font-size: 9px; letter-spacing: .6px; }
-    .rewards-hero-copy > small { font-size: 10px; }
-    .level-collection { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
-    .level-collectible { padding: 12px 10px 16px; }
-    .level-collectible .level-art-badge { width: 110px; }
-    .rewards-tabs [data-slot='tabs-trigger'] { padding-inline: 8px; font-size: 12px; }
-    .rewards-tabs [data-slot='tabs-trigger'] > span { display: none; }
-    .level-detail { flex-wrap: wrap; gap: 12px; padding: 14px; }
-    .level-detail .level-art-badge { width: 60px; }
-    .level-detail > div { min-width: 150px; }
-    .level-detail [data-slot='button'] { width: 100%; }
-    .milestone-grid, .rewards-guide { grid-template-columns: 1fr; }
-    .rewards-dialog-footer { flex-wrap: wrap; }
-    .reward-toast { right: 16px; bottom: 16px; }
-    .app-shell:has(.reward-toast) .toast { bottom: 240px; }
+  .level-art-badge {
+    display: inline-block;
+    width: 144px;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    background-image: url("/badges/level-collection.png");
+    background-size: 400% 200%;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 8px 18px #b86d2520);
   }
-  @media (prefers-reduced-motion: reduce) { .reward-toast { animation: none; } .rewards-meter i { transition: none; } }
+  .level-art-locked {
+    filter: grayscale(0.9) brightness(0.65);
+    opacity: 0.65;
+  }
+  .gamification-trophy-stage {
+    display: grid;
+    place-items: center;
+    min-width: 138px;
+  }
+  .gamification-trophy-stage .level-art-badge {
+    width: 148px;
+  }
+  .rewards-dialog {
+    width: min(1000px, calc(100vw - 32px));
+    max-width: none;
+    max-height: 90dvh;
+    overflow: auto;
+    padding: 32px;
+    gap: 24px;
+    border-radius: 20px;
+    background:
+      radial-gradient(ellipse at 0% 0%, var(--brand-glow), transparent 65%),
+      var(--card);
+  }
+  .rewards-dialog [data-slot="dialog-header"] {
+    text-align: left;
+    padding-right: 24px;
+  }
+  .rewards-dialog [data-slot="dialog-title"] {
+    font-size: clamp(25px, 3vw, 34px);
+    font-weight: 550;
+    letter-spacing: -1px;
+  }
+  .rewards-dialog [data-slot="dialog-close"] {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+  }
+  .rewards-hero {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    padding: 24px;
+    background: color-mix(in srgb, var(--background) 75%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .rewards-hero-art {
+    position: relative;
+    width: 170px;
+    height: 170px;
+    display: grid;
+    place-items: center;
+  }
+  .rewards-hero-art .level-art-badge {
+    width: 170px;
+    position: relative;
+    z-index: 1;
+  }
+  .rewards-orbit {
+    position: absolute;
+    inset: -2px;
+    border: 1px solid color-mix(in srgb, var(--brand-accent) 22%, transparent);
+    border-radius: 50%;
+    transform: rotateX(55deg) rotate(-25deg);
+  }
+  .rewards-hero-copy {
+    flex: 1;
+    min-width: 0;
+  }
+  .rewards-rank-label {
+    color: var(--brand-accent);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  .rewards-hero-copy h2 {
+    font-size: clamp(23px, 3vw, 34px);
+    letter-spacing: -1px;
+    margin: 9px 0 12px;
+  }
+  .rewards-hero-copy p {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--muted-foreground);
+  }
+  .rewards-hero-copy p strong {
+    color: var(--foreground);
+    font-size: 22px;
+    font-weight: 500;
+  }
+  .rewards-hero-copy > small {
+    display: block;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 10px;
+  }
+  .rewards-meter {
+    height: 5px;
+    border-radius: 100px;
+    background: var(--muted);
+    overflow: hidden;
+    margin: 13px 0;
+  }
+  .rewards-meter i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #b9753b, var(--brand-accent));
+    transition: width 400ms ease;
+  }
+  .rewards-tabs > [data-slot="tabs-list"] {
+    width: 100%;
+    height: auto;
+    min-height: 44px;
+    justify-content: flex-start;
+    padding: 4px;
+    gap: 4px;
+  }
+  .rewards-tabs [data-slot="tabs-trigger"] {
+    min-height: 40px;
+    padding-inline: 16px;
+    gap: 8px;
+  }
+  .rewards-tabs [data-slot="tabs-trigger"] > span {
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+  .level-collection {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .level-collectible {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--background);
+    padding: 12px 14px 18px;
+    text-align: center;
+    transition:
+      border-color 180ms,
+      background 180ms;
+  }
+  .level-collectible:hover {
+    background: var(--muted);
+  }
+  .level-collectible.selected {
+    border-color: var(--brand-accent);
+    background: color-mix(in srgb, var(--accent) 40%, var(--background));
+  }
+  .level-collectible-top {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--muted-foreground);
+    font:
+      10px var(--font-geist-mono),
+      monospace;
+    letter-spacing: 1px;
+  }
+  .level-collectible.earned .level-collectible-top {
+    color: var(--brand-accent);
+  }
+  .level-collectible .level-art-badge {
+    width: min(135px, 100%);
+    margin: 10px 0;
+  }
+  .level-collectible > strong {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .level-collectible > small {
+    font-size: 11px;
+    color: var(--muted-foreground);
+    margin-top: 5px;
+  }
+  .level-detail {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 18px;
+  }
+  .level-detail .level-art-badge {
+    width: 80px;
+  }
+  .level-detail > div {
+    flex: 1;
+  }
+  .level-detail h3 {
+    font-size: 18px;
+    margin: 6px 0;
+  }
+  .level-detail p,
+  .level-detail small {
+    color: var(--muted-foreground);
+    font-size: 12px;
+  }
+  .level-detail small {
+    display: block;
+    margin-top: 6px;
+  }
+  .level-detail .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .rewards-filter {
+    display: flex;
+    gap: 6px;
+    margin: 18px 0;
+  }
+  .rewards-filter button {
+    min-height: 40px;
+    padding: 8px 15px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+  }
+  .rewards-filter button[aria-pressed="true"] {
+    border-color: var(--brand-accent);
+    color: var(--accent-foreground);
+    background: var(--accent);
+  }
+  .milestone-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .milestone-card {
+    border: 1px solid var(--border);
+    background: var(--background);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .milestone-earned {
+    border-color: color-mix(in srgb, var(--brand-accent) 45%, var(--border));
+  }
+  .milestone-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    color: var(--muted-foreground);
+    font-size: 11px;
+  }
+  .milestone-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--muted);
+  }
+  .milestone-earned .milestone-icon {
+    color: var(--brand-accent);
+    background: var(--accent);
+  }
+  .milestone-card h3 {
+    font-size: 15px;
+  }
+  .milestone-card p {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    min-height: 38px;
+    margin-top: 6px;
+  }
+  .milestone-card footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+  }
+  .milestone-card footer > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .milestone-card footer small {
+    color: var(--muted-foreground);
+    font-size: 10px;
+  }
+  .rewards-guide {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 28px;
+    margin-top: 20px;
+  }
+  .rewards-guide h3 {
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+  .rewards-guide p {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.75;
+  }
+  .xp-rules {
+    margin: 15px 0 22px;
+  }
+  .xp-rules > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding-block: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .xp-rules dd {
+    white-space: nowrap;
+    color: var(--brand-accent);
+  }
+  .rewards-rule-note {
+    margin-bottom: 24px;
+  }
+  .feedback-control-heading {
+    display: flex;
+    gap: 12px;
+    color: var(--brand-accent);
+    align-items: flex-start;
+  }
+  .feedback-control-heading svg {
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .feedback-control-heading h3 {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .feedback-control-heading p {
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--muted-foreground);
+  }
+  .feedback-toggle {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    padding-block: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .feedback-toggle strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .feedback-toggle small {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .feedback-volume {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    margin: 18px 0;
+  }
+  .feedback-volume span {
+    margin-left: auto;
+    color: var(--muted-foreground);
+  }
+  .feedback-volume input {
+    width: 100%;
+    min-height: 28px;
+    accent-color: var(--brand-accent);
+  }
+  .feedback-status {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    color: var(--muted-foreground);
+    font-size: 11px;
+    line-height: 1.6;
+    margin-top: 15px;
+  }
+  .feedback-status svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .rewards-dialog-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-size: 11px;
+  }
+  .rewards-dialog-footer > span,
+  .rewards-dialog-footer button {
+    display: inline-flex;
+    gap: 7px;
+    align-items: center;
+  }
+  .rewards-dialog-footer button {
+    min-height: 44px;
+  }
+  .rewards-empty {
+    color: var(--muted-foreground);
+    padding: 30px;
+    text-align: center;
+  }
+  .reward-toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 80;
+    width: min(380px, calc(100vw - 32px));
+    border: 1px solid color-mix(in srgb, var(--brand-accent) 70%, var(--border));
+    border-radius: 16px;
+    background:
+      radial-gradient(ellipse at 0% 0%, var(--brand-glow), transparent 80%),
+      var(--popover);
+    box-shadow: 0 20px 60px #0004;
+    padding: 22px 18px 0;
+    animation: reward-enter 300ms ease-out;
+  }
+  .reward-toast-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .reward-toast-content .level-art-badge {
+    width: 86px;
+  }
+  .reward-eyebrow {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    color: var(--brand-accent);
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .reward-toast h2 {
+    font-size: 19px;
+    margin-top: 6px;
+    letter-spacing: -0.6px;
+  }
+  .reward-toast p,
+  .reward-toast small {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+  .reward-close {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    width: 32px;
+    height: 32px;
+  }
+  .reward-view {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    min-height: 44px;
+    font-size: 12px;
+    margin-top: 16px;
+  }
+  @keyframes reward-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (max-width: 760px) {
+    .rewards-dialog {
+      padding: 24px 16px;
+      gap: 18px;
+    }
+    .rewards-hero {
+      gap: 12px;
+      padding: 14px;
+    }
+    .rewards-hero-art,
+    .rewards-hero-art .level-art-badge {
+      width: 90px;
+      height: 90px;
+    }
+    .rewards-hero-copy p {
+      gap: 6px;
+    }
+    .rewards-hero-copy p strong {
+      font-size: 20px;
+    }
+    .rewards-hero-copy p > span {
+      font-size: 11px;
+    }
+    .rewards-hero-copy h2 {
+      font-size: 20px;
+    }
+    .rewards-rank-label {
+      font-size: 9px;
+      letter-spacing: 0.6px;
+    }
+    .rewards-hero-copy > small {
+      font-size: 10px;
+    }
+    .level-collection {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .level-collectible {
+      padding: 12px 10px 16px;
+    }
+    .level-collectible .level-art-badge {
+      width: 110px;
+    }
+    .rewards-tabs [data-slot="tabs-trigger"] {
+      padding-inline: 8px;
+      font-size: 12px;
+    }
+    .rewards-tabs [data-slot="tabs-trigger"] > span {
+      display: none;
+    }
+    .level-detail {
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 14px;
+    }
+    .level-detail .level-art-badge {
+      width: 60px;
+    }
+    .level-detail > div {
+      min-width: 150px;
+    }
+    .level-detail [data-slot="button"] {
+      width: 100%;
+    }
+    .milestone-grid,
+    .rewards-guide {
+      grid-template-columns: 1fr;
+    }
+    .rewards-dialog-footer {
+      flex-wrap: wrap;
+    }
+    .reward-toast {
+      right: 16px;
+      bottom: 16px;
+    }
+    .app-shell:has(.reward-toast) .toast {
+      bottom: 240px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reward-toast {
+      animation: none;
+    }
+    .rewards-meter i {
+      transition: none;
+    }
+  }
 }

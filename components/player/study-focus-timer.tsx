@@ -23,10 +23,7 @@ import { useWorkspace } from "@/stores/workspace";
 import { localDay, cn } from "@/lib/utils";
 import type { PlayerHandle } from "./youtube-player";
 
-import {
-  useFocusTimerStore,
-  TIMER_PRESETS,
-} from "@/stores/focus-timer";
+import { useFocusTimerStore, TIMER_PRESETS } from "@/stores/focus-timer";
 
 type StudyFocusTimerProps = {
   isVideoPlaying: boolean;
@@ -42,7 +39,10 @@ export function StudyFocusTimer({
 }: StudyFocusTimerProps) {
   const { data, notify } = useWorkspace();
   const { soundEnabled, setSoundEnabled } = useFeedback();
-  const toggleSound = () => { setSoundEnabled(!soundEnabled); if (!soundEnabled) void unlockAudio(); };
+  const toggleSound = () => {
+    setSoundEnabled(!soundEnabled);
+    if (!soundEnabled) void unlockAudio();
+  };
 
   // Persistent Zustand Store
   const {
@@ -151,7 +151,10 @@ export function StudyFocusTimer({
 
   // Check if timer is mid-session paused (e.g. 13m remaining out of 15m)
   const isPausedMidSession =
-    !isVideoPlaying && remainingSeconds < targetSeconds && remainingSeconds > 0 && !isCompleted;
+    !isVideoPlaying &&
+    remainingSeconds < targetSeconds &&
+    remainingSeconds > 0 &&
+    !isCompleted;
 
   // Circular progress math
   const RADIUS = 62;
@@ -238,8 +241,12 @@ export function StudyFocusTimer({
             type="button"
             className="icon-button focus-timer-sound-btn"
             onClick={toggleSound}
-            title={soundEnabled ? "Mute chime sound" : "Enable completion chime"}
-            aria-label={soundEnabled ? "Mute chime sound" : "Enable completion chime"}
+            title={
+              soundEnabled ? "Mute chime sound" : "Enable completion chime"
+            }
+            aria-label={
+              soundEnabled ? "Mute chime sound" : "Enable completion chime"
+            }
           >
             {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
           </button>
@@ -312,7 +319,11 @@ export function StudyFocusTimer({
                 {formatTimeRemaining(remainingSeconds)}
               </span>
               <span className="focus-timer-target-tag">
-                / {targetSeconds >= 3600 ? `${targetSeconds / 3600}h` : `${targetSeconds / 60}m`} target
+                /{" "}
+                {targetSeconds >= 3600
+                  ? `${targetSeconds / 3600}h`
+                  : `${targetSeconds / 60}m`}{" "}
+                target
               </span>
               <span className="focus-timer-micro-state">
                 {isCompleted
@@ -407,7 +418,10 @@ export function StudyFocusTimer({
                 <span className="focus-metric-label">Today Total:</span>
                 <strong className="focus-metric-value">
                   {totalTodayMinutes}m
-                  <small className="goal-ref"> / {dailyGoalMinutes}m goal</small>
+                  <small className="goal-ref">
+                    {" "}
+                    / {dailyGoalMinutes}m goal
+                  </small>
                 </strong>
               </div>
             </div>
@@ -421,11 +435,16 @@ export function StudyFocusTimer({
               {formatTimeRemaining(remainingSeconds)}
             </span>
             <span className="collapsed-target">
-              / {targetSeconds >= 3600 ? `${targetSeconds / 3600}h` : `${targetSeconds / 60}m`}
+              /{" "}
+              {targetSeconds >= 3600
+                ? `${targetSeconds / 3600}h`
+                : `${targetSeconds / 60}m`}
             </span>
           </div>
           <div className="collapsed-session-stat">
-            <span>Session: <strong>{formatSessionTime(sessionFocusSeconds)}</strong></span>
+            <span>
+              Session: <strong>{formatSessionTime(sessionFocusSeconds)}</strong>
+            </span>
           </div>
           <div className="collapsed-actions">
             <button

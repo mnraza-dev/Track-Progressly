@@ -31,10 +31,7 @@ import {
 import { format, subDays } from "date-fns";
 import { ActivityChart } from "./activity-chart";
 import { LearningLandscape } from "./learning-landscape";
-import {
-  LearningMix,
-  WeekdayRhythm,
-} from "./progress-charts";
+import { LearningMix, WeekdayRhythm } from "./progress-charts";
 import { weekdayData } from "@/lib/analytics";
 import {
   parseVideoChapters,
@@ -99,9 +96,7 @@ export function Analytics() {
   const timestampedNotes = allNotes.filter(
     (n) => n.timestamp_seconds > 0,
   ).length;
-  const reviewedNotes = allNotes.filter(
-    (n) => !n.is_revision_required,
-  ).length;
+  const reviewedNotes = allNotes.filter((n) => !n.is_revision_required).length;
 
   // 3. Active vs. Passive Learning Balance
   const totalStudyMinutes = Math.round(total / 60);
@@ -133,7 +128,8 @@ export function Analytics() {
     (sum, c) =>
       sum +
       c.videos.filter(
-        (v) => v.availability_status === "available" && !v.progress.is_completed,
+        (v) =>
+          v.availability_status === "available" && !v.progress.is_completed,
       ).length,
     0,
   );
@@ -182,7 +178,8 @@ export function Analytics() {
         return {
           category: cat,
           totalCourses: catCourses.length,
-          completedCourses: catCourses.filter((c) => completion(c) === 100).length,
+          completedCourses: catCourses.filter((c) => completion(c) === 100)
+            .length,
           totalVideos: catVideos.length,
           completedVideos: catCompletedVideos.length,
           totalNotes: catNotes.length,
@@ -330,7 +327,8 @@ ${courseDiagnostics
           <span className="eyebrow">COMPREHENSIVE LEARNING INTELLIGENCE</span>
           <h1>Analytics & Diagnostics Studio</h1>
           <p>
-            Study velocity, cognitive retention ratios, category mastery, and circadian learning rhythms.
+            Study velocity, cognitive retention ratios, category mastery, and
+            circadian learning rhythms.
           </p>
         </div>
         <div className="analytics-header-actions">
@@ -368,7 +366,8 @@ ${courseDiagnostics
           </div>
           <div className="stat-value">{duration(total)}</div>
           <p>
-            {activeDays.length} active sessions · avg {duration(avgDailySeconds)} / day
+            {activeDays.length} active sessions · avg{" "}
+            {duration(avgDailySeconds)} / day
           </p>
         </Card>
 
@@ -379,7 +378,9 @@ ${courseDiagnostics
               <TrendingUp size={19} />
             </span>
           </div>
-          <div className="stat-value">{weeklyLessonVelocity} <small style={{ fontSize: 13 }}>/ wk</small></div>
+          <div className="stat-value">
+            {weeklyLessonVelocity} <small style={{ fontSize: 13 }}>/ wk</small>
+          </div>
           <p>
             {estimatedDaysToComplete
               ? `~${estimatedDaysToComplete} days to finish active courses`
@@ -407,7 +408,9 @@ ${courseDiagnostics
               <BookOpen size={19} />
             </span>
           </div>
-          <div className="stat-value">{allNotes.length} <small style={{ fontSize: 13 }}>notes</small></div>
+          <div className="stat-value">
+            {allNotes.length} <small style={{ fontSize: 13 }}>notes</small>
+          </div>
           <p>
             {timestampedNotes} timestamped · {reviewedNotes} reviewed
           </p>
@@ -451,7 +454,9 @@ ${courseDiagnostics
                 </strong>
               </div>
               <div className="velocity-metric-item">
-                <span className="velocity-metric-label">Remaining Duration</span>
+                <span className="velocity-metric-label">
+                  Remaining Duration
+                </span>
                 <strong className="velocity-metric-val">
                   {duration(remainingSeconds)}
                   <span>to complete</span>
@@ -468,7 +473,8 @@ ${courseDiagnostics
                     : "Complete 1 lesson this week to generate graduation projections."}
                 </strong>
                 <p>
-                  At your current rate, you are on track to master your currently active courses with sustained momentum.
+                  At your current rate, you are on track to master your
+                  currently active courses with sustained momentum.
                 </p>
               </div>
             </div>
@@ -481,7 +487,9 @@ ${courseDiagnostics
             <div>
               <span className="section-index">COGNITIVE ENGAGEMENT</span>
               <h2>Active vs. Passive Balance</h2>
-              <p>How effectively you convert watch time into long-term recall.</p>
+              <p>
+                How effectively you convert watch time into long-term recall.
+              </p>
             </div>
             <Brain size={20} className="text-primary" />
           </div>
@@ -511,7 +519,9 @@ ${courseDiagnostics
               <div className="retention-breakdown-item">
                 <div className="retention-item-dot practice" />
                 <div>
-                  <strong>{completedTasks} / {allTasks.length}</strong>
+                  <strong>
+                    {completedTasks} / {allTasks.length}
+                  </strong>
                   <span>Hands-on tasks</span>
                 </div>
               </div>
@@ -528,11 +538,15 @@ ${courseDiagnostics
               <p>
                 {activeRatioScore >= 70 ? (
                   <>
-                    <strong>Superb active recall balance!</strong> You regularly apply concepts through notes and practice exercises rather than just passively observing.
+                    <strong>Superb active recall balance!</strong> You regularly
+                    apply concepts through notes and practice exercises rather
+                    than just passively observing.
                   </>
                 ) : (
                   <>
-                    <strong>Boost your active retention:</strong> Take 1 timestamped note or complete a practice task every 15 minutes of video to lock in deeper memory.
+                    <strong>Boost your active retention:</strong> Take 1
+                    timestamped note or complete a practice task every 15
+                    minutes of video to lock in deeper memory.
                   </>
                 )}
               </p>
@@ -567,7 +581,9 @@ ${courseDiagnostics
               </div>
               <div className="category-card-stats">
                 <div>
-                  <strong>{cat.completedVideos} / {cat.totalVideos}</strong>
+                  <strong>
+                    {cat.completedVideos} / {cat.totalVideos}
+                  </strong>
                   <span>lessons</span>
                 </div>
                 <div>
@@ -579,7 +595,9 @@ ${courseDiagnostics
                   <span>notes</span>
                 </div>
                 <div>
-                  <strong>{cat.completedCourses} / {cat.totalCourses}</strong>
+                  <strong>
+                    {cat.completedCourses} / {cat.totalCourses}
+                  </strong>
                   <span>finished</span>
                 </div>
               </div>
@@ -589,7 +607,9 @@ ${courseDiagnostics
           {!categoryStats.length && (
             <div className="small-empty">
               <BookOpen size={24} />
-              <p>No courses added yet. Add a course to see category breakdowns.</p>
+              <p>
+                No courses added yet. Add a course to see category breakdowns.
+              </p>
             </div>
           )}
         </div>
@@ -638,7 +658,8 @@ ${courseDiagnostics
         />
         {!activity.length && (
           <div className="chart-empty-caption">
-            Every journey starts somewhere. Your first session will bring this chart to life.
+            Every journey starts somewhere. Your first session will bring this
+            chart to life.
           </div>
         )}
       </section>
@@ -650,16 +671,25 @@ ${courseDiagnostics
           <div className="rhythm-extra-summary">
             <div className="rhythm-pill">
               <Sun size={14} className="text-yellow-500" />
-              <span>Weekday Focus: <strong>{weekdayFocusMinutes}m</strong></span>
+              <span>
+                Weekday Focus: <strong>{weekdayFocusMinutes}m</strong>
+              </span>
             </div>
             <div className="rhythm-pill">
               <Moon size={14} className="text-indigo-400" />
-              <span>Weekend Focus: <strong>{weekendFocusMinutes}m</strong></span>
+              <span>
+                Weekend Focus: <strong>{weekendFocusMinutes}m</strong>
+              </span>
             </div>
             {peakWeekday && (
               <div className="rhythm-pill highlight">
                 <Flame size={14} className="text-orange-500" />
-                <span>Peak Day: <strong>{peakWeekday.name} ({peakWeekday.minutes}m)</strong></span>
+                <span>
+                  Peak Day:{" "}
+                  <strong>
+                    {peakWeekday.name} ({peakWeekday.minutes}m)
+                  </strong>
+                </span>
               </div>
             )}
           </div>
@@ -682,7 +712,10 @@ ${courseDiagnostics
           <div>
             <span className="section-index">COURSE DIAGNOSTICS</span>
             <h2>Course-by-Course Health Matrix</h2>
-            <p>Detailed breakdown of duration, chapters, practice, and notes per course.</p>
+            <p>
+              Detailed breakdown of duration, chapters, practice, and notes per
+              course.
+            </p>
           </div>
           <Link href="/courses" className="text-link">
             Open library
@@ -706,18 +739,24 @@ ${courseDiagnostics
                       style={{ width: `${c.progress}%` }}
                     />
                   </div>
-                  <span className="course-diag-progress-pct">{c.progress}%</span>
+                  <span className="course-diag-progress-pct">
+                    {c.progress}%
+                  </span>
                 </div>
               </div>
 
               <div className="course-diag-meta-grid">
                 <div className="diag-meta-item">
                   <span>Watched / Total</span>
-                  <strong>{duration(c.watchedDuration)} / {duration(c.totalDuration)}</strong>
+                  <strong>
+                    {duration(c.watchedDuration)} / {duration(c.totalDuration)}
+                  </strong>
                 </div>
                 <div className="diag-meta-item">
                   <span>Lessons</span>
-                  <strong>{c.completedVideos} / {c.totalVideos}</strong>
+                  <strong>
+                    {c.completedVideos} / {c.totalVideos}
+                  </strong>
                 </div>
                 <div className="diag-meta-item">
                   <span>Chapters</span>
@@ -730,7 +769,9 @@ ${courseDiagnostics
                 <div className="diag-meta-item">
                   <span>Practice Tasks</span>
                   <strong>
-                    {c.totalTasks > 0 ? `${c.doneTasks} / ${c.totalTasks}` : "—"}
+                    {c.totalTasks > 0
+                      ? `${c.doneTasks} / ${c.totalTasks}`
+                      : "—"}
                   </strong>
                 </div>
                 <div className="diag-meta-item">
@@ -753,7 +794,9 @@ ${courseDiagnostics
           {!courseDiagnostics.length && (
             <div className="small-empty">
               <BookOpen size={24} />
-              <p>Add courses to your library to populate the diagnostic matrix.</p>
+              <p>
+                Add courses to your library to populate the diagnostic matrix.
+              </p>
             </div>
           )}
         </div>
@@ -769,7 +812,9 @@ ${courseDiagnostics
               a.practice_completed > 0,
           ).length
         }{" "}
-        active sessions recorded in this period · Timezone: {data.profile.timezone}. Data is computed directly from your private workspace activity records.
+        active sessions recorded in this period · Timezone:{" "}
+        {data.profile.timezone}. Data is computed directly from your private
+        workspace activity records.
       </p>
     </div>
   );

@@ -20,7 +20,15 @@ beforeAll(async () => {
     "utf8",
   ).replace("create extension if not exists pgcrypto;", "");
   await db.exec(migration);
-  await db.exec(readFileSync(new URL("../supabase/migrations/002_learning_rewards.sql", import.meta.url), "utf8"));
+  await db.exec(
+    readFileSync(
+      new URL(
+        "../supabase/migrations/002_learning_rewards.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
   await db.query("insert into auth.users(id) values ($1),($2)", [alice, bob]);
   await asUser(alice);
   const result = await db.query<{ id: string }>(
@@ -211,18 +219,32 @@ describe("PostgreSQL migrations, atomic mutations, and RLS isolation", () => {
   });
   it("awards server-derived rewards once and rejects direct XP changes", async () => {
     await asUser(alice);
-    const first = await db.query<{ rewards: { version: number; events: Record<string, { xp: number }> } }>("select sync_learning_rewards() rewards");
+    const first = await db.query<{
+      rewards: { version: number; events: Record<string, { xp: number }> };
+    }>("select sync_learning_rewards() rewards");
     expect(first.rows[0].rewards.events["lesson:j942wKiXFu8"].xp).toBe(50);
-    const second = await db.query<{ rewards: unknown }>("select sync_learning_rewards() rewards");
+    const second = await db.query<{ rewards: unknown }>(
+      "select sync_learning_rewards() rewards",
+    );
     expect(second.rows[0].rewards).toEqual(first.rows[0].rewards);
-    await expect(db.query("insert into learning_rewards(user_id,event_key,xp) values($1,'cheat',9999)", [alice])).rejects.toThrow(/permission denied/);
+    await expect(
+      db.query(
+        "insert into learning_rewards(user_id,event_key,xp) values($1,'cheat',9999)",
+        [alice],
+      ),
+    ).rejects.toThrow(/permission denied/);
     await db.query("select save_video_progress($1,'in_progress',0,0)", [video]);
-    const undo = await db.query<{ rewards: { events: Record<string, { xp: number }> } }>("select sync_learning_rewards() rewards");
+    const undo = await db.query<{
+      rewards: { events: Record<string, { xp: number }> };
+    }>("select sync_learning_rewards() rewards");
     expect(undo.rows[0].rewards.events["lesson:j942wKiXFu8"].xp).toBe(50);
     await asUser(bob);
-    expect((await db.query("select * from learning_rewards")).rows).toHaveLength(0);
-    const own = await db.query<{ rewards: { events: object } }>("select sync_learning_rewards() rewards");
+    expect(
+      (await db.query("select * from learning_rewards")).rows,
+    ).toHaveLength(0);
+    const own = await db.query<{ rewards: { events: object } }>(
+      "select sync_learning_rewards() rewards",
+    );
     expect(own.rows[0].rewards.events).toEqual({});
   });
-
 });

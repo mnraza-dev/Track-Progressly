@@ -247,8 +247,7 @@ export function Dashboard() {
       resumeLessonItem.progress.is_completed,
     );
 
-    const percent =
-      dur > 0 ? Math.min(100, Math.round((pos / dur) * 100)) : 0;
+    const percent = dur > 0 ? Math.min(100, Math.round((pos / dur) * 100)) : 0;
 
     return {
       chapters,
@@ -450,9 +449,7 @@ export function Dashboard() {
                 <strong>{resumeDetails?.percent || 0}% completed</strong>
               </div>
               <div className="progress-track">
-                <div
-                  style={{ width: `${resumeDetails?.percent || 0}%` }}
-                />
+                <div style={{ width: `${resumeDetails?.percent || 0}%` }} />
               </div>
             </div>
 
@@ -708,7 +705,10 @@ export function Dashboard() {
               </h3>
               <div className="gamification-xp-row">
                 <span className="gamification-total-xp">
-                  <strong>{gamificationStats.levelInfo.totalXP.toLocaleString()}</strong> XP
+                  <strong>
+                    {gamificationStats.levelInfo.totalXP.toLocaleString()}
+                  </strong>{" "}
+                  XP
                 </span>
                 <span className="gamification-next-xp">
                   {gamificationStats.levelInfo.isMaxLevel ? (
@@ -739,7 +739,9 @@ export function Dashboard() {
                 >
                   <Trophy size={14} className="text-yellow-500" />
                   <span>
-                    Achievements & Badges ({gamificationStats.unlockedAchievementsCount}/{gamificationStats.totalAchievementsCount})
+                    Achievements & Badges (
+                    {gamificationStats.unlockedAchievementsCount}/
+                    {gamificationStats.totalAchievementsCount})
                   </span>
                   <ArrowRight size={13} />
                 </Button>
@@ -809,7 +811,10 @@ export function Dashboard() {
       </section>
 
       {/* Weekly Consistency Tracker */}
-      <section className="panel weekly-consistency-panel" data-tour="weekly-consistency">
+      <section
+        className="panel weekly-consistency-panel"
+        data-tour="weekly-consistency"
+      >
         <div className="weekly-header">
           <div>
             <span className="section-index">7-DAY MOMENTUM</span>
@@ -818,8 +823,8 @@ export function Dashboard() {
           <div className="weekly-summary-pill">
             <Calendar size={14} />
             <span>
-              <strong>{activeDaysThisWeek} of 7 days</strong> active this week
-              · {totalMinutesThisWeek}m focused
+              <strong>{activeDaysThisWeek} of 7 days</strong> active this week ·{" "}
+              {totalMinutesThisWeek}m focused
             </span>
           </div>
         </div>
@@ -858,7 +863,10 @@ export function Dashboard() {
       {/* Practice Checklist & Revision Queue (High Utility Interactive Section) */}
       <div className="dashboard-action-grid">
         {/* Practice Checklist Panel */}
-        <section className="panel practice-queue-panel" data-tour="practice-queue">
+        <section
+          className="panel practice-queue-panel"
+          data-tour="practice-queue"
+        >
           <div className="panel-heading">
             <div>
               <span className="section-index">HANDS-ON LEARNING</span>
@@ -960,7 +968,10 @@ export function Dashboard() {
         </section>
 
         {/* Revision Queue Panel */}
-        <section className="panel revision-queue-panel" data-tour="revision-queue">
+        <section
+          className="panel revision-queue-panel"
+          data-tour="revision-queue"
+        >
           <div className="panel-heading">
             <div>
               <span className="section-index">KNOWLEDGE RETENTION</span>
@@ -979,9 +990,7 @@ export function Dashboard() {
             {revisionNotes.slice(0, 3).map((n) => (
               <div key={n.id} className="revision-note-item">
                 <div className="revision-note-top">
-                  <span className="revision-course-name">
-                    {n.courseTitle}
-                  </span>
+                  <span className="revision-course-name">{n.courseTitle}</span>
                   <Link
                     href={`/courses/${n.courseId}/learn/${n.videoId}`}
                     className="revision-timestamp-pill"
@@ -995,9 +1004,7 @@ export function Dashboard() {
                 <p className="revision-note-content">{n.content}</p>
 
                 <div className="revision-note-footer">
-                  <span className="revision-lesson-title">
-                    {n.videoTitle}
-                  </span>
+                  <span className="revision-lesson-title">{n.videoTitle}</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -1204,7 +1211,9 @@ export function Dashboard() {
           </div>
           <h3>Curious about your pace, retention, and topic mastery?</h3>
           <p>
-            Explore circadian rhythm analysis, active vs. passive learning ratios, course completion forecasts, and category breakdowns in your dedicated analytics space.
+            Explore circadian rhythm analysis, active vs. passive learning
+            ratios, course completion forecasts, and category breakdowns in your
+            dedicated analytics space.
           </p>
           <div className="analytics-spotlight-metrics">
             <div className="spotlight-metric-pill">
@@ -1212,7 +1221,12 @@ export function Dashboard() {
               <span>all-time focus</span>
             </div>
             <div className="spotlight-metric-pill">
-              <strong>{courses.flatMap((c) => c.videos.flatMap((v) => v.notes)).length}</strong>
+              <strong>
+                {
+                  courses.flatMap((c) => c.videos.flatMap((v) => v.notes))
+                    .length
+                }
+              </strong>
               <span>notes written</span>
             </div>
             <div className="spotlight-metric-pill">
