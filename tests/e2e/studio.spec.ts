@@ -33,7 +33,7 @@ test("3D studio renders through one context, responds to input, and stays respon
     .getByRole("heading", { name: /You bring the link/ })
     .scrollIntoViewIfNeeded();
   await expect(
-    page.locator('[data-three-scene="code"]').first(),
+    page.locator('[data-three-scene="books"]').first(),
   ).toHaveAttribute("data-three-state", "ready");
   await page.screenshot({
     path: `test-results/studio-objects-${testInfo.project.name}.png`,

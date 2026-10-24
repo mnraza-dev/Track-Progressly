@@ -25,7 +25,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `bun run dev --port ${port}`,
+    command: `bun run ${process.env.PLAYWRIGHT_SERVER_MODE === "production" ? "start" : "dev"} --port ${port}`,
     url: baseURL,
     reuseExistingServer: true,
     timeout: 120000,

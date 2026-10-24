@@ -1,3 +1,4 @@
+import { gradeQuiz } from "@/lib/quiz";
 import { reconcileRewards } from "@/lib/rewards";
 import type { Workspace, Course } from "@/types";
 import { emptyProgress } from "@/types";
@@ -26,6 +27,33 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
     return row;
   };
   switch (mutation.op) {
+    case "save_quiz": {
+      const video = findVideo(mutation.video_id);
+      if (!video) throw new Error("Lesson not found.");
+      video.quiz = mutation.quiz;
+      break;
+    }
+    case "submit_quiz": {
+      const video = findVideo(mutation.video_id);
+      if (!video?.quiz) throw new Error("Quiz not found.");
+      const score = gradeQuiz(
+        video.quiz,
+        mutation.quiz_version,
+        mutation.answers,
+      );
+      if (!(video.quiz_attempts || []).some((a) => a.id === mutation.id))
+        video.quiz_attempts = [
+          ...(video.quiz_attempts || []),
+          {
+            id: mutation.id,
+            quiz_version: mutation.quiz_version,
+            answers: mutation.answers,
+            ...score,
+            completed_at: now,
+          },
+        ].slice(-100);
+      break;
+    }
     case "create_course": {
       if (
         mutation.course.youtube_playlist_id &&

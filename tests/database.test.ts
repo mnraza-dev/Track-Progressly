@@ -29,6 +29,12 @@ beforeAll(async () => {
       "utf8",
     ),
   );
+  await db.exec(
+    readFileSync(
+      new URL("../supabase/migrations/003_lesson_quizzes.sql", import.meta.url),
+      "utf8",
+    ),
+  );
   await db.query("insert into auth.users(id) values ($1),($2)", [alice, bob]);
   await asUser(alice);
   const result = await db.query<{ id: string }>(
@@ -246,5 +252,99 @@ describe("PostgreSQL migrations, atomic mutations, and RLS isolation", () => {
       "select sync_learning_rewards() rewards",
     );
     expect(own.rows[0].rewards.events).toEqual({});
+  });
+});
+
+describe("private lesson quizzes and server grading", () => {
+  const version = "33333333-3333-4333-8333-333333333333";
+  const attempt = "44444444-4444-4444-8444-444444444444";
+  const question = {
+    id: "55555555-5555-4555-8555-555555555555",
+    prompt: "Which answer is correct?",
+    options: ["First", "Second", "Third", "Fourth"],
+    correct_index: 2,
+    explanation: "Third is the supplied correct answer.",
+  };
+  it("validates authoring and calculates an idempotent score without accepting client scores", async () => {
+    await asUser(alice);
+    await expect(
+      db.query("select save_lesson_quiz($1,$2::jsonb)", [
+        video,
+        JSON.stringify({
+          version,
+          questions: [{ ...question, options: ["Same", "SAME", "C", "D"] }],
+        }),
+      ]),
+    ).rejects.toThrow(/different/);
+    await db.query("select save_lesson_quiz($1,$2::jsonb)", [
+      video,
+      JSON.stringify({ version, questions: [question] }),
+    ]);
+    await expect(
+      db.query("select submit_lesson_quiz($1,$2,$3,$4::jsonb)", [
+        video,
+        attempt,
+        version,
+        "[]",
+      ]),
+    ).rejects.toThrow(/every question/);
+    const run = () =>
+      db.query<{ result: { correct: number; total: number; passed: boolean } }>(
+        "select submit_lesson_quiz($1,$2,$3,$4::jsonb) result",
+        [video, attempt, version, "[2]"],
+      );
+    expect((await run()).rows[0].result).toMatchObject({
+      correct: 1,
+      total: 1,
+      passed: true,
+    });
+    await run();
+    expect(
+      (await db.query("select * from lesson_quiz_attempts")).rows,
+    ).toHaveLength(1);
+    await expect(
+      db.query(
+        "insert into lesson_quiz_attempts(id,user_id,course_video_id,quiz_version,answers,correct,total,passed) values(gen_random_uuid(),$1,$2,$3,'[2]',1,1,true)",
+        [alice, video, version],
+      ),
+    ).rejects.toThrow(/permission denied/);
+    await db.query("select save_lesson_quiz($1,$2::jsonb)", [
+      video,
+      JSON.stringify({
+        version: "66666666-6666-4666-8666-666666666666",
+        questions: [question],
+      }),
+    ]);
+    await expect(
+      db.query("select submit_lesson_quiz($1,$2,$3,$4::jsonb)", [
+        video,
+        "77777777-7777-4777-8777-777777777777",
+        version,
+        "[2]",
+      ]),
+    ).rejects.toThrow(/changed/);
+  });
+  it("isolates questions and attempts and refuses cross-account writes", async () => {
+    await asUser(bob);
+    expect((await db.query("select * from lesson_quizzes")).rows).toHaveLength(
+      0,
+    );
+    expect(
+      (await db.query("select * from lesson_quiz_attempts")).rows,
+    ).toHaveLength(0);
+    await expect(
+      db.query("select save_lesson_quiz($1,$2::jsonb)", [
+        video,
+        JSON.stringify({ version, questions: [question] }),
+      ]),
+    ).rejects.toThrow(/Lesson not found/);
+    await expect(
+      db.query("select submit_lesson_quiz($1,$2,$3,$4::jsonb)", [
+        video,
+        attempt,
+        version,
+        "[2]",
+      ]),
+    ).rejects.toThrow(/Lesson not found/);
   });
 });

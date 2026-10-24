@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Box, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { dailySeries } from "@/lib/analytics";
-import { localDay } from "@/lib/utils";
+import { learningTime, localDay } from "@/lib/utils";
 import { SceneArtwork } from "@/components/three/scene-provider";
 import type { Activity } from "@/types";
 
@@ -37,9 +37,9 @@ export function LearningLandscape({
         <div className="landscape-copy">
           <span className="landscape-period">LAST 7 DAYS</span>
           <strong>
-            {metric === "minutes" ? Math.round(total) : total}
+            {metric === "minutes" ? learningTime(total) : total}
             <span>
-              {metric === "minutes" ? "minutes of focus" : "lessons completed"}
+              {metric === "minutes" ? "of focus" : "lessons completed"}
             </span>
           </strong>
           <p>Each column is a day you made space for learning.</p>
@@ -48,7 +48,7 @@ export function LearningLandscape({
               onClick={() => setMetric("minutes")}
               aria-pressed={metric === "minutes"}
             >
-              Minutes
+              Learning time
             </button>
             <button
               onClick={() => setMetric("videos")}
@@ -67,7 +67,7 @@ export function LearningLandscape({
             values={values}
             selected={selected}
             interactive
-            label={`Interactive learning timeline. ${Math.round(total)} ${metric === "minutes" ? "minutes" : "lessons"} in the last seven days. Drag or use arrow keys to rotate.`}
+            label={`Interactive learning timeline. ${metric === "minutes" ? learningTime(total) : `${total} lessons`} in the last seven days. Drag or use arrow keys to rotate.`}
           />
           <span className="landscape-hint">
             DRAG TO EXPLORE · SELECT A DAY BELOW
@@ -80,10 +80,14 @@ export function LearningLandscape({
             key={day.day}
             onClick={() => setSelected(index)}
             aria-pressed={selected === index}
-            aria-label={`${day.label}: ${Math.round(day[metric])} ${metric === "minutes" ? "minutes" : "lessons"}`}
+            aria-label={`${day.label}: ${metric === "minutes" ? learningTime(day[metric]) : `${day[metric]} lessons`}`}
           >
             <span>{day.name}</span>
-            <strong>{Math.round(day[metric])}</strong>
+            <strong>
+              {metric === "minutes"
+                ? learningTime(day[metric], true)
+                : day[metric]}
+            </strong>
             <i />
           </button>
         ))}
@@ -91,8 +95,9 @@ export function LearningLandscape({
       <div className="landscape-footer" aria-live="polite">
         <span>{current.label}</span>
         <strong>
-          {Math.round(current[metric])}{" "}
-          {metric === "minutes" ? "minutes" : "lessons"}
+          {metric === "minutes"
+            ? learningTime(current[metric])
+            : `${current[metric]} lessons`}
         </strong>
         <span>Heights relative to this week’s maximum</span>
       </div>

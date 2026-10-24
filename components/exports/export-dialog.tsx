@@ -19,6 +19,7 @@ const icons = {
   notes: FileText,
   progress: FileSpreadsheet,
   activity: FileSpreadsheet,
+  quizzes: FileSpreadsheet,
   backup: FileJson,
   report: Printer,
 };
@@ -33,17 +34,22 @@ export function ExportDialog({ compact = false }: { compact?: boolean }) {
     (c) => courseId === "all" || c.id === courseId,
   );
   const notes = courses.flatMap((c) => c.videos.flatMap((v) => v.notes)).length;
+  const quizAttempts = courses.flatMap((c) =>
+    c.videos.flatMap((v) => v.quiz_attempts || []),
+  ).length;
   const lessons = courses.flatMap((c) => c.videos).length;
   const empty =
-    format === "notes"
-      ? !notes
-      : format === "progress"
-        ? !lessons
-        : format === "activity"
-          ? !data.activity.length
-          : format === "report"
-            ? !courses.length
-            : false;
+    format === "quizzes"
+      ? !quizAttempts
+      : format === "notes"
+        ? !notes
+        : format === "progress"
+          ? !lessons
+          : format === "activity"
+            ? !data.activity.length
+            : format === "report"
+              ? !courses.length
+              : false;
   function runExport() {
     setError("");
     try {
@@ -145,15 +151,17 @@ export function ExportDialog({ compact = false }: { compact?: boolean }) {
             </p>
           )}
           <p className="export-summary" role="status">
-            {format === "notes"
-              ? `${notes} notes across ${courses.length} courses`
-              : format === "progress"
-                ? `${lessons} lessons across ${courses.length} courses`
-                : format === "activity"
-                  ? `${data.activity.length} days of activity`
-                  : format === "backup"
-                    ? `${data.courses.length} courses · ${data.goals.length} goals · complete history`
-                    : `${courses.length} courses · progress and practice summary`}
+            {format === "quizzes"
+              ? `${quizAttempts} quiz attempts across ${courses.length} courses`
+              : format === "notes"
+                ? `${notes} notes across ${courses.length} courses`
+                : format === "progress"
+                  ? `${lessons} lessons across ${courses.length} courses`
+                  : format === "activity"
+                    ? `${data.activity.length} days of activity`
+                    : format === "backup"
+                      ? `${data.courses.length} courses · ${data.goals.length} goals · complete history`
+                      : `${courses.length} courses · progress and practice summary`}
           </p>
           {empty && (
             <p className="muted">

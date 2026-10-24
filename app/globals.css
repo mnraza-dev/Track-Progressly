@@ -2410,6 +2410,8 @@
   .workspace-dialog {
     max-height: 88dvh;
     overflow-y: auto;
+    grid-auto-rows: max-content;
+    align-content: start;
     z-index: 60;
   }
   .workspace-dialog .search-input {

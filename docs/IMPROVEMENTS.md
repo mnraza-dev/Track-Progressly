@@ -2,26 +2,22 @@
 
 ## Implemented
 
-- A ChaiCode-inspired visual system: near-black surfaces, warm highlights, large headings, outlined cards, subtle geometric decoration, and responsive spacing. Progressly keeps its own identity. New visitors start in dark mode; saved theme choices still apply, and light/system themes remain available.
-- A shared export panel in the workspace header and Settings: Markdown notes with timestamped YouTube links, lesson-level CSV, daily activity CSV, complete JSON backups, and a printable progress report that can be saved as PDF. Notes, progress, and reports support selecting one course. Activity and backup always cover the full workspace.
-- UTF-8 spreadsheet exports with quoted cells and formula neutralization. Report text is HTML-escaped. Exports run on the device.
-- Validated browser backup restore with a preview, replacement confirmation, persistence under the correct storage key, and inline errors. Account restore is explicitly unavailable until a server-side restore flow exists; account export still works.
+- ChaiCode-inspired dark surfaces, copper highlights, outlined cards, responsive layouts, and larger typography. Space Grotesk headings, DM Sans reading text, and Geist Mono labels are self-hosted. Light/system themes remain available.
+- Exports for Markdown notes, lesson CSV, activity CSV, quiz-results CSV, complete JSON backups, and printable reports/save PDF. Course-scoped exports, formula-safe CSV cells, escaped reports, validated browser restore, and device-local file creation.
+- Eight original collectible level badges, persistent one-time XP, daily quests, milestone achievements, reduced-motion celebrations, and opt-in sound effects with volume, preview, mute, and quiet-during-video preferences.
+- Custom lesson quizzes with four-option questions, explanations, a 70% pass mark, retries, saved attempts, versioned edits, completion actions, and server-derived grading for accounts.
+- Consistent learning time labels: 60 minutes displays as 1 Hour, 90 as 1 Hour 30 Minutes, with compact chart labels. Editable minute inputs and clocks keep their explicit units.
+- Restored database baseline, account ownership constraints and RLS, immutable server reward ledger, private quizzes, streamed request limits, response security headers, bounded anonymous rate-limit storage, repaired course/player hooks, clearer analytics labels, and CI checks against a production build. Framework dependencies are pinned to 16.4.3.
 
-## Recommended next, in priority order
+## Recommended next
 
-1. **Repair the existing reliability checks.** Restore the missing `supabase/migrations/001_learntrack.sql` migration and resolve existing conditional hooks and effect issues in the course/player code. These checks currently prevent a clean full-suite result.
-2. **Build a scheduled revision queue.** Notes already support “needs revision.” Add next-review dates and a short daily queue so learners know what to revisit.
-3. **Make planning actionable.** Use course deadlines and available study days to suggest a realistic weekly lesson plan, then show one clear next action on the dashboard.
-4. **Add account backup restore.** Validate on the server, preview conflicts, and restore transactionally with ownership checks and a recovery path. The current browser-only restore must not pretend to save account data.
-5. **Simplify analytics language.** Prefer watch time, completed lessons, completed practice, and review backlog. Current retention/mastery-style labels are proxies based on activity, not measured knowledge; explain or rename them.
-6. **Add resilient sync status.** Show when the last save completed and provide actionable retry feedback when connectivity or browser storage fails.
-
-The Next.js dev server also reports a security advisory for the installed framework version. Review and apply the framework security upgrade in a separate change, then run the app's regression checks.
+1. Complete the hosted launch checks in [Development](DEVELOPMENT.md#production-release): configure credentials, apply migrations, verify email/OAuth and two-account isolation, monitor errors, and test recovery.
+2. Add a scheduled revision queue using existing notes and quiz mistakes.
+3. Suggest realistic weekly plans from course deadlines and available study days.
+4. Add transactional account backup restore with a conflict preview and recovery path. Browser restore is already available.
+5. Add per-course loading for very large libraries and shared anonymous import limiting for multi-instance deployments.
+6. Surface last-sync timestamps and actionable reconnect/retry status for cloud workspaces.
 
 ## Validation
 
-- Production build and TypeScript check pass.
-- 92 unit tests pass when excluding the database suite, which cannot initialize because the SQL migration referenced by that suite is missing.
-- All 16 targeted browser checks pass across desktop/mobile: actual downloads, course selection, printable reports, invalid-file rejection, confirmed restore and persistence after reload, empty states, keyboard focus, theme persistence/contrast, the landing page, and small-phone/landscape layouts with reduced motion.
-- ESLint passes for changed source and test files. Repository-wide lint still reports existing issues outside this work.
-- Set `PLAYWRIGHT_PORT=3100` when another local app occupies the default port.
+Run `bun run lint --max-warnings 0`, `bun run typecheck`, `bun run test`, and `bun run build`. Run browser checks without Supabase environment variables, using `PLAYWRIGHT_SERVER_MODE=production PLAYWRIGHT_PORT=3300 bun run test:e2e` after a build. PostgreSQL tests use PGlite with authenticated roles and two users. Browser checks cover desktop/mobile layouts, exports, restoration, themes, courses, notes, practice, player chapters, charts, rewards, sounds, and quizzes. Hosted authentication, email, OAuth, monitoring, and real service configuration remain deployment checks.

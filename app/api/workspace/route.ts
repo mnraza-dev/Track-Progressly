@@ -69,6 +69,8 @@ export async function GET() {
       profile,
       activity,
       rewards,
+      quizzes,
+      quizAttempts,
     ] = await Promise.all([
       allRows(db, "courses", "updated_at"),
       allRows(db, "course_videos", "position"),
@@ -80,6 +82,8 @@ export async function GET() {
       db.from("profiles").select("*").eq("id", user.id).single(),
       db.rpc("learning_analytics"),
       db.rpc("sync_learning_rewards"),
+      allRows(db, "lesson_quizzes"),
+      allRows(db, "lesson_quiz_attempts", "completed_at"),
     ]);
     if (profile.error) throw profile.error;
     if (activity.error) throw activity.error;
@@ -96,6 +100,15 @@ export async function GET() {
                 progress:
                   progress.find((p) => p.course_video_id === v.id) ||
                   emptyProgress,
+                quiz: (() => {
+                  const quiz = quizzes.find((q) => q.course_video_id === v.id);
+                  return quiz
+                    ? { version: quiz.version, questions: quiz.questions }
+                    : undefined;
+                })(),
+                quiz_attempts: quizAttempts
+                  .filter((a) => a.course_video_id === v.id)
+                  .slice(-100),
                 notes: notes.filter((n) => n.course_video_id === v.id),
                 tasks: tasks.filter((t) => t.course_video_id === v.id),
                 bookmarks: bookmarks.filter((b) => b.course_video_id === v.id),
@@ -131,6 +144,20 @@ export async function POST(request: Request) {
     if (baselineRewards.error) throw baselineRewards.error;
     let result;
     switch (m.op) {
+      case "save_quiz":
+        result = await db.rpc("save_lesson_quiz", {
+          video: m.video_id,
+          payload: m.quiz,
+        });
+        break;
+      case "submit_quiz":
+        result = await db.rpc("submit_lesson_quiz", {
+          video: m.video_id,
+          attempt_id: m.id,
+          quiz_version: m.quiz_version,
+          answers: m.answers,
+        });
+        break;
       case "create_course":
         result = await db.rpc("import_course", { payload: m.course });
         break;
@@ -269,7 +296,11 @@ export async function POST(request: Request) {
     const rewards = await db.rpc("sync_learning_rewards");
     if (rewards.error) throw rewards.error;
     return Response.json(
-      { ok: true, rewards: rewards.data },
+      {
+        ok: true,
+        rewards: rewards.data,
+        quiz_attempt: m.op === "submit_quiz" ? result?.data : undefined,
+      },
       { headers: { "Cache-Control": "private, no-store" } },
     );
   } catch (error) {

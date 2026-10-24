@@ -1,4 +1,5 @@
 "use client";
+import { learningTime } from "@/lib/utils";
 import { FeedbackControls } from "@/components/gamification/feedback-controls";
 import { ExportDialog } from "@/components/exports/export-dialog";
 import { WorkspaceDialog } from "@/components/ui/workspace-dialog";
@@ -155,6 +156,11 @@ export function Settings() {
                 minutes
               </span>
             </label>
+            {minutes >= 60 && (
+              <p className="settings-help">
+                Daily intention: {learningTime(minutes)}
+              </p>
+            )}
             <div className="toggle-setting">
               <div>
                 <strong>Automatic lesson completion</strong>

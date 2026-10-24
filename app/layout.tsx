@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { DM_Sans, Space_Grotesk, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "./studio.css";
 import "./charts.css";
 import "./product.css";
 import "./chai.css";
 import "./rewards.css";
+import "./quiz.css";
 import { SceneProvider } from "@/components/three/scene-provider";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { TourProvider } from "@/components/tour/tour-context";
 import { ProductTour } from "@/components/tour/product-tour";
 
-const inter = Inter({
+const bodyFont = DM_Sans({
   variable: "--font-body",
   subsets: ["latin"],
 });
 
-const jakarta = Plus_Jakarta_Sans({
+const displayFont = Space_Grotesk({
   variable: "--font-display",
   subsets: ["latin"],
 });
@@ -38,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
-      className={`${inter.variable} ${jakarta.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${bodyFont.variable} ${displayFont.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider>

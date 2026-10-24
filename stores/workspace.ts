@@ -100,6 +100,18 @@ export const useWorkspace = create<State>((set, get) => ({
               const before = get().data;
               const data = applyMutation(before, parsed);
               if (result.rewards) data.rewards = result.rewards;
+              if (parsed.op === "submit_quiz" && result.quiz_attempt) {
+                const video = data.courses
+                  .flatMap((c) => c.videos)
+                  .find((v) => v.id === parsed.video_id);
+                if (video)
+                  video.quiz_attempts = [
+                    ...(video.quiz_attempts || []).filter(
+                      (a) => a.id !== parsed.id,
+                    ),
+                    result.quiz_attempt,
+                  ].slice(-100);
+              }
               set({ data, celebration: earnedCelebration(before, data) });
             }
           } else {

@@ -12,7 +12,7 @@ export const TIMER_PRESETS: FocusTimerPreset[] = [
   { label: "5 min", seconds: 5 * 60 },
   { label: "15 min", seconds: 15 * 60 },
   { label: "30 min", seconds: 30 * 60 },
-  { label: "1 hr", seconds: 60 * 60 },
+  { label: "1 Hour", seconds: 60 * 60 },
 ];
 
 export interface FocusTimerState {

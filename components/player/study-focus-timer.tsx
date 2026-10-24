@@ -20,7 +20,7 @@ import { unlockAudio, playFeedbackSound } from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { fireConfetti } from "@/lib/confetti";
 import { useWorkspace } from "@/stores/workspace";
-import { localDay, cn } from "@/lib/utils";
+import { learningTime, localDay, cn } from "@/lib/utils";
 import type { PlayerHandle } from "./youtube-player";
 
 import { useFocusTimerStore, TIMER_PRESETS } from "@/stores/focus-timer";
@@ -101,7 +101,7 @@ export function StudyFocusTimer({
       playFeedbackSound("focus");
     }
     notify(
-      `🎉 Focus sprint completed! You logged a focused ${Math.round(targetSeconds / 60)}m study session!`,
+      `🎉 Focus sprint completed! You logged a focused ${learningTime(targetSeconds / 60)} study session!`,
     );
   }, [soundEnabled, targetSeconds, notify, setCompleted]);
 
@@ -122,9 +122,7 @@ export function StudyFocusTimer({
   // Set target preset
   const selectPreset = (seconds: number) => {
     setTargetPreset(seconds);
-    notify(
-      `Focus target set to ${seconds >= 3600 ? `${seconds / 3600} hr` : `${seconds / 60} min`}`,
-    );
+    notify(`Focus target set to ${learningTime(seconds / 60)}`);
   };
 
   // Reset timer
@@ -180,7 +178,7 @@ export function StudyFocusTimer({
     const mins = Math.floor(secs / 60);
     const remSecs = secs % 60;
     if (mins === 0) return `${remSecs}s`;
-    return `${mins}m ${remSecs}s`;
+    return `${learningTime(mins, true)}${remSecs ? ` ${remSecs}s` : ""}`;
   };
 
   return (
@@ -318,11 +316,7 @@ export function StudyFocusTimer({
                 {formatTimeRemaining(remainingSeconds)}
               </span>
               <span className="focus-timer-target-tag">
-                /{" "}
-                {targetSeconds >= 3600
-                  ? `${targetSeconds / 3600}h`
-                  : `${targetSeconds / 60}m`}{" "}
-                target
+                / {learningTime(targetSeconds / 60)} target
               </span>
               <span className="focus-timer-micro-state">
                 {isCompleted
@@ -416,10 +410,10 @@ export function StudyFocusTimer({
               <div className="focus-metric-box">
                 <span className="focus-metric-label">Today Total:</span>
                 <strong className="focus-metric-value">
-                  {totalTodayMinutes}m
+                  {learningTime(totalTodayMinutes)}
                   <small className="goal-ref">
                     {" "}
-                    / {dailyGoalMinutes}m goal
+                    / {learningTime(dailyGoalMinutes)} goal
                   </small>
                 </strong>
               </div>
@@ -434,10 +428,7 @@ export function StudyFocusTimer({
               {formatTimeRemaining(remainingSeconds)}
             </span>
             <span className="collapsed-target">
-              /{" "}
-              {targetSeconds >= 3600
-                ? `${targetSeconds / 3600}h`
-                : `${targetSeconds / 60}m`}
+              / {learningTime(targetSeconds / 60)}
             </span>
           </div>
           <div className="collapsed-session-stat">

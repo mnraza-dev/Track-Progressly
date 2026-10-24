@@ -59,7 +59,7 @@
     background: var(--brand-accent);
   }
   .product-hero h1 {
-    font-family: var(--font-body), sans-serif;
+    font-family: var(--font-display), sans-serif;
     font-size: clamp(44px, 5.1vw, 74px);
     line-height: 1.08;
     font-weight: 500;
@@ -126,7 +126,7 @@
   .product-section-title h2,
   .product-perspective h2,
   .product-final h2 {
-    font-family: var(--font-body), sans-serif;
+    font-family: var(--font-display), sans-serif;
     font-weight: 500;
     letter-spacing: -1.8px;
   }
@@ -230,6 +230,7 @@
   }
   .export-center {
     display: grid;
+    grid-auto-rows: max-content;
     gap: 16px;
   }
   .export-formats {

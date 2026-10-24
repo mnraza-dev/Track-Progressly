@@ -54,6 +54,10 @@ Grow through eight levels with custom collectible badges, daily quests, and mile
 
 Earned rewards survive breaks, archived courses, and repeated completion. In **Settings → Sound effects**, opt into original milestone chimes, choose a volume, or keep learning quiet. Celebration effects respect reduced motion.
 
+Each lesson also has a **Lesson quiz** section. Create custom multiple-choice questions, review explanations, retry for a 70% pass, and complete the lesson from your result. Quiz attempts are saved and can be exported as CSV; full backups include questions and attempts. Learning summaries use hours once they reach 60 minutes.
+
+Space Grotesk headings, DM Sans body text, and Geist Mono labels complete the dark, copper-accented visual style.
+
 ## Your knowledge, yours to keep
 
 Choose **Export** in the workspace header, or **Open export options** in Settings:
@@ -94,4 +98,4 @@ Building or running Progressly? See the separate [developer guide](docs/DEVELOPM
 
 See [improvement priorities](docs/IMPROVEMENTS.md) for the next product and reliability improvements.
 
-For a hosted product launch, follow the [release guide](docs/RELEASE.md).
+For a hosted product launch, follow the [release guide](docs/DEVELOPMENT.md#production-release).

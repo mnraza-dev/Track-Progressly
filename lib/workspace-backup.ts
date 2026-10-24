@@ -1,19 +1,29 @@
 import { z } from "zod";
+import { lessonQuizSchema, quizAttemptSchema } from "@/lib/quiz";
 import type { Workspace } from "@/types";
 
 const id = z.string().min(1).max(200);
 const text = z.string().max(50000);
 const seconds = z.number().finite().min(0).max(Number.MAX_SAFE_INTEGER);
-const nullableDate = z.string().nullable();
+const timestamp = z.string().datetime({ offset: true });
+const nullableDate = z.string().date().nullable();
+const nullableTimestamp = timestamp.nullable();
 const workspaceSchema = z.object({
   rewards: z
     .object({
       version: z.literal(1),
       events: z.record(
-        z.string().max(100000),
+        z
+          .string()
+          .max(100000)
+          .refine(
+            (key) =>
+              !key.startsWith("day:") ||
+              z.string().date().safeParse(key.slice(4)).success,
+          ),
         z.object({
           xp: z.number().int().min(0).max(10000),
-          earned_at: z.string().datetime(),
+          earned_at: timestamp,
         }),
       ),
     })
@@ -51,9 +61,9 @@ const workspaceSchema = z.object({
         ]),
         is_favorite: z.boolean(),
         target_completion_date: nullableDate,
-        completed_at: nullableDate,
-        created_at: z.string(),
-        updated_at: z.string(),
+        completed_at: nullableTimestamp,
+        created_at: timestamp,
+        updated_at: timestamp,
         videos: z
           .array(
             z.object({
@@ -75,16 +85,18 @@ const workspaceSchema = z.object({
                 last_position_seconds: seconds,
                 watched_seconds: seconds,
                 is_completed: z.boolean(),
-                last_watched_at: nullableDate,
-                completed_at: nullableDate,
+                last_watched_at: nullableTimestamp,
+                completed_at: nullableTimestamp,
               }),
+              quiz: lessonQuizSchema.optional(),
+              quiz_attempts: z.array(quizAttemptSchema).max(100).optional(),
               notes: z.array(
                 z.object({
                   id,
                   content: text,
                   timestamp_seconds: seconds,
                   is_revision_required: z.boolean(),
-                  updated_at: z.string(),
+                  updated_at: timestamp,
                 }),
               ),
               tasks: z.array(
@@ -92,7 +104,7 @@ const workspaceSchema = z.object({
                   id,
                   title: text,
                   is_completed: z.boolean(),
-                  completed_at: nullableDate,
+                  completed_at: nullableTimestamp,
                 }),
               ),
               bookmarks: z.array(
@@ -109,7 +121,7 @@ const workspaceSchema = z.object({
       id,
       goal_type: z.enum(["daily_minutes", "daily_videos", "weekly_minutes"]),
       target_value: z.number().int().min(1).max(10080),
-      start_date: z.string(),
+      start_date: z.string().date(),
       end_date: nullableDate,
     }),
   ),

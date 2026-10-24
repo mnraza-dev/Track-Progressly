@@ -13,7 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { chartData, type ActivityMetric } from "@/lib/analytics";
-import { localDay } from "@/lib/utils";
+import { learningTime, localDay } from "@/lib/utils";
 import type { Activity } from "@/types";
 
 export const chartTooltipStyle = {
@@ -54,9 +54,7 @@ export function ActivityChart({
       <div className="chart-tools">
         <span>
           <i className="chart-key" />
-          {unit === "minutes"
-            ? "Active learning · minutes"
-            : `Completed ${unit}`}
+          {unit === "minutes" ? "Active learning time" : `Completed ${unit}`}
         </span>
         <div className="chart-view-switch" aria-label="Activity chart view">
           <button
@@ -110,11 +108,16 @@ export function ActivityChart({
               minTickGap={22}
             />
             <YAxis
-              width={34}
+              width={48}
               axisLine={false}
               tickLine={false}
               tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
               allowDecimals={false}
+              tickFormatter={(value) =>
+                metric === "minutes"
+                  ? learningTime(Number(value), true)
+                  : String(value)
+              }
               domain={[
                 0,
                 data.every((v) => !v.value)
@@ -133,7 +136,12 @@ export function ActivityChart({
                   : { stroke: "var(--chart-1)", strokeDasharray: "3 4" }
               }
               labelFormatter={(_, payload) => payload[0]?.payload.label || ""}
-              formatter={(value) => [`${value} ${unit}`, "Learning"]}
+              formatter={(value) => [
+                metric === "minutes"
+                  ? learningTime(Number(value))
+                  : `${value} ${unit}`,
+                "Learning",
+              ]}
             />
             {goal && metric === "minutes" ? (
               <ReferenceLine
@@ -142,7 +150,7 @@ export function ActivityChart({
                 strokeDasharray="5 5"
                 ifOverflow="extendDomain"
                 label={{
-                  value: `Goal ${goal}m`,
+                  value: `Goal ${learningTime(goal)}`,
                   fill: "var(--chart-2)",
                   fontSize: 12,
                   position: "insideTopRight",
@@ -190,14 +198,18 @@ export function ActivityChart({
                       ? "Week starting"
                       : "Date"}
                 </th>
-                <th scope="col">{unit}</th>
+                <th scope="col">
+                  {metric === "minutes" ? "Learning time" : unit}
+                </th>
               </tr>
             </thead>
             <tbody>
               {data.map((row) => (
                 <tr key={row.label}>
                   <th scope="row">{row.label}</th>
-                  <td>{row.value}</td>
+                  <td>
+                    {metric === "minutes" ? learningTime(row.value) : row.value}
+                  </td>
                 </tr>
               ))}
             </tbody>

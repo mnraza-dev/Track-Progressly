@@ -2,7 +2,7 @@ import type { Workspace } from "@/types";
 import { completion, localDay, timestamp } from "@/lib/utils";
 
 export type ExportFormat =
-  "notes" | "progress" | "activity" | "backup" | "report";
+  "notes" | "progress" | "activity" | "quizzes" | "backup" | "report";
 export const exportFormats = [
   {
     id: "notes",
@@ -26,11 +26,18 @@ export const exportFormats = [
       "Your full daily learning history, including study time and completed work.",
   },
   {
+    id: "quizzes",
+    title: "Quiz results",
+    extension: ".csv",
+    description:
+      "Saved attempts, scores, pass status, and question-set versions by lesson.",
+  },
+  {
     id: "backup",
     title: "Workspace backup",
     extension: ".json",
     description:
-      "All courses, notes, bookmarks, practice, goals, activity, and preferences.",
+      "All courses, notes, quizzes, attempts, rewards, goals, activity, and preferences.",
   },
   {
     id: "report",
@@ -117,6 +124,39 @@ export function createExport(
           ]),
       ]),
       filename: filename("activity", "csv"),
+      mime: "text/csv;charset=utf-8",
+    };
+  if (format === "quizzes")
+    return {
+      content: csv([
+        [
+          "Course",
+          "Lesson",
+          "Attempt ID",
+          "Question set",
+          "Correct",
+          "Total",
+          "Score %",
+          "Passed",
+          "Completed at",
+        ],
+        ...courses.flatMap((c) =>
+          c.videos.flatMap((v) =>
+            (v.quiz_attempts || []).map((a) => [
+              c.title,
+              v.title,
+              a.id,
+              a.quiz_version,
+              a.correct,
+              a.total,
+              Math.round((a.correct / a.total) * 100),
+              a.passed,
+              a.completed_at,
+            ]),
+          ),
+        ),
+      ]),
+      filename: filename(`quiz-results-${scope}`, "csv"),
       mime: "text/csv;charset=utf-8",
     };
   if (format === "progress")

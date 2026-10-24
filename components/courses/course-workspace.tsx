@@ -1,4 +1,6 @@
 "use client";
+import { LessonQuiz } from "@/components/quizzes/lesson-quiz";
+import { latestQuizPass } from "@/lib/quiz";
 import type { Course } from "@/types";
 import { useFeedback } from "@/stores/feedback";
 import { Textarea } from "@/components/ui/textarea";
@@ -238,7 +240,22 @@ function CourseWorkspaceContent({
   const [upNextActive, setUpNextActive] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
+  const openQuiz = () => {
+    const section = document.getElementById("lesson-quiz");
+    section?.scrollIntoView({
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+      block: "start",
+    });
+    section?.focus({ preventScroll: true });
+  };
   const triggerUpNext = () => {
+    if (lesson?.quiz && !latestQuizPass(lesson.quiz, lesson.quiz_attempts)) {
+      openQuiz();
+      notify("Check your understanding with the lesson quiz before moving on.");
+      return;
+    }
     if (!next) return;
     setUpNextActive(true);
     setCountdown(5);
@@ -684,6 +701,9 @@ function CourseWorkspaceContent({
                     <Save size={15} />
                     Save progress
                   </Button>
+                  <Button variant="outline" onClick={openQuiz}>
+                    Lesson quiz
+                  </Button>
                   <div
                     className="playback-speed-control"
                     title="Playback speed"
@@ -747,6 +767,24 @@ function CourseWorkspaceContent({
                 isVideoPlaying={isVideoPlaying}
                 playerRef={player}
               />
+              {lesson.availability_status === "available" && (
+                <LessonQuiz
+                  key={`quiz:${lesson.id}`}
+                  lesson={lesson}
+                  onComplete={async () => {
+                    await mutate({
+                      op: "progress",
+                      video_id: lesson.id,
+                      status: "completed",
+                      active_seconds: 0,
+                      position:
+                        player.current?.position() ||
+                        lesson.progress.last_position_seconds,
+                    });
+                    notify("Quiz passed. Lesson completed!");
+                  }}
+                />
+              )}
               <LessonNotes
                 key={`notes:${lesson.id}`}
                 lesson={lesson}
@@ -768,7 +806,7 @@ function CourseWorkspaceContent({
                     </span>
                     <h2>You finished this course!</h2>
                     <p>
-                      Every lesson and exercise completed. Your momentum is
+                      Every available lesson completed. Your momentum is
                       extraordinary.
                     </p>
                     <div className="trophy-actions">

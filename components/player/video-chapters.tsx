@@ -1,7 +1,7 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   Search,
   ListVideo,
@@ -54,6 +54,7 @@ export function VideoChapters({
   onSaveCustomChapters?: (text: string) => void;
   onClearCustomChapters?: () => void;
 }) {
+  const stateId = useId();
   const [query, setQuery] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [customInput, setCustomInput] = useState("");
@@ -239,11 +240,15 @@ export function VideoChapters({
                       onClick={() => onSeek(chapter.start_seconds)}
                       aria-current={isActive ? "true" : undefined}
                       aria-label={`Jump to ${chapter.title} at ${chapterTimestamp(chapter.start_seconds)}`}
-                      aria-description={
-                        isCompleted ? "Completed chapter" : "Not completed"
-                      }
+                      aria-describedby={`${stateId}-${chapter.index}`}
                       className="chapter-jump-btn"
                     >
+                      <span
+                        id={`${stateId}-${chapter.index}`}
+                        className="sr-only"
+                      >
+                        {isCompleted ? "Completed chapter" : "Not completed"}
+                      </span>
                       <span
                         className={cn(
                           "chapter-number",

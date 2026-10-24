@@ -1,3 +1,4 @@
+import type { LessonQuiz, QuizAttempt } from "@/lib/quiz";
 import type { RewardLedger } from "@/lib/rewards";
 export type LessonStatus =
   "not_started" | "in_progress" | "completed" | "needs_revision";
@@ -32,6 +33,8 @@ export type Lesson = {
     last_watched_at: string | null;
     completed_at: string | null;
   };
+  quiz?: LessonQuiz;
+  quiz_attempts?: QuizAttempt[];
   notes: Note[];
   tasks: PracticeTask[];
   bookmarks: Bookmark[];

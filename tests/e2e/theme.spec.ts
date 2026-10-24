@@ -116,8 +116,8 @@ test("light, dark, and system themes persist with readable text and larger typog
       getComputedStyle(document.querySelector("input")!).fontSize,
     ),
   }));
-  expect(type.body).toContain("Inter");
-  expect(type.heading).toContain("Plus Jakarta Sans");
+  expect(type.body).toContain("DM Sans");
+  expect(type.heading).toContain("Space Grotesk");
   expect(type.bodySize).toBeGreaterThanOrEqual(15);
   expect(type.inputSize).toBeGreaterThanOrEqual(15);
   await themes.getByRole("tab", { name: "System" }).click();

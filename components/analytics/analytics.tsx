@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import {
+  learningTime,
   duration,
   localDay,
   completion,
@@ -676,13 +677,15 @@ ${courseDiagnostics
             <div className="rhythm-pill">
               <Sun size={14} className="text-yellow-500" />
               <span>
-                Weekday Focus: <strong>{weekdayFocusMinutes}m</strong>
+                Weekday Focus:{" "}
+                <strong>{learningTime(weekdayFocusMinutes)}</strong>
               </span>
             </div>
             <div className="rhythm-pill">
               <Moon size={14} className="text-indigo-400" />
               <span>
-                Weekend Focus: <strong>{weekendFocusMinutes}m</strong>
+                Weekend Focus:{" "}
+                <strong>{learningTime(weekendFocusMinutes)}</strong>
               </span>
             </div>
             {peakWeekday && (
@@ -691,7 +694,7 @@ ${courseDiagnostics
                 <span>
                   Peak Day:{" "}
                   <strong>
-                    {peakWeekday.name} ({peakWeekday.minutes}m)
+                    {peakWeekday.name} ({learningTime(peakWeekday.minutes)})
                   </strong>
                 </span>
               </div>

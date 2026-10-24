@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { lessonQuizSchema } from "@/lib/quiz";
 export const importVideoSchema = z.object({
   youtube_video_id: z.string().regex(/^[\w-]{11}$/),
   title: z.string().min(1).max(500),
@@ -21,6 +22,18 @@ export const courseSchema = z.object({
   videos: z.array(importVideoSchema).min(1).max(5000),
 });
 export const mutationSchema = z.discriminatedUnion("op", [
+  z.object({
+    op: z.literal("save_quiz"),
+    video_id: z.uuid(),
+    quiz: lessonQuizSchema,
+  }),
+  z.object({
+    op: z.literal("submit_quiz"),
+    video_id: z.uuid(),
+    id: z.uuid(),
+    quiz_version: z.uuid(),
+    answers: z.array(z.number().int().min(0).max(3)).min(1).max(20),
+  }),
   z.object({ op: z.literal("create_course"), course: courseSchema }),
   z.object({
     op: z.literal("update_course"),

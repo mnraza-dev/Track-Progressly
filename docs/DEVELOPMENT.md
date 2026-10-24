@@ -32,7 +32,7 @@ Behind a reverse proxy, forward the public hostname in `Host` or `X-Forwarded-Ho
 
 ## Product design and Three.js studio
 
-The product uses a minimalist shadcn/ui system: warm chalk and deep teal surfaces, teal and copper accents, semantic light/dark tokens, Plus Jakarta Sans headings, and Inter body text. The dashboard and public page share an interactive Watch / Practice / Remember showcase; its controls switch between custom Three.js scenes and explain the learning process. Buttons, cards, dialogs, inputs, textareas, tabs, switches, badges, checkboxes, and separators use the official shadcn components backed by Radix. `next-themes` persists Light, Dark, or System and follows operating-system changes. Existing workspace and theme storage keys are retained so rebranding does not discard saved data.
+The product uses a ChaiCode-inspired shadcn/ui system: near-black surfaces, warm copper highlights, outlined cards, Space Grotesk headings, DM Sans body text, and Geist Mono labels. Next.js self-hosts the fonts. The dashboard and public page share an interactive Watch / Practice / Remember showcase; its controls switch between custom Three.js scenes and explain the learning process. Buttons, cards, dialogs, inputs, textareas, tabs, switches, badges, checkboxes, and separators use shadcn components backed by Radix. `next-themes` persists Light, Dark, or System and follows operating-system changes. Existing workspace and theme storage keys are retained so rebranding does not discard saved data.
 
 The interface uses a shared Three.js WebGL renderer for the dashboard sculpture, physical daily-goal ring, category artwork, library empty state, learning goals, analytics insights, import guide, authentication, and public homepage. The scenes use custom procedural models, PBR materials, environment lighting, and pointer parallax. The hero can be rotated with a mouse drag or the arrow keys; Home and the reset control restore its orientation.
 
@@ -46,10 +46,10 @@ The daily-goal ring uses actual saved learning progress. Learning data and playb
 
 ## Connect Supabase
 
-**Current checkout limitation:** `supabase/migrations/001_learntrack.sql` is missing. The steps below describe the expected setup, but cloud mode and the nine database integration tests cannot be verified until that migration is restored. The local workspace, YouTube integration, and UI do not require this migration.
+All three database migrations are included and exercised by the PostgreSQL integration tests. Hosted authentication, email, OAuth, and real service credentials require verification against your configured Supabase project.
 
 1. Create a free Supabase project.
-2. Run **the entire** `supabase/migrations/001_learntrack.sql` in the Supabase SQL editor, or use `supabase db push` after linking your project. Apply this migration to a new database, once.
+2. Apply every migration in `supabase/migrations/` in numeric order: `001_learntrack.sql`, `002_learning_rewards.sql`, then `003_lesson_quizzes.sql`. Use the Supabase SQL editor or `supabase db push` after linking your project. Apply each migration once; existing installations should apply only migrations they have not already run.
 3. Copy the project URL and **publishable key** from the project's Connect dialog into `.env.local`:
 
 ```dotenv
@@ -138,8 +138,32 @@ Refresh the README screenshots from an isolated illustrative workspace with `UPD
 1. Push this repository to your Git host and import it into Vercel as a Next.js project.
 2. Use `bun install --frozen-lockfile` for installation and `bun run build` as the build command. Alternatively, npm can install from `package.json` if you generate and commit an npm lockfile.
 3. For browser mode, add only `YOUTUBE_API_KEY` to the correct Vercel environment and leave both Supabase variables unset. For cloud mode, add both Supabase variables too. Redeploy after changing environment variables.
-4. For cloud mode, apply the migration to your production Supabase project.
+4. For cloud mode, apply all pending migrations to your production Supabase project in numeric order.
 5. For cloud mode, set Supabase's site URL to your production domain and allow its `/auth/callback` and password-reset callback. Add preview domains only if you need preview sign-in.
 6. Deploy and verify playlist preview/confirm, video playback, completion, notes, and reload persistence. For cloud mode, also verify signup/email confirmation, Google OAuth, logout/login persistence, and isolation using two accounts.
 
 No hosted deployment or live Supabase/YouTube connection is included without your project credentials. Cloud integration is implemented, but hosted account flows and live YouTube imports must be validated with those credentials before treating a deployment as production-ready.
+
+## Production release
+
+The app includes a production build, strict lint and TypeScript checks, PostgreSQL ownership tests, and desktop/mobile browser workflows. CI runs these checks, then exercises the compiled production app with `PLAYWRIGHT_SERVER_MODE=production`. Next.js and its ESLint config are pinned to 16.4.3. Response headers include frame protection, no-sniff, referrer policy, and restricted device permissions. JSON endpoints enforce streamed request size limits, validate mutations, and reject foreign origins.
+
+### Rewards and feedback
+
+Eight generated enamel/metal badges represent levels at 0, 150, 400, 800, 1,400, 2,200, 3,200, and 4,500 XP. The first badge welcomes new learners. A persistent ledger grants one-time lesson, note, practice, course, daily quest, focus, and achievement rewards. Undoing, archiving, deleting, or re-importing earned work does not replay its rewards. Moving the playback position or checking chapters does not grant learning XP. Account rewards are calculated by a private database function with an account lock and unique event keys; clients cannot insert XP.
+
+Milestone chimes use the Web Audio API with device-level opt-in, volume control, preview, mute, and a quiet-during-video setting. Sounds do not play on initial load or replay after navigation. Hidden tabs suppress sounds; confetti respects reduced motion and the celebration preference. Automated browser checks verify sound scheduling; preview the chimes on real target devices before release.
+
+### Lesson quizzes
+
+Each available lesson has a personal multiple-choice quiz section. Learners can author 1–20 questions with four unique options, a correct answer, and an optional explanation. All questions must be answered; 70% passes. Results include answer review, retries, best score, and a completion action. Passing does not automatically erase unfinished lesson work. Video-ended navigation pauses for an unpassed quiz when one exists; explicit lesson navigation remains available.
+
+Editing starts a new quiz version. Older attempts remain in the backup, while the current version controls the pass badge and best score. The latest 100 attempts per lesson are retained. Browser data persists with the workspace. Account quizzes and attempts use ownership constraints, read-only RLS policies, and validated RPCs; PostgreSQL computes scores from the saved questions. Question editing is personal study authoring, not an assessment certification or public exam system. Questions are custom; imports do not claim to include verified quizzes or AI-generated transcripts.
+
+Export includes a course-scoped quiz-results CSV and complete quiz data in JSON backups. All learning time summaries use hour/minute labels, with compact labels on chart axes and small day cells. Numeric minute inputs and playback/countdown clocks retain their explicit units.
+
+### Hosted launch checks
+
+Configure the hosting domain, server-only YouTube key, Supabase project, redirect URLs, email/Google authentication, and all three migrations. Validate signup, confirmation, password reset, OAuth, cross-account isolation, live imports, video tracking, quizzes, rewards, and persistence against that environment. Configure production monitoring, database backup/recovery, and a shared anonymous import limiter if deploying across multiple instances; the current anonymous limiter is process-local. Browser-only workspaces require backups to move between devices.
+
+No hosted deployment, email delivery, OAuth callback, or live service connection has been verified without your production credentials. The code checks do not replace those launch checks.

@@ -198,3 +198,21 @@ describe("persistent rewards", () => {
     ).toEqual(data.rewards);
   });
 });
+
+describe("reward backup integrity", () => {
+  it("rejects invalid completion dates and malformed reward days before restore", () => {
+    const data = fixture();
+    data.courses[0].videos[0].progress.completed_at = "invalid";
+    expect(() => parseWorkspaceBackup(JSON.stringify(data))).toThrow(
+      /incomplete or invalid/,
+    );
+    data.courses[0].videos[0].progress.completed_at = null;
+    data.rewards = {
+      version: 1,
+      events: { "day:invalid": { xp: 30, earned_at: now.toISOString() } },
+    };
+    expect(() => parseWorkspaceBackup(JSON.stringify(data))).toThrow(
+      /incomplete or invalid/,
+    );
+  });
+});

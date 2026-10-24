@@ -37,12 +37,27 @@ export function completion(course: Course) {
   );
 }
 export function duration(seconds: number) {
-  if (seconds >= 3600)
-    return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
-  return `${Math.floor(seconds / 60)}m`;
+  return learningTime(Math.floor(seconds / 60));
+}
+/** Human-readable learning time; clocks and editable minute inputs stay numeric. */
+export function learningTime(minutes: number, compact = false) {
+  const total = Math.max(0, Math.round(Number.isFinite(minutes) ? minutes : 0));
+  const hours = Math.floor(total / 60);
+  const rest = total % 60;
+  if (compact)
+    return hours ? `${hours}h${rest ? ` ${rest}m` : ""}` : `${rest}m`;
+  const parts = [];
+  if (hours) parts.push(`${hours} ${hours === 1 ? "Hour" : "Hours"}`);
+  if (rest || !hours)
+    parts.push(`${rest} ${rest === 1 ? "Minute" : "Minutes"}`);
+  return parts.join(" ");
 }
 export function timestamp(seconds: number) {
-  return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+  const value = Math.max(0, Math.floor(seconds));
+  const tail = `${String(Math.floor((value % 3600) / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
+  return value >= 3600
+    ? `${Math.floor(value / 3600)}:${tail}`
+    : `${Math.floor(value / 60)}:${String(value % 60).padStart(2, "0")}`;
 }
 export function localDay(date = new Date(), timezone = "UTC") {
   return new Intl.DateTimeFormat("en-CA", {

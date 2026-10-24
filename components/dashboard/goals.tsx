@@ -14,7 +14,13 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
-import { localDay, streak, longestStreak, completion } from "@/lib/utils";
+import {
+  learningTime,
+  localDay,
+  streak,
+  longestStreak,
+  completion,
+} from "@/lib/utils";
 import { subDays, format } from "date-fns";
 import { SceneArtwork } from "@/components/three/scene-provider";
 import { ActivityChart } from "@/components/analytics/activity-chart";
@@ -116,8 +122,8 @@ export function Goals() {
           </span>
           <div>
             <strong>
-              {weekMinutes}
-              <span> minutes this week</span>
+              {learningTime(weekMinutes)}
+              <span> this week</span>
             </strong>
             <p>Time invested in the person you’re becoming.</p>
           </div>
@@ -159,11 +165,21 @@ export function Goals() {
                 </p>
                 <div className="goal-card-numbers">
                   <strong>
-                    {actual}
-                    <span> / {g.target_value}</span>
+                    {g.goal_type === "daily_videos"
+                      ? actual
+                      : learningTime(actual)}
+                    <span>
+                      {" "}
+                      /{" "}
+                      {g.goal_type === "daily_videos"
+                        ? g.target_value
+                        : learningTime(g.target_value)}
+                    </span>
                   </strong>
                   <span>
-                    {g.goal_type === "daily_videos" ? "lessons" : "minutes"}
+                    {g.goal_type === "daily_videos"
+                      ? "lessons"
+                      : "learning time"}
                   </span>
                 </div>
                 <Progress value={(actual / g.target_value) * 100} />
@@ -176,8 +192,9 @@ export function Goals() {
                   ) : (
                     <>
                       <Clock size={14} />
-                      {g.target_value - actual}{" "}
-                      {g.goal_type === "daily_videos" ? "lessons" : "minutes"}{" "}
+                      {g.goal_type === "daily_videos"
+                        ? `${g.target_value - actual} lessons`
+                        : learningTime(g.target_value - actual)}{" "}
                       to go
                     </>
                   )}
@@ -246,7 +263,7 @@ export function Goals() {
               <div
                 key={d}
                 className={`calendar-cell level-${minutes >= 60 ? 4 : minutes >= 30 ? 3 : minutes > 0 ? 2 : row?.videos_completed ? 1 : 0}`}
-                title={`${d}: ${minutes} minutes, ${row?.videos_completed || 0} lessons completed`}
+                title={`${d}: ${learningTime(minutes)}, ${row?.videos_completed || 0} lessons completed`}
               />
             );
           })}
@@ -351,6 +368,9 @@ export function Goals() {
               onChange={(e) => setValue(Number(e.target.value))}
             />
           </label>
+          {type !== "daily_videos" && value >= 60 && (
+            <p className="muted">Your target: {learningTime(value)}</p>
+          )}
           <div className="info-banner">
             <Target size={16} />
             Consistency matters more than a big number.

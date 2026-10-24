@@ -1,4 +1,5 @@
 "use client";
+import { learningTime } from "@/lib/utils";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -263,7 +264,7 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
         <div>
           <span className="section-index">MAKE IT A HABIT</span>
           <h2>Find your rhythm</h2>
-          <p>Learning minutes by weekday in this period.</p>
+          <p>Learning time by weekday in this period.</p>
         </div>
       </div>
       <div
@@ -290,8 +291,9 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
               dy={8}
             />
             <YAxis
-              width={32}
+              width={48}
               allowDecimals={false}
+              tickFormatter={(value) => learningTime(Number(value), true)}
               axisLine={false}
               tickLine={false}
               domain={[0, maximum ? "auto" : 60]}
@@ -299,7 +301,7 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
             />
             <Tooltip
               contentStyle={chartTooltipStyle}
-              formatter={(value) => [`${value} minutes`, "Learning"]}
+              formatter={(value) => [learningTime(Number(value)), "Learning"]}
               cursor={{
                 fill: "color-mix(in srgb, var(--chart-2) 5%, transparent)",
               }}
@@ -326,18 +328,18 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
       </div>
       <p className="rhythm-insight">
         {maximum > 0
-          ? `${best?.name} leads with ${maximum} minutes. Notice which days give you the most room to learn.`
+          ? `${best?.name} leads with ${learningTime(maximum)}. Notice which days give you the most room to learn.`
           : "Your first sessions will reveal the days that work for you."}
       </p>
       <details className="chart-data">
         <summary>View weekday data</summary>
         <table>
-          <caption>Total learning minutes by weekday</caption>
+          <caption>Total learning time by weekday</caption>
           <tbody>
             {rows.map((row) => (
               <tr key={row.name}>
                 <th scope="row">{row.name}</th>
-                <td>{row.minutes} minutes</td>
+                <td>{learningTime(row.minutes)}</td>
               </tr>
             ))}
           </tbody>

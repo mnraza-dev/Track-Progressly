@@ -28,7 +28,7 @@ test("real activity powers chart views, lesson segments, and the interactive 3D 
     .click();
   await activity.getByText("View chart data", { exact: true }).click();
   await expect(
-    activity.getByRole("cell", { name: "45", exact: true }),
+    activity.getByRole("cell", { name: "45 Minutes", exact: true }),
   ).toBeVisible();
   await activity.getByText("View chart data", { exact: true }).click();
   await page.screenshot({
@@ -55,11 +55,11 @@ test("real activity powers chart views, lesson segments, and the interactive 3D 
     landscape.locator('[data-three-scene="timeline"]'),
   ).toHaveAttribute("data-three-state", "ready", { timeout: 20000 });
   await expect(landscape.locator(".landscape-copy > strong")).toContainText(
-    "110",
+    "1 Hour 50 Minutes",
   );
-  await landscape.getByRole("button", { name: /45 minutes$/ }).click();
+  await landscape.getByRole("button", { name: /45 Minutes$/ }).click();
   await expect(landscape.locator(".landscape-footer strong")).toHaveText(
-    "45 minutes",
+    "45 Minutes",
   );
   await landscape.getByRole("button", { name: "Lessons", exact: true }).click();
   await expect(landscape.locator(".landscape-copy > strong")).toContainText(

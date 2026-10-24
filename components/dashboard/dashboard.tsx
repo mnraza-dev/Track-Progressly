@@ -31,6 +31,7 @@ import { useGamification } from "@/components/gamification/use-gamification";
 import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
 import {
   completion,
+  learningTime,
   duration,
   streak,
   longestStreak,
@@ -824,7 +825,7 @@ export function Dashboard() {
             <Calendar size={14} />
             <span>
               <strong>{activeDaysThisWeek} of 7 days</strong> active this week ·{" "}
-              {totalMinutesThisWeek}m focused
+              {learningTime(totalMinutesThisWeek)} focused
             </span>
           </div>
         </div>
@@ -852,7 +853,7 @@ export function Dashboard() {
                 )}
               </div>
               <span className="weekly-day-minutes">
-                {w.hasActivity ? `${w.dayMinutes}m` : "—"}
+                {w.hasActivity ? learningTime(w.dayMinutes, true) : "—"}
               </span>
               {w.isToday && <span className="weekly-today-badge">TODAY</span>}
             </div>
@@ -1142,14 +1143,16 @@ export function Dashboard() {
           </div>
           <div className="activity-summary">
             <strong>
-              {Math.round(
-                dailySeries(
-                  activity,
-                  localDay(now, profile.timezone),
-                  period,
-                ).reduce((n, day) => n + day.minutes, 0),
+              {learningTime(
+                Math.round(
+                  dailySeries(
+                    activity,
+                    localDay(now, profile.timezone),
+                    period,
+                  ).reduce((n, day) => n + day.minutes, 0),
+                ),
               )}
-              <span>minutes of focus</span>
+              <span>of focus</span>
             </strong>
             <span className="activity-summary-caption">
               <span className="legend-dot" />
@@ -1180,14 +1183,14 @@ export function Dashboard() {
             <SceneArtwork
               kind="goal"
               progress={Math.min(1, todayMinutes / dailyGoal)}
-              label={`Daily learning goal: ${todayMinutes} of ${dailyGoal} minutes completed`}
+              label={`Daily learning goal: ${learningTime(todayMinutes)} of ${learningTime(dailyGoal)} completed`}
             />
             <div className="goal-ring-value">
               <strong>
-                {todayMinutes}
-                <span> / {dailyGoal}</span>
+                {learningTime(todayMinutes)}
+                <span> / {learningTime(dailyGoal)}</span>
               </strong>
-              <small>minutes today</small>
+              <small>today</small>
             </div>
           </div>
           <div className="goal-encouragement">
