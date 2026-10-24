@@ -74,10 +74,9 @@ test("manual course, completion, notes, practice and reload persistence", async 
     page.getByRole("heading", { name: "Daily learning time" }),
   ).toBeVisible();
   await page.goto("/dashboard#learning-overview");
-  await page.getByText("More insights", { exact: true }).click();
   await expect(
     page
-      .locator(".course-diag-card")
+      .locator(".course-card")
       .filter({ hasText: "My React learning path" })
       .getByText("50%", { exact: true }),
   ).toBeVisible();

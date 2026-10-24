@@ -2567,6 +2567,13 @@
   }
 }
 @media (max-width: 1000px) {
+  .topbar-right {
+    gap: 6px;
+  }
+  .breadcrumb-home,
+  .breadcrumb-divider {
+    display: none;
+  }
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

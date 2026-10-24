@@ -36,8 +36,7 @@ export function LearningMix({ courses }: { courses: Course[] }) {
     >
       <div className="panel-heading">
         <div>
-          <span className="section-index">ONE LESSON AT A TIME</span>
-          <h2 id="learning-mix-title">Your learning mix</h2>
+          <h2 id="learning-mix-title">Lesson status</h2>
         </div>
         <BookOpen size={19} />
       </div>
@@ -110,14 +109,6 @@ export function LearningMix({ courses }: { courses: Course[] }) {
           </button>
         ))}
       </div>
-      <p className="chart-footnote">
-        {total
-          ? "Select a segment to take a closer look. Archived courses and unavailable videos are excluded."
-          : "Add your first course to start building your learning picture."}
-      </p>
-      <Link className="chart-card-link" href="/courses">
-        Explore your library <ArrowUpRight size={14} />
-      </Link>
     </section>
   );
 }
@@ -257,14 +248,11 @@ export function CourseComparison({ courses }: { courses: Course[] }) {
 export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
   const rows = weekdayData(activity);
   const maximum = Math.max(...rows.map((row) => row.minutes));
-  const best = rows.find((row) => row.minutes === maximum);
   return (
     <section className="panel rhythm-panel">
       <div className="panel-heading">
         <div>
-          <span className="section-index">MAKE IT A HABIT</span>
-          <h2>Find your rhythm</h2>
-          <p>Learning time by weekday in this period.</p>
+          <h2>Weekly rhythm</h2>
         </div>
       </div>
       <div
@@ -326,11 +314,6 @@ export function WeekdayRhythm({ activity }: { activity: Activity[] }) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="rhythm-insight">
-        {maximum > 0
-          ? `${best?.name} leads with ${learningTime(maximum)}. Notice which days give you the most room to learn.`
-          : "Your first sessions will reveal the days that work for you."}
-      </p>
       <details className="chart-data">
         <summary>View weekday data</summary>
         <table>

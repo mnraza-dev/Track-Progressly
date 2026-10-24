@@ -1,16 +1,8 @@
 "use client";
 
 import { useState, useMemo, type ReactNode } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  ChartNoAxesCombined,
-  BookOpen,
-  Download,
-  ArrowRight,
-  ArrowUpRight,
-  Layers,
-} from "lucide-react";
+import { ChartNoAxesCombined, BookOpen, Download, Layers } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import {
   duration,
@@ -22,7 +14,7 @@ import {
 } from "@/lib/utils";
 import { format, subDays } from "date-fns";
 import { ActivityChart } from "./activity-chart";
-import { LearningMix, WeekdayRhythm } from "./progress-charts";
+import { LearningMix } from "./progress-charts";
 import {
   parseVideoChapters,
   completedChaptersCount,
@@ -85,10 +77,15 @@ export function LearningOverview({
   const timestampedNotes = allNotes.filter(
     (n) => n.timestamp_seconds > 0,
   ).length;
+
   // Progress by category
   const categoryStats = useMemo(() => {
     const cats = Array.from(
-      new Set(data.courses.map((c) => c.category || "General")),
+      new Set(
+        data.courses
+          .filter((c) => c.status !== "archived")
+          .map((c) => c.category || "General"),
+      ),
     );
     return cats
       .map((cat) => {
@@ -321,160 +318,67 @@ ${courseDiagnostics
       <details className="learning-overview-details">
         <summary>More insights</summary>
         <div className="learning-overview-breakdowns">
-          {/* Category progress */}
-          <section className="panel category-matrix-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>Progress by category</h2>
-              </div>
-              <Layers size={20} />
-            </div>
-
-            <div className="category-mastery-cards-grid">
-              {categoryStats.map((cat) => (
-                <div key={cat.category} className="category-mastery-card">
-                  <div className="category-card-top">
-                    <span className="category-badge">{cat.category}</span>
-                    <span className="category-percent-tag">{cat.percent}%</span>
-                  </div>
-                  <div className="category-progress-track">
-                    <div
-                      className="category-progress-bar"
-                      style={{ width: `${cat.percent}%` }}
-                    />
-                  </div>
-                  <div className="category-card-stats">
-                    <div>
-                      <strong>
-                        {cat.completedVideos} / {cat.totalVideos}
-                      </strong>
-                      <span>lessons</span>
-                    </div>
-                    <div>
-                      <strong>{duration(cat.totalDuration)}</strong>
-                      <span>content</span>
-                    </div>
-                    <div>
-                      <strong>{cat.totalNotes}</strong>
-                      <span>notes</span>
-                    </div>
-                    <div>
-                      <strong>
-                        {cat.completedCourses} / {cat.totalCourses}
-                      </strong>
-                      <span>finished</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {!categoryStats.length && (
-                <div className="small-empty">
-                  <BookOpen size={24} />
-                  <p>
-                    No courses added yet. Add a course to see category
-                    breakdowns.
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Weekly rhythm and lesson status */}
           <div className="analytics-dual-grid">
-            <WeekdayRhythm activity={activity} />
-            <LearningMix courses={data.courses} />
-          </div>
-
-          {/* Detailed course progress */}
-          <section className="panel course-diagnostics-panel">
-            <div className="panel-heading">
-              <div>
-                <h2>Course progress</h2>
+            {/* Category progress */}
+            <section className="panel category-matrix-panel">
+              <div className="panel-heading">
+                <div>
+                  <h2>Progress by category</h2>
+                </div>
+                <Layers size={20} />
               </div>
-              <Link href="/courses" className="text-link">
-                Open library
-                <ArrowUpRight size={14} />
-              </Link>
-            </div>
 
-            <div className="course-diag-cards-list">
-              {courseDiagnostics.map((c) => (
-                <div key={c.id} className="course-diag-card">
-                  <div className="course-diag-main">
-                    <div className="course-diag-title-row">
-                      <span className="category-badge">{c.category}</span>
-                      <strong className="course-diag-title">{c.title}</strong>
-                      <span className="course-diag-channel">{c.channel}</span>
-                    </div>
-                    <div className="course-diag-progress-row">
-                      <div className="course-diag-progress-track">
-                        <div
-                          className="course-diag-progress-fill"
-                          style={{ width: `${c.progress}%` }}
-                        />
-                      </div>
-                      <span className="course-diag-progress-pct">
-                        {c.progress}%
+              <div className="category-mastery-cards-grid">
+                {categoryStats.map((cat) => (
+                  <div key={cat.category} className="category-mastery-card">
+                    <div className="category-card-top">
+                      <span className="category-badge">{cat.category}</span>
+                      <span className="category-percent-tag">
+                        {cat.percent}%
                       </span>
                     </div>
-                  </div>
-
-                  <div className="course-diag-meta-grid">
-                    <div className="diag-meta-item">
-                      <span>Watched / Total</span>
-                      <strong>
-                        {duration(c.watchedDuration)} /{" "}
-                        {duration(c.totalDuration)}
-                      </strong>
+                    <div className="category-progress-track">
+                      <div
+                        className="category-progress-bar"
+                        style={{ width: `${cat.percent}%` }}
+                      />
                     </div>
-                    <div className="diag-meta-item">
-                      <span>Lessons</span>
-                      <strong>
-                        {c.completedVideos} / {c.totalVideos}
-                      </strong>
-                    </div>
-                    <div className="diag-meta-item">
-                      <span>Chapters</span>
-                      <strong>
-                        {c.totalChapters > 0
-                          ? `${c.completedChapters} / ${c.totalChapters}`
-                          : "—"}
-                      </strong>
-                    </div>
-                    <div className="diag-meta-item">
-                      <span>Practice Tasks</span>
-                      <strong>
-                        {c.totalTasks > 0
-                          ? `${c.doneTasks} / ${c.totalTasks}`
-                          : "—"}
-                      </strong>
-                    </div>
-                    <div className="diag-meta-item">
-                      <span>Notes</span>
-                      <strong>{c.totalNotes}</strong>
+                    <div className="category-card-stats">
+                      <div>
+                        <strong>
+                          {cat.completedVideos} / {cat.totalVideos}
+                        </strong>
+                        <span>lessons</span>
+                      </div>
+                      <div>
+                        <strong>{duration(cat.totalDuration)}</strong>
+                        <span>content</span>
+                      </div>
+                      <div>
+                        <strong>{cat.totalNotes}</strong>
+                        <span>notes</span>
+                      </div>
+                      <div>
+                        <strong>
+                          {cat.completedCourses} / {cat.totalCourses}
+                        </strong>
+                        <span>finished</span>
+                      </div>
                     </div>
                   </div>
+                ))}
 
-                  <div className="course-diag-action">
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/courses/${c.id}`}>
-                        View course
-                        <ArrowRight size={13} />
-                      </Link>
-                    </Button>
+                {!categoryStats.length && (
+                  <div className="small-empty">
+                    <BookOpen size={24} />
+                    <p>Add a course to see category progress.</p>
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
+            </section>
 
-              {!courseDiagnostics.length && (
-                <div className="small-empty">
-                  <BookOpen size={24} />
-                  <p>Add a course to see your progress here.</p>
-                </div>
-              )}
-            </div>
-          </section>
+            <LearningMix courses={data.courses} />
+          </div>
         </div>
       </details>
     </section>

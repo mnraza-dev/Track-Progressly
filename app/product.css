@@ -1845,134 +1845,128 @@
   .dashboard-studio > *:nth-child(5) { animation-delay: 0.16s; }
   .dashboard-studio > *:nth-child(6) { animation-delay: 0.20s; }
 
-  /* ==========================================================================
-     ENRICHED DASHBOARD: WEEKLY CONSISTENCY TRACKER
-     ========================================================================== */
-
-  .weekly-consistency-panel {
+  /* Activity calendar */
+  .momentum-panel {
+    --momentum-empty: color-mix(in srgb, var(--muted) 70%, var(--card));
+    --momentum-color: var(--brand-accent);
     padding: 22px 26px;
     margin-bottom: 24px;
+    min-width: 0;
   }
-
-  .weekly-header {
+  .momentum-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+  }
+  .momentum-heading h2 {
+    font-size: 18px;
+    font-weight: 550;
+  }
+  .momentum-heading > span,
+  .momentum-footer {
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+  .momentum-scroll {
+    overflow-x: auto;
+    padding: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .momentum-grid {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 4px;
+    table-layout: fixed;
+    min-width: 790px;
+  }
+  .momentum-grid th,
+  .momentum-grid td {
+    padding: 0;
+    border: 0;
+  }
+  .momentum-grid tr > :first-child {
+    width: 30px;
+    position: sticky;
+    left: 0;
+    background: var(--card);
+    z-index: 1;
+  }
+  .momentum-month {
+    position: relative;
+    height: 22px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--muted-foreground);
+  }
+  .momentum-month > span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+  }
+  .momentum-weekday {
+    font-size: 10px;
+    font-weight: 400;
+    text-align: left;
+    color: var(--muted-foreground);
+  }
+  .momentum-cell {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 3px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 6%, transparent);
+    background: var(--momentum-empty);
+  }
+  .momentum-cell[data-level="1"] {
+    background: color-mix(in srgb, var(--momentum-color) 25%, var(--momentum-empty));
+  }
+  .momentum-cell[data-level="2"] {
+    background: color-mix(in srgb, var(--momentum-color) 45%, var(--momentum-empty));
+  }
+  .momentum-cell[data-level="3"] {
+    background: color-mix(in srgb, var(--momentum-color) 70%, var(--momentum-empty));
+  }
+  .momentum-cell[data-level="4"] {
+    background: var(--momentum-color);
+  }
+  button.momentum-cell:hover,
+  button.momentum-cell[aria-pressed="true"] {
+    outline: 1px solid var(--foreground);
+    outline-offset: 1px;
+  }
+  button.momentum-cell:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
+  }
+  .momentum-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 18px;
     flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    line-height: 1.5;
   }
-
-  .weekly-header h2 {
-    font-size: 18px;
-    margin: 0;
-  }
-
-  .weekly-summary-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 12px;
-    padding: 5px 12px;
-    border-radius: 6px;
-    background: var(--muted);
-    color: var(--muted-foreground);
-  }
-
-  .weekly-summary-pill strong {
-    color: var(--foreground);
-  }
-
-  .weekly-days-grid {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .weekly-day-card {
+  .momentum-legend {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 12px 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    background: var(--card);
-    position: relative;
-    transition: all 0.2s ease;
+    gap: 4px;
+    margin-left: auto;
   }
-
-  .weekly-day-card:hover {
-    border-color: var(--input);
-    background: color-mix(in srgb, var(--card) 90%, var(--primary));
+  .momentum-legend > .momentum-cell {
+    width: 12px;
   }
-
-  .weekly-day-name {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted-foreground);
-    margin-bottom: 4px;
+  .momentum-legend > span:first-child {
+    margin-right: 4px;
   }
-
-  .weekly-day-number {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--foreground);
-    margin-bottom: 8px;
-  }
-
-  .weekly-status-indicator {
-    width: 26px;
-    height: 26px;
-    display: grid;
-    place-items: center;
-    margin-bottom: 6px;
-  }
-
-  .weekly-check-icon {
-    color: var(--success, #10b981);
-  }
-
-  .weekly-partial-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--primary);
-    box-shadow: 0 0 8px var(--primary);
-  }
-
-  .weekly-rest-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--border);
-  }
-
-  .weekly-day-minutes {
-    font-size: 11px;
-    color: var(--muted-foreground);
-    font-family: var(--font-geist-mono), monospace;
-  }
-
-  .weekly-day-today {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
-  }
-
-  .weekly-today-badge {
-    position: absolute;
-    top: -7px;
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    background: var(--primary);
-    color: var(--primary-foreground);
-    padding: 1px 5px;
-    border-radius: 3px;
-  }
-
-  .weekly-day-goal-met {
-    background: color-mix(in srgb, var(--success, #10b981) 6%, var(--card));
-    border-color: color-mix(in srgb, var(--success, #10b981) 30%, var(--border));
+  .momentum-legend > span:last-child {
+    margin-left: 4px;
   }
 
   /* ==========================================================================
@@ -2338,6 +2332,7 @@
 
   .gamification-rank-kicker {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
   }
@@ -2365,6 +2360,8 @@
 
   .gamification-xp-row {
     display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
     justify-content: space-between;
     align-items: baseline;
     font-size: 12px;
@@ -3364,15 +3361,6 @@
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  .weekly-days-grid {
-    grid-template-columns: repeat(7, minmax(44px, 1fr));
-    overflow-x: auto;
-    padding-bottom: 6px;
-  }
-  .weekly-day-card {
-    min-width: 44px;
-    padding: 10px 4px 8px;
-  }
   .resume-actions-row {
     flex-direction: column;
     align-items: stretch;
@@ -3385,7 +3373,7 @@
     width: calc(100vw - 32px);
   }
   .gamification-hero-split {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
   .gamification-trophy-side {
@@ -3395,6 +3383,9 @@
     padding-bottom: 18px;
     flex-direction: column;
     align-items: flex-start;
+  }
+  .gamification-trophy-details {
+    width: 100%;
   }
   .achievements-hero-card {
     grid-template-columns: 1fr;
@@ -3863,119 +3854,6 @@
   text-transform: uppercase;
 }
 
-/* Course Diagnostics Matrix */
-.course-diagnostics-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.course-diag-cards-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.course-diag-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--muted) 18%, var(--card));
-  transition: all 0.2s ease;
-  flex-wrap: wrap;
-}
-
-.course-diag-card:hover {
-  border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
-}
-
-.course-diag-main {
-  flex: 1 1 240px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.course-diag-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.course-diag-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--foreground);
-}
-
-.course-diag-channel {
-  font-size: 12px;
-  color: var(--muted-foreground);
-}
-
-.course-diag-progress-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 320px;
-}
-
-.course-diag-progress-track {
-  flex: 1;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--muted);
-  overflow: hidden;
-}
-
-.course-diag-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--primary);
-}
-
-.course-diag-progress-pct {
-  font-size: 12px;
-  font-weight: 700;
-  font-family: var(--font-geist-mono), monospace;
-  color: var(--foreground);
-  min-width: 36px;
-}
-
-.course-diag-meta-grid {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.diag-meta-item {
-  display: flex;
-  flex-direction: column;
-  font-size: 11px;
-}
-
-.diag-meta-item span {
-  color: var(--muted-foreground);
-}
-
-.diag-meta-item strong {
-  font-size: 12px;
-  color: var(--foreground);
-  margin-top: 1px;
-}
-
-.course-diag-action {
-  display: flex;
-  align-items: center;
-}
-
 /* ==========================================================================
    Study Focus Timer Component (Circular Graph & Synchronized Pacing)
    ========================================================================== */
@@ -4314,6 +4192,17 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+@media (max-width: 420px) {
+  .workspace-export-trigger > span {
+    display: none;
+  }
+  .view-achievements-btn {
+    white-space: normal;
+    height: auto;
+    min-height: 32px;
+  }
 }
 
 

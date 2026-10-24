@@ -47,9 +47,9 @@ export const DEFAULT_TOUR_STEPS: TourStep[] = [
   {
     id: "weekly-consistency",
     target: '[data-tour="weekly-consistency"]',
-    title: "Weekly Consistency Tracker",
+    title: "Your Learning Momentum",
     description:
-      "Consistency beats intensity. Check your daily learning momentum across all 7 days of the week and stay committed to your daily intention.",
+      "Explore your learning activity across the past year. Select a day or use the arrow keys to see its focus time, lessons, and practice.",
     icon: "target",
     placement: "bottom",
     badge: "04 / 07",

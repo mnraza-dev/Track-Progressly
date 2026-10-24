@@ -12,7 +12,10 @@ test("dashboard learning overview shows real activity, lesson status, and course
     chartWorkspace(),
   );
   await page.goto("/analytics");
-  await expect(page).toHaveURL(/\/dashboard#learning-overview$/);
+  await expect(page).toHaveURL(/\/dashboard#learning-overview$/, { timeout: 15000 });
+  const todayStat = page.locator('[data-tour="stats-grid"] .stat-card').first();
+  await expect(todayStat).toContainText("Learning today");
+  await expect(todayStat.locator(".stat-value")).toHaveText("18m");
   await page
     .getByRole("combobox", { name: "Learning period" })
     .selectOption("7");
@@ -40,10 +43,11 @@ test("dashboard learning overview shows real activity, lesson status, and course
     page.getByRole("link", { name: "Analytics", exact: true }),
   ).toHaveCount(0);
   await page.getByText("More insights", { exact: true }).click();
-  const courses = page.locator(".course-diag-cards-list");
+  const courses = page.locator(".dashboard-studio > .course-grid");
   await expect(courses).toContainText("33%");
   await expect(courses).toContainText("25%");
   await expect(courses).not.toContainText("Archived course");
+  await expect(page.locator(".course-diagnostics-panel")).toHaveCount(0);
   const mix = page.locator(".learning-mix-panel");
   await mix.scrollIntoViewIfNeeded();
   await expect(mix.locator(".donut-center strong")).toHaveText("10");
@@ -52,8 +56,17 @@ test("dashboard learning overview shows real activity, lesson status, and course
     .click();
   await expect(mix.locator(".donut-center strong")).toHaveText("3");
   await expect(mix.locator(".donut-center span")).toHaveText("Completed");
-  await page.getByText("View weekday data", { exact: true }).click();
-  await expect(page.locator(".rhythm-panel table")).toContainText("45 Minutes");
+  await expect(page.locator(".rhythm-panel")).toHaveCount(0);
+  const momentum = page.getByRole("region", { name: "Learning momentum" });
+  await expect(momentum.getByRole("button")).toHaveCount(365);
+  await expect(momentum).toContainText("5 active days");
+  const today = momentum.locator('[aria-current="date"]');
+  await today.focus();
+  await expect(momentum.getByRole("status")).toContainText("18m focused");
+  await page.keyboard.press("ArrowLeft");
+  await expect(momentum.getByRole("status")).toContainText("0m focused");
+  await page.keyboard.press("ArrowRight");
+  await expect(today).toBeFocused();
   await page.screenshot({
     path: `test-results/dashboard-insights-${testInfo.project.name}.png`,
     animations: "disabled",
@@ -116,6 +129,4 @@ test("empty charts keep their real zero values when WebGL is unavailable", async
   );
   await page.getByText("More insights", { exact: true }).click();
   await expect(page.locator(".donut-center strong")).toHaveText("0");
-  await page.getByText("View weekday data", { exact: true }).click();
-  await expect(page.locator(".rhythm-panel table")).toContainText("0 Minutes");
 });

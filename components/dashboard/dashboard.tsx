@@ -10,6 +10,7 @@ import {
   ArrowUpRight,
   ArrowRight,
   BookOpen,
+  Clock3,
   CircleCheck,
   CheckCircle2,
   Flame,
@@ -18,17 +19,14 @@ import {
   Check,
   Sparkles,
   ListTodo,
-  Calendar,
   Circle,
   Trophy,
   Target,
 } from "lucide-react";
-import { format } from "date-fns";
 import { useWorkspace } from "@/stores/workspace";
 import { useGamification } from "@/components/gamification/use-gamification";
 import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
 import {
-  completion,
   learningTime,
   duration,
   streak,
@@ -46,6 +44,7 @@ import { useTour } from "@/components/tour/tour-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CourseCard } from "@/components/courses/course-card";
+import { MomentumHeatmap } from "@/components/dashboard/momentum-heatmap";
 import { LearningOverview } from "@/components/analytics/learning-overview";
 import { isConnected } from "@/lib/supabase/client";
 import { SceneArtwork } from "@/components/three/scene-provider";
@@ -68,10 +67,6 @@ export function Dashboard() {
   const active = courses.filter(
     (c) => !["completed", "archived"].includes(c.status),
   );
-
-  const done = courses.filter(
-    (c) => completion(c) === 100 && c.videos.length > 0,
-  ).length;
 
   const availableCount = courses
     .filter((c) => c.status !== "archived")
@@ -254,45 +249,6 @@ export function Dashboard() {
     };
   }, [resumeLessonItem]);
 
-  // 5. Weekly consistency days (Mon - Sun of current week)
-  const { weekDays, activeDaysThisWeek, totalMinutesThisWeek } = useMemo(() => {
-    const todayStr = localDay(now, profile.timezone);
-    const todayDate = new Date(`${todayStr}T12:00:00Z`);
-    const dayOfWeek = (todayDate.getUTCDay() + 6) % 7; // 0 = Mon, 6 = Sun
-
-    const daysList = Array.from({ length: 7 }, (_, i) => {
-      const diff = i - dayOfWeek;
-      const d = new Date(todayDate.getTime() + diff * 86400000);
-      const dayStr = d.toISOString().slice(0, 10);
-      const dayActivity = activity.find((a) => a.day === dayStr);
-      const daySeconds = dayActivity?.active_seconds || 0;
-      const dayMinutes = Math.floor(daySeconds / 60);
-      const isToday = dayStr === todayStr;
-      const isPast = dayStr < todayStr;
-      const isGoalMet = dayMinutes >= dailyGoal && dailyGoal > 0;
-
-      return {
-        dayStr,
-        dayName: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i],
-        dateNum: d.getUTCDate(),
-        dayMinutes,
-        isToday,
-        isPast,
-        isGoalMet,
-        hasActivity: dayMinutes > 0,
-      };
-    });
-
-    const activeCount = daysList.filter((w) => w.hasActivity).length;
-    const totalMinutes = daysList.reduce((acc, w) => acc + w.dayMinutes, 0);
-
-    return {
-      weekDays: daysList,
-      activeDaysThisWeek: activeCount,
-      totalMinutesThisWeek: totalMinutes,
-    };
-  }, [activity, dailyGoal, now, profile.timezone]);
-
   // Handlers for interactive actions
   const handleToggleTask = async (task: {
     videoId: string;
@@ -370,11 +326,6 @@ export function Dashboard() {
             <span>Product Tour</span>
           </Button>
 
-          <span className="date-label">
-            <span>{format(now, "EEE")}</span>
-            {format(now, "MMM d")}
-          </span>
-
           <Button asChild>
             <Link href="/courses/new">
               <Plus size={17} />
@@ -383,6 +334,69 @@ export function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Enriched Stats Grid */}
+      <section className="stats-grid" data-tour="stats-grid">
+        <Stat
+          icon={<Clock3 size={18} />}
+          label="Learning today"
+          value={learningTime(todayMinutes, true)}
+          color="orange"
+          detail={
+            todayMinutes >= dailyGoal
+              ? "Daily goal reached"
+              : `${learningTime(dailyGoal - todayMinutes, true)} to daily goal`
+          }
+          index="01"
+        />
+        <Stat
+          icon={<CircleCheck size={18} />}
+          label="Lessons & Chapters"
+          value={videoCount}
+          color="green"
+          detail={
+            totalCompletedChapters > 0
+              ? `${totalCompletedChapters} chapters finished`
+              : `${availableCount ? Math.round((completedCount / availableCount) * 100) : 0}% library progress`
+          }
+          index="02"
+        />
+        <Stat
+          icon={<CheckCircle2 size={18} />}
+          label="Practice tasks done"
+          value={
+            allPracticeTasks.length
+              ? `${completedTasksCount} / ${allPracticeTasks.length}`
+              : "0"
+          }
+          color="blue"
+          detail={
+            pendingTasks.length
+              ? `${pendingTasks.length} pending action items`
+              : "All exercises completed"
+          }
+          index="03"
+        />
+        <Stat
+          icon={<Flame size={18} />}
+          label="Current streak"
+          value={
+            <>
+              {days}
+              <small>{days === 1 ? "day" : "days"}</small>
+            </>
+          }
+          color="orange"
+          detail={
+            bestStreak > days
+              ? `Best streak: ${bestStreak} days`
+              : days
+                ? "Keep the momentum"
+                : "Your next session is day one"
+          }
+          index="04"
+        />
+      </section>
 
       {/* Resume Hero ("Jump Back In") OR Starter Hero */}
       {resumeLessonItem ? (
@@ -619,64 +633,6 @@ export function Dashboard() {
         </section>
       )}
 
-      {/* Enriched Stats Grid */}
-      <section className="stats-grid" data-tour="stats-grid">
-        <Stat
-          icon={<BookOpen size={18} />}
-          label="Courses in progress"
-          value={courses.filter((c) => c.status === "in_progress").length}
-          color="purple"
-          detail={`${courses.filter((c) => c.status !== "archived").length} in library · ${done} finished`}
-          index="01"
-        />
-        <Stat
-          icon={<CircleCheck size={18} />}
-          label="Lessons & Chapters"
-          value={videoCount}
-          color="green"
-          detail={
-            totalCompletedChapters > 0
-              ? `${totalCompletedChapters} chapters finished`
-              : `${availableCount ? Math.round((completedCount / availableCount) * 100) : 0}% library progress`
-          }
-          index="02"
-        />
-        <Stat
-          icon={<CheckCircle2 size={18} />}
-          label="Practice tasks done"
-          value={
-            allPracticeTasks.length
-              ? `${completedTasksCount} / ${allPracticeTasks.length}`
-              : "0"
-          }
-          color="blue"
-          detail={
-            pendingTasks.length
-              ? `${pendingTasks.length} pending action items`
-              : "All exercises completed"
-          }
-          index="03"
-        />
-        <Stat
-          icon={<Flame size={18} />}
-          label="Current streak"
-          value={
-            <>
-              {days}
-              <small>{days === 1 ? "day" : "days"}</small>
-            </>
-          }
-          color="orange"
-          detail={
-            bestStreak > days
-              ? `Best streak: ${bestStreak} days`
-              : days
-                ? "Keep the momentum"
-                : "Your next session is day one"
-          }
-          index="04"
-        />
-      </section>
       {/* Gamification: Level Mastery & Daily Quests */}
       <section
         className="panel dashboard-gamification-panel"
@@ -805,55 +761,12 @@ export function Dashboard() {
         </div>
       </section>
 
-      {/* Weekly Consistency Tracker */}
-      <section
-        className="panel weekly-consistency-panel"
-        data-tour="weekly-consistency"
-      >
-        <div className="weekly-header">
-          <div>
-            <span className="section-index">7-DAY MOMENTUM</span>
-            <h2>Weekly Consistency</h2>
-          </div>
-          <div className="weekly-summary-pill">
-            <Calendar size={14} />
-            <span>
-              <strong>{activeDaysThisWeek} of 7 days</strong> active this week ·{" "}
-              {learningTime(totalMinutesThisWeek)} focused
-            </span>
-          </div>
-        </div>
-
-        <div className="weekly-days-grid">
-          {weekDays.map((w) => (
-            <div
-              key={w.dayStr}
-              className={cn(
-                "weekly-day-card",
-                w.isToday && "weekly-day-today",
-                w.isGoalMet && "weekly-day-goal-met",
-                w.hasActivity && !w.isGoalMet && "weekly-day-active",
-              )}
-            >
-              <span className="weekly-day-name">{w.dayName}</span>
-              <span className="weekly-day-number">{w.dateNum}</span>
-              <div className="weekly-status-indicator">
-                {w.isGoalMet ? (
-                  <CheckCircle2 size={17} className="weekly-check-icon" />
-                ) : w.hasActivity ? (
-                  <div className="weekly-partial-dot" />
-                ) : (
-                  <div className="weekly-rest-dot" />
-                )}
-              </div>
-              <span className="weekly-day-minutes">
-                {w.hasActivity ? learningTime(w.dayMinutes, true) : "—"}
-              </span>
-              {w.isToday && <span className="weekly-today-badge">TODAY</span>}
-            </div>
-          ))}
-        </div>
-      </section>
+      <MomentumHeatmap
+        activity={activity}
+        timezone={profile.timezone}
+        dailyGoal={dailyGoal}
+        now={now}
+      />
 
       {/* Practice Checklist & Revision Queue (High Utility Interactive Section) */}
       <div className="dashboard-action-grid">
