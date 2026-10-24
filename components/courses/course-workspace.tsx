@@ -473,7 +473,7 @@ function CourseWorkspaceContent({
                 <div className="lesson-sidebar-header">
                   <div>
                     <h3>Your learning path</h3>
-                    <strong>{percent}%</strong>
+                    <strong className="text-2xl font-bold blur-sm">{percent}%</strong>
                   </div>
                   <Progress value={percent} />
                   <p>

@@ -452,7 +452,7 @@ export function Dashboard() {
                     ? `${timestamp(resumeLessonItem.progress.last_position_seconds)} / ${duration(resumeLessonItem.duration_seconds)}`
                     : duration(resumeLessonItem.duration_seconds)}
                 </span>
-                <strong>{resumeDetails?.percent || 0}% completed</strong>
+                <strong className="text-2xl font-bold blur-sm">{resumeDetails?.percent || 0}% completed</strong>
               </div>
               <div className="progress-track">
                 <div style={{ width: `${resumeDetails?.percent || 0}%` }} />
@@ -540,7 +540,7 @@ export function Dashboard() {
                   <span className="resume-3d-hint">
                     <Sparkles size={11} /> Interactive 3D Model · Drag to rotate
                   </span>
-                  <strong>{resumeDetails?.percent || 0}% Progress</strong>
+                  <strong className="text-2xl font-bold blur-sm">{resumeDetails?.percent || 0}% Progress</strong>
                 </div>
               </div>
             ) : (

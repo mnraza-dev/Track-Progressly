@@ -200,7 +200,7 @@ export function CourseCard({ course }: { course: Course }) {
               ? `${completedChapters} of ${singleChapters.length} chapters`
               : `${completed} of ${availableVideos.length} lessons`}
           </span>
-          <strong>{percent}%</strong>
+          <strong className="text-2xl font-bold blur-sm">{percent}%</strong>
         </div>
         <Progress value={percent} />
         <div className="course-card-bottom">
