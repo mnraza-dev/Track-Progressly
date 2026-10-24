@@ -1124,7 +1124,7 @@ function Stat({
         <span>{label}</span>
         <StudyIllustration kind={illustration} className="stat-illustration" />
       </div>
-      <div className="stat-value"><strong className="text-2xl font-bold blur-sm">{value}</strong></div>
+      <div className="stat-value"><strong className="text-3xl font-extrabold opacity-75">{value}</strong></div>
       <div className="stat-bottom">
         <p>{detail}</p>
         <span>{index}</span>
