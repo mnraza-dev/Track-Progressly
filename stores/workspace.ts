@@ -1,6 +1,7 @@
 "use client";
 import { reconcileRewards } from "@/lib/rewards";
 import { parseWorkspaceBackup } from "@/lib/workspace-backup";
+import { earnedCelebration, type Celebration } from "@/lib/celebrations";
 import { create } from "zustand";
 import { emptyWorkspace, type Workspace } from "@/types";
 import { isConnected } from "@/lib/supabase/client";
@@ -13,6 +14,7 @@ type State = {
   loaded: boolean;
   error: string | null;
   toast: string | null;
+  celebration: Celebration | null;
   load: () => Promise<void>;
   mutate: (mutation: Mutation) => Promise<void>;
   restore: (data: Workspace) => Promise<void>;
@@ -23,6 +25,7 @@ export const useWorkspace = create<State>((set, get) => ({
   loaded: false,
   error: null,
   toast: null,
+  celebration: null,
   notify: (message) => {
     set({ toast: message });
     setTimeout(() => {
@@ -85,11 +88,17 @@ export const useWorkspace = create<State>((set, get) => ({
               throw new Error(result.error || "Could not save changes.");
             if (parsed.op === "create_course" || parsed.op === "refresh_course")
               await get().load();
-            else set({ data: applyMutation(get().data, parsed) });
+            else {
+              const before = get().data;
+              const data = applyMutation(before, parsed);
+              if (result.rewards) data.rewards = result.rewards;
+              set({ data, celebration: earnedCelebration(before, data) });
+            }
           } else {
-            const data = applyMutation(get().data, parsed);
+            const before = get().data;
+            const data = applyMutation(before, parsed);
             localStorage.setItem(storageKey, JSON.stringify(data));
-            set({ data });
+            set({ data, celebration: earnedCelebration(before, data) });
           }
         } catch (error) {
           const message =
