@@ -1,3 +1,4 @@
+import { reconcileRewards } from "@/lib/rewards";
 import type { Workspace, Course } from "@/types";
 import { emptyProgress } from "@/types";
 import type { Mutation } from "@/lib/validations";
@@ -5,6 +6,7 @@ import { localDay } from "@/lib/utils";
 import { createId } from "@/lib/id";
 export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
   const next = structuredClone(state);
+  next.rewards = reconcileRewards(state);
   const now = new Date().toISOString();
   const findVideo = (id: string) =>
     next.courses.flatMap((c) => c.videos).find((v) => v.id === id);
@@ -216,5 +218,6 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
     });
   });
   next.activity.sort((a, b) => a.day.localeCompare(b.day));
+  next.rewards = reconcileRewards(next);
   return next;
 }

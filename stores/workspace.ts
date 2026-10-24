@@ -1,4 +1,6 @@
 "use client";
+import { reconcileRewards } from "@/lib/rewards";
+import { parseWorkspaceBackup } from "@/lib/workspace-backup";
 import { create } from "zustand";
 import { emptyWorkspace, type Workspace } from "@/types";
 import { isConnected } from "@/lib/supabase/client";
@@ -37,8 +39,11 @@ export const useWorkspace = create<State>((set, get) => ({
         set({ data, loaded: true, error: null });
       } else {
         const stored = localStorage.getItem(storageKey);
+        const data = stored ? parseWorkspaceBackup(stored) : structuredClone(emptyWorkspace);
+        data.rewards = reconcileRewards(data);
+        localStorage.setItem(storageKey, JSON.stringify(data));
         set({
-          data: stored ? JSON.parse(stored) : structuredClone(emptyWorkspace),
+          data,
           loaded: true,
           error: null,
         });

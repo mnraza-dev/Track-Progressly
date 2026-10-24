@@ -6,6 +6,7 @@ const text = z.string().max(50000);
 const seconds = z.number().finite().min(0).max(Number.MAX_SAFE_INTEGER);
 const nullableDate = z.string().nullable();
 const workspaceSchema = z.object({
+  rewards: z.object({ version: z.literal(1), events: z.record(z.string().max(100000), z.object({ xp: z.number().int().min(0).max(10000), earned_at: z.string().datetime() })) }).optional(),
   profile: z.object({
     display_name: z.string().max(100),
     timezone: z.string().refine((value) => {

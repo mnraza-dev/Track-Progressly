@@ -1,3 +1,4 @@
+import type { RewardLedger } from "@/lib/rewards";
 export type LessonStatus =
   "not_started" | "in_progress" | "completed" | "needs_revision";
 export type Note = {
@@ -73,6 +74,7 @@ export type Profile = {
   weekend_rest?: boolean;
 };
 export type Workspace = {
+  rewards?: RewardLedger;
   courses: Course[];
   goals: Goal[];
   activity: Activity[];

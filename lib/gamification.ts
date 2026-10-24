@@ -1,5 +1,6 @@
 import type { Workspace } from "@/types";
-import { completion, streak, localDay } from "@/lib/utils";
+import { ACHIEVEMENT_RULES, reconcileRewards, rewardMetrics } from "@/lib/rewards";
+import { streak, localDay } from "@/lib/utils";
 import { parseVideoChapters, completedChaptersCount } from "@/lib/youtube/chapters";
 
 export type LevelTier = {
@@ -21,16 +22,11 @@ export const LEVEL_TIERS: LevelTier[] = [
 ];
 
 export type Achievement = {
-  id: string;
-  title: string;
-  description: string;
-  category: "streak" | "lessons" | "chapters" | "practice" | "notes" | "courses";
+  id: string; title: string; description: string;
+  category: "streak" | "lessons" | "practice" | "notes" | "courses" | "focus";
   icon: "flame" | "check" | "layers" | "trophy" | "book" | "sparkles" | "target";
-  xpReward: number;
-  current: number;
-  target: number;
-  unlocked: boolean;
-  progressPercent: number;
+  xpReward: number; current: number; target: number; unlocked: boolean; progressPercent: number;
+  earnedAt: string | null;
 };
 
 export type LevelInfo = {
@@ -54,260 +50,51 @@ export type DailyQuest = {
   icon: "target" | "play" | "check";
 };
 
-export function getGamificationStats(workspace: Workspace) {
-  const { courses, activity, profile } = workspace;
-  const nonArchivedCourses = courses.filter((c) => c.status !== "archived");
-
-  // 1. Lessons completed
-  const completedVideos = nonArchivedCourses.reduce(
-    (sum, c) => sum + c.videos.filter((v) => v.progress.is_completed).length,
-    0,
-  );
-
-  // 2. Chapters completed
-  let totalChaptersCompleted = 0;
-  nonArchivedCourses.forEach((c) => {
-    c.videos.forEach((v) => {
-      const chaps = parseVideoChapters(v.description || "", v.duration_seconds || 0);
-      if (chaps.length > 0) {
-        totalChaptersCompleted += completedChaptersCount(
-          chaps,
-          v.progress.last_position_seconds || 0,
-          v.duration_seconds || 0,
-          v.progress.is_completed,
-        );
-      }
-    });
+export function getGamificationStats(workspace: Workspace, now = new Date()) {
+  const ledger = reconcileRewards(workspace, now);
+  const metrics = rewardMetrics(ledger);
+  const achievements: Achievement[] = ACHIEVEMENT_RULES.map((rule) => {
+    const earnedAt = ledger.events[`achievement:${rule.id}`]?.earned_at || null;
+    const current = earnedAt ? Math.max(rule.target, metrics[rule.metric]) : metrics[rule.metric];
+    return { ...rule, current, unlocked: !!earnedAt, earnedAt, progressPercent: Math.min(100, Math.round(current / rule.target * 100)) };
   });
-
-  // 3. Practice tasks completed
-  const allTasks = nonArchivedCourses.flatMap((c) =>
-    c.videos.flatMap((v) => v.tasks),
-  );
-  const completedTasks = allTasks.filter((t) => t.is_completed).length;
-
-  // 4. Notes written
-  const allNotes = nonArchivedCourses.flatMap((c) =>
-    c.videos.flatMap((v) => v.notes),
-  );
-  const notesCount = allNotes.length;
-
-  // 5. Courses finished (100% completion)
-  const completedCourses = nonArchivedCourses.filter(
-    (c) => completion(c) === 100 && c.videos.length > 0,
-  ).length;
-
-  // 6. Streak & Active time
-  const currentStreak = streak(activity, profile.timezone, profile.weekend_rest);
-  const totalSeconds = activity.reduce((sum, a) => sum + (a.active_seconds || 0), 0);
-  const totalMinutes = Math.floor(totalSeconds / 60);
-
-  // Raw action XP
-  const baseXP =
-    completedVideos * 50 +
-    totalChaptersCompleted * 15 +
-    completedTasks * 25 +
-    notesCount * 10 +
-    completedCourses * 200 +
-    currentStreak * 30 +
-    Math.floor(totalMinutes / 15) * 10;
-
-  // Compute Achievements
-  const rawAchievements: Array<Omit<Achievement, "progressPercent" | "unlocked">> = [
-    {
-      id: "first_step",
-      title: "First Step Forward",
-      description: "Complete your first lesson in any course",
-      category: "lessons",
-      icon: "check",
-      xpReward: 50,
-      current: completedVideos,
-      target: 1,
-    },
-    {
-      id: "streak_spark",
-      title: "Momentum Spark",
-      description: "Maintain a 3-day learning streak",
-      category: "streak",
-      icon: "flame",
-      xpReward: 75,
-      current: currentStreak,
-      target: 3,
-    },
-    {
-      id: "streak_master",
-      title: "Unstoppable Force",
-      description: "Maintain a 7-day learning streak",
-      category: "streak",
-      icon: "flame",
-      xpReward: 150,
-      current: currentStreak,
-      target: 7,
-    },
-    {
-      id: "chapter_cadence",
-      title: "Chapter Cadence",
-      description: "Finish 5 video chapters across your courses",
-      category: "chapters",
-      icon: "layers",
-      xpReward: 100,
-      current: totalChaptersCompleted,
-      target: 5,
-    },
-    {
-      id: "chapter_virtuoso",
-      title: "Chapter Virtuoso",
-      description: "Finish 20 video chapters",
-      category: "chapters",
-      icon: "layers",
-      xpReward: 250,
-      current: totalChaptersCompleted,
-      target: 20,
-    },
-    {
-      id: "maker_mindset",
-      title: "Maker Mindset",
-      description: "Complete 3 practice tasks and exercises",
-      category: "practice",
-      icon: "target",
-      xpReward: 100,
-      current: completedTasks,
-      target: 3,
-    },
-    {
-      id: "execution_prodigy",
-      title: "Execution Prodigy",
-      description: "Complete 10 practice tasks",
-      category: "practice",
-      icon: "target",
-      xpReward: 200,
-      current: completedTasks,
-      target: 10,
-    },
-    {
-      id: "the_archivist",
-      title: "The Archivist",
-      description: "Capture 5 thoughtful study notes",
-      category: "notes",
-      icon: "book",
-      xpReward: 75,
-      current: notesCount,
-      target: 5,
-    },
-    {
-      id: "the_finisher",
-      title: "The Finisher",
-      description: "Complete a full course from start to finish",
-      category: "courses",
-      icon: "trophy",
-      xpReward: 200,
-      current: completedCourses,
-      target: 1,
-    },
-    {
-      id: "deep_focus",
-      title: "Deep Work Master",
-      description: "Log at least 120 minutes of total focus time",
-      category: "streak",
-      icon: "sparkles",
-      xpReward: 150,
-      current: totalMinutes,
-      target: 120,
-    },
-  ];
-
-  const achievements: Achievement[] = rawAchievements.map((a) => {
-    const unlocked = a.current >= a.target;
-    const progressPercent = Math.min(100, Math.round((a.current / a.target) * 100));
-    return {
-      ...a,
-      unlocked,
-      progressPercent,
-    };
-  });
-
-  const achievementBonusXP = achievements
-    .filter((a) => a.unlocked)
-    .reduce((sum, a) => sum + a.xpReward, 0);
-
-  const totalXP = baseXP + achievementBonusXP;
-
-  // Level computation
-  let currentTier = LEVEL_TIERS[0];
-  for (let i = LEVEL_TIERS.length - 1; i >= 0; i--) {
-    if (totalXP >= LEVEL_TIERS[i].minXP) {
-      currentTier = LEVEL_TIERS[i];
-      break;
-    }
-  }
-
-  const isMaxLevel = currentTier.level === LEVEL_TIERS[LEVEL_TIERS.length - 1].level;
-  const xpInCurrentLevel = totalXP - currentTier.minXP;
-  const xpNeededForNext = currentTier.nextXP - currentTier.minXP;
-  const levelProgressPercent = isMaxLevel
-    ? 100
-    : Math.min(100, Math.round((xpInCurrentLevel / xpNeededForNext) * 100));
-
+  const totalXP = Object.values(ledger.events).reduce((sum, event) => sum + event.xp, 0);
+  const currentTier = [...LEVEL_TIERS].reverse().find((tier) => totalXP >= tier.minXP) || LEVEL_TIERS[0];
+  const isMaxLevel = currentTier.level === LEVEL_TIERS.length;
   const levelInfo: LevelInfo = {
-    level: currentTier.level,
-    title: currentTier.title,
-    totalXP,
-    currentLevelXP: xpInCurrentLevel,
-    xpNeededForNext,
-    levelProgressPercent,
+    level: currentTier.level, title: currentTier.title, totalXP,
+    currentLevelXP: totalXP - currentTier.minXP,
+    xpNeededForNext: currentTier.nextXP - currentTier.minXP,
+    levelProgressPercent: isMaxLevel ? 100 : Math.min(100, Math.floor((totalXP - currentTier.minXP) / (currentTier.nextXP - currentTier.minXP) * 100)),
     isMaxLevel,
   };
-
-  // Daily quests for today
-  const todayStr = localDay(new Date(), profile.timezone);
-  const todayRow = activity.find((a) => a.day === todayStr);
-  const todayMinutes = Math.floor((todayRow?.active_seconds || 0) / 60);
-
-  const dailyQuests: DailyQuest[] = [
-    {
-      id: "quest_focus",
-      title: "Daily Focus Time",
-      description: "Focus for at least 15 minutes today",
-      current: todayMinutes,
-      target: 15,
-      completed: todayMinutes >= 15,
-      xpReward: 35,
-      icon: "target",
-    },
-    {
-      id: "quest_lesson",
-      title: "One Lesson Closer",
-      description: "Finish at least 1 lesson or chapter today",
-      current: (todayRow?.videos_completed || 0),
-      target: 1,
-      completed: (todayRow?.videos_completed || 0) >= 1,
-      xpReward: 40,
-      icon: "play",
-    },
-    {
-      id: "quest_practice",
-      title: "Hands-on Exercise",
-      description: "Complete 1 practice task today",
-      current: (todayRow?.practice_completed || 0),
-      target: 1,
-      completed: (todayRow?.practice_completed || 0) >= 1,
-      xpReward: 45,
-      icon: "check",
-    },
+  const today = localDay(now, workspace.profile.timezone);
+  const todayRow = workspace.activity.find((row) => row.day === today);
+  const quest = (id: string, title: string, description: string, current: number, target: number, xpReward: number, icon: DailyQuest["icon"]): DailyQuest => ({ id, title, description, current, target, xpReward, icon, completed: !!ledger.events[`${id}:${today}`] });
+  const dailyQuests = [
+    quest("quest_focus", "Daily Focus Time", "Log 15 minutes of active learning today", Math.floor((todayRow?.active_seconds || 0) / 60), 15, 35, "target"),
+    quest("quest_lesson", "One Lesson Closer", "Complete one available lesson today", todayRow?.videos_completed || 0, 1, 40, "play"),
+    quest("quest_practice", "Hands-on Exercise", "Complete one practice task today", todayRow?.practice_completed || 0, 1, 45, "check"),
   ];
-
+  let totalChaptersCompleted = 0;
+  for (const course of workspace.courses) for (const video of course.videos) {
+    if (video.availability_status !== "available") continue;
+    const chapters = parseVideoChapters(video.description, video.duration_seconds);
+    totalChaptersCompleted += completedChaptersCount(chapters, video.progress.last_position_seconds, video.duration_seconds, video.progress.is_completed);
+  }
+  const xpBreakdown = [
+    { label: "Lessons", prefix: "lesson:" }, { label: "Practice", prefix: "practice:" },
+    { label: "Useful notes", prefix: "note:" }, { label: "Courses", prefix: "course:" },
+    { label: "Consistency", prefix: "day:" }, { label: "Focus time", prefix: "focus:" },
+    { label: "Daily quests", prefix: "quest_" }, { label: "Achievements", prefix: "achievement:" },
+  ].map((item) => ({ label: item.label, xp: Object.entries(ledger.events).filter(([key]) => key.startsWith(item.prefix)).reduce((sum, [, event]) => sum + event.xp, 0) }));
   return {
-    levelInfo,
-    achievements,
-    dailyQuests,
+    levelInfo, achievements, dailyQuests, xpBreakdown, ledger,
     unlockedAchievementsCount: achievements.filter((a) => a.unlocked).length,
     totalAchievementsCount: achievements.length,
-    completedVideos,
-    totalChaptersCompleted,
-    completedTasks,
-    notesCount,
-    completedCourses,
-    currentStreak,
-    totalMinutes,
+    completedVideos: metrics.lessons, totalChaptersCompleted,
+    completedTasks: metrics.practice, notesCount: metrics.notes, completedCourses: metrics.courses,
+    currentStreak: streak(workspace.activity, workspace.profile.timezone, workspace.profile.weekend_rest),
+    totalMinutes: Math.max(metrics.minutes, Math.floor(workspace.activity.reduce((sum, row) => sum + row.active_seconds, 0) / 60)),
   };
 }
