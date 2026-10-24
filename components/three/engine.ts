@@ -93,9 +93,7 @@ export class StudioRenderer {
       registration.options.kind === "books" ? 0.24 : 0.08,
       registration.options.kind === "hero"
         ? 6.8
-        : ["goal", "focus", "lessons", "practice", "streak"].includes(
-              registration.options.kind,
-            )
+        : registration.options.kind === "goal"
           ? 4.8
           : registration.options.kind === "timeline"
             ? 7.8

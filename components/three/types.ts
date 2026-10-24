@@ -1,8 +1,4 @@
 export type SceneKind =
-  | "focus"
-  | "lessons"
-  | "practice"
-  | "streak"
   | "hero"
   | "books"
   | "code"
