@@ -1,4 +1,5 @@
 "use client";
+import { ExportDialog } from "@/components/exports/export-dialog";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -277,6 +278,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span>{title}</span>
           </div>
           <div className="topbar-right">
+            <ExportDialog compact />
             <button
               className="global-search"
               aria-label="Search workspace"

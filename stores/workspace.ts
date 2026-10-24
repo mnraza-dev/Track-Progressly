@@ -13,6 +13,7 @@ type State = {
   toast: string | null;
   load: () => Promise<void>;
   mutate: (mutation: Mutation) => Promise<void>;
+  restore: (data: Workspace) => Promise<void>;
   notify: (message: string) => void;
 };
 export const useWorkspace = create<State>((set, get) => ({
@@ -49,6 +50,18 @@ export const useWorkspace = create<State>((set, get) => ({
           error instanceof Error ? error.message : "Could not load workspace.",
       });
     }
+  },
+  restore: async (data) => {
+    if (isConnected)
+      throw new Error("Restore is available in browser workspaces only.");
+    const job = pending
+      .catch(() => {})
+      .then(() => {
+        localStorage.setItem(storageKey, JSON.stringify(data));
+        set({ data, error: null, loaded: true });
+      });
+    pending = job;
+    await job;
   },
   mutate: async (input) => {
     const parsed = mutationSchema.parse(input);

@@ -63,10 +63,9 @@ test("light, dark, and system themes persist with readable text and larger typog
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/settings");
   const themes = page.getByRole("tablist", { name: "Color theme" });
-  await expect(themes.getByRole("tab", { name: "System" })).toHaveAttribute(
-    "aria-selected",
-    "true",
-  );
+  await expect(
+    themes.getByRole("tab", { name: "Dark", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
   const samples = [
     "body",
     ".page-heading p",

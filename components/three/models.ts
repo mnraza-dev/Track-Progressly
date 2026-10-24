@@ -2,13 +2,13 @@ import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import type { SceneKind } from "./types";
 const palette = {
-  ink: "#20363a",
-  teal: "#378f80",
+  ink: "#29292d",
+  teal: "#d27d3f",
   cream: "#f1e9d8",
-  sage: "#a8b991",
+  sage: "#b7a591",
   copper: "#c47a50",
-  slate: "#7da5aa",
-  silver: "#d3dfdb",
+  slate: "#8d8997",
+  silver: "#ddd7d0",
 };
 function material(color: string, metalness = 0, roughness = 0.36) {
   return new THREE.MeshPhysicalMaterial({

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -29,6 +30,7 @@ export function Landing() {
           <a href="#the-method">The method</a>
           <a href="#inside">What’s inside</a>
           <Link href="/login">Sign in</Link>
+          <ThemeToggle />
           <Button asChild>
             <a href="/signup">
               Get started free <ArrowUpRight size={16} />
@@ -40,22 +42,17 @@ export function Landing() {
         <section className="product-hero">
           <div className="product-hero-copy">
             <span className="product-eyebrow">
-              <i /> YOUR YOUTUBE LEARNING STUDIO
+              <i /> A little structure. A lot of progress.
             </span>
             <h1>
-              Stop collecting tutorials.
+              Consistency meets
               <br />
-              <em>Start completing.</em>
-              <span className="product-title-star" aria-hidden="true">
-                ✳
-              </span>
+              <em>completion.</em>
             </h1>
             <p>
-              You already have the curiosity.
-              <br />
-              Give it a little structure, a place to practice,
-              <br className="desktop-break" /> and a reason to come back
-              tomorrow.
+              Content is everywhere. <strong>Make the learning stick.</strong>{" "}
+              Turn your YouTube playlists into a daily practice, with notes,
+              goals, and progress you can take anywhere.
             </p>
             <div className="product-hero-actions">
               <Button asChild>
@@ -68,7 +65,7 @@ export function Landing() {
               </a>
             </div>
             <span className="product-hero-note">
-              <Check size={13} /> Start in your browser. Make it your own.
+              <Check size={13} /> Your courses. Your pace. Your progress.
             </span>
             <div className="product-hero-signoff">
               <span>LESS “SAVED FOR LATER.”</span>

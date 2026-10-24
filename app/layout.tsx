@@ -4,6 +4,7 @@ import "./globals.css";
 import "./studio.css";
 import "./charts.css";
 import "./product.css";
+import "./chai.css";
 import { SceneProvider } from "@/components/three/scene-provider";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { TourProvider } from "@/components/tour/tour-context";

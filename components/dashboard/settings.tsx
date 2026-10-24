@@ -1,4 +1,8 @@
 "use client";
+import { ExportDialog } from "@/components/exports/export-dialog";
+import { WorkspaceDialog } from "@/components/ui/workspace-dialog";
+import { parseWorkspaceBackup } from "@/lib/workspace-backup";
+import type { Workspace } from "@/types";
 import { Input } from "@/components/ui/input";
 import { useState, useRef } from "react";
 import { useTheme } from "next-themes";
@@ -6,7 +10,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   User,
-  Shield,
   Globe,
   Save,
   Cloud,
@@ -17,9 +20,7 @@ import {
   ArrowUpRight,
   LogOut,
   Play,
-  Download,
   Upload,
-  FileJson,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
@@ -28,18 +29,21 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { downloadText } from "@/lib/utils";
 import { fireConfetti } from "@/lib/confetti";
-import { format } from "date-fns";
 
 export function Settings() {
   const router = useRouter();
-  const { data, mutate, notify } = useWorkspace();
+  const { data, mutate, notify, restore } = useWorkspace();
+  const [pendingRestore, setPendingRestore] = useState<Workspace | null>(null);
+  const [restoreBusy, setRestoreBusy] = useState(false);
+  const [restoreError, setRestoreError] = useState("");
   const [name, setName] = useState(data.profile.display_name);
   const [timezone, setTimezone] = useState(data.profile.timezone);
   const [minutes, setMinutes] = useState(data.profile.daily_minutes);
   const [auto, setAuto] = useState(data.profile.auto_complete);
-  const [weekendRest, setWeekendRest] = useState(data.profile.weekend_rest ?? false);
+  const [weekendRest, setWeekendRest] = useState(
+    data.profile.weekend_rest ?? false,
+  );
   const [busy, setBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { theme, setTheme } = useTheme();
@@ -169,7 +173,8 @@ export function Settings() {
               <div>
                 <strong>Weekend Rest (Mon–Fri momentum)</strong>
                 <p>
-                  Preserve your study streak over Saturdays and Sundays without breaking momentum.
+                  Preserve your study streak over Saturdays and Sundays without
+                  breaking momentum.
                 </p>
               </div>
               <Switch
@@ -208,7 +213,7 @@ export function Settings() {
             <p className="settings-help">
               {isConnected
                 ? "Your courses, progress, and notes are private and saved to your account."
-                : "Your courses, notes, and goals are saved in this browser. Return on this device to pick up where you left off. You can export your notes below."}
+                : "Your courses, notes, and goals are saved in this browser. Return on this device to pick up where you left off. Use export options below to keep a backup."}
             </p>
             {isConnected ? (
               <Button
@@ -250,55 +255,35 @@ export function Settings() {
             </Tabs>
           </Card>
           <section className="panel settings-panel">
+            <span className="eyebrow">TAKE YOUR PROGRESS WITH YOU</span>
             <h2>Your knowledge, yours to keep.</h2>
             <p className="settings-help">
-              Export your notes as Markdown, ready to take anywhere.
+              Export Markdown notes, lesson progress and activity CSVs, a
+              complete JSON backup, or a report to print and save as PDF.
             </p>
-            <Button
-              variant="outline"
-              onClick={() => {
-                downloadText(
-                  `# My Progressly notes\n\n${data.courses.flatMap((c) => c.videos.flatMap((v) => v.notes.map((n) => `## ${c.title} / ${v.title}\n\n${n.content}`))).join("\n\n")}`,
-                  "progressly-notes.md",
-                );
-                notify("Notes exported.");
-              }}
-            >
-              <Download size={15} />
-              Export all notes
-            </Button>
-            <span className="secure-hint">
-              <Shield size={13} />
-              No paid tools. No AI required.
-            </span>
+            <ExportDialog />
           </section>
           <section className="panel settings-panel">
             <h2>Workspace Backup & Restore</h2>
             <p className="settings-help">
-              Download a complete JSON snapshot of all your courses, lessons, notes, and activity, or restore from a previous backup file.
+              Download a complete JSON snapshot of all your courses, lessons,
+              notes, and activity, or restore from a previous backup file.
             </p>
+            {isConnected && (
+              <p className="settings-help">
+                Restore is available in browser workspaces. Account backups can
+                be exported; restoring account data is not supported yet.
+              </p>
+            )}
+            {restoreError && (
+              <p role="alert" className="export-error">
+                {restoreError}
+              </p>
+            )}
             <div className="backup-actions-row">
               <Button
                 variant="outline"
-                onClick={() => {
-                  const payload = {
-                    version: 1,
-                    app: "progressly",
-                    exported_at: new Date().toISOString(),
-                    workspace: data,
-                  };
-                  downloadText(
-                    JSON.stringify(payload, null, 2),
-                    `progressly-workspace-${format(new Date(), "yyyy-MM-dd")}.json`,
-                  );
-                  notify("Complete workspace snapshot exported.");
-                }}
-              >
-                <Download size={15} />
-                Export JSON backup
-              </Button>
-              <Button
-                variant="outline"
+                disabled={isConnected}
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload size={15} />
@@ -313,31 +298,16 @@ export function Settings() {
                   const file = e.target.files?.[0];
                   if (!file) return;
                   try {
-                    const text = await file.text();
-                    const parsed = JSON.parse(text);
-                    const workspaceData = parsed.workspace || parsed;
-                    if (
-                      !workspaceData.courses ||
-                      !Array.isArray(workspaceData.courses)
-                    ) {
-                      throw new Error(
-                        "Invalid Progressly backup file structure.",
-                      );
-                    }
-                    useWorkspace.setState({ data: workspaceData });
-                    try {
-                      localStorage.setItem(
-                        "progressly_workspace_v1",
-                        JSON.stringify(workspaceData),
-                      );
-                    } catch {}
-                    fireConfetti();
-                    notify("Workspace successfully restored from backup!");
-                    router.refresh();
-                  } catch (err: any) {
-                    notify(
-                      err?.message ||
-                        "Could not restore backup. Please verify file format.",
+                    if (file.size > 25_000_000)
+                      throw new Error("Choose a backup smaller than 25 MB.");
+                    const workspace = parseWorkspaceBackup(await file.text());
+                    setRestoreError("");
+                    setPendingRestore(workspace);
+                  } catch (err: unknown) {
+                    setRestoreError(
+                      err instanceof Error
+                        ? err.message
+                        : "Could not read this backup.",
                     );
                   } finally {
                     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -348,6 +318,62 @@ export function Settings() {
           </section>
         </aside>
       </div>
+      <WorkspaceDialog
+        open={!!pendingRestore}
+        onOpenChange={(open) => {
+          if (!open && !restoreBusy) setPendingRestore(null);
+        }}
+        title="Restore this workspace?"
+        description="Restoring replaces the data saved in this browser. Export your current workspace first if you want to keep it."
+      >
+        <p>
+          {pendingRestore?.courses.length ?? 0} courses ·{" "}
+          {pendingRestore?.goals.length ?? 0} goals ·{" "}
+          {pendingRestore?.activity.length ?? 0} days of activity
+        </p>
+        {restoreError && (
+          <p role="alert" className="export-error">
+            {restoreError}
+          </p>
+        )}
+        <div className="backup-actions-row">
+          <Button
+            variant="outline"
+            disabled={restoreBusy}
+            onClick={() => setPendingRestore(null)}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={restoreBusy}
+            onClick={async () => {
+              if (!pendingRestore) return;
+              setRestoreBusy(true);
+              try {
+                await restore(pendingRestore);
+                setName(pendingRestore.profile.display_name);
+                setTimezone(pendingRestore.profile.timezone);
+                setMinutes(pendingRestore.profile.daily_minutes);
+                setAuto(pendingRestore.profile.auto_complete);
+                setWeekendRest(pendingRestore.profile.weekend_rest ?? false);
+                setPendingRestore(null);
+                fireConfetti();
+                notify("Workspace restored and saved in this browser.");
+              } catch (err) {
+                setRestoreError(
+                  err instanceof Error
+                    ? err.message
+                    : "Could not restore workspace.",
+                );
+              } finally {
+                setRestoreBusy(false);
+              }
+            }}
+          >
+            {restoreBusy ? "Restoring..." : "Replace and restore"}
+          </Button>
+        </div>
+      </WorkspaceDialog>
     </>
   );
 }

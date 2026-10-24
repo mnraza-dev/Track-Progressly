@@ -1,10 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
+const port = Number(process.env.PLAYWRIGHT_PORT || 3000);
+const baseURL = `http://localhost:${port}`;
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: false,
   workers: 2,
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL,
     trace: "retain-on-failure",
     launchOptions: { args: ["--enable-unsafe-swiftshader"] },
   },
@@ -22,8 +24,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "bun run dev",
-    url: "http://localhost:3000",
+    command: `bun run dev --port ${port}`,
+    url: baseURL,
     reuseExistingServer: true,
     timeout: 120000,
   },

@@ -2,7 +2,10 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { Course, Activity } from "@/types";
 import { format, subDays } from "date-fns";
-import { parseVideoChapters, chapterProgressPercent } from "@/lib/youtube/chapters";
+import {
+  parseVideoChapters,
+  chapterProgressPercent,
+} from "@/lib/youtube/chapters";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -111,11 +114,17 @@ export function longestStreak(activity: Activity[]) {
   }
   return longest;
 }
-export function downloadText(text: string, filename: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/markdown" }));
+export function downloadText(
+  text: string,
+  filename: string,
+  mime = "text/markdown;charset=utf-8",
+) {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }));
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
