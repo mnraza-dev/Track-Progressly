@@ -55,7 +55,7 @@ test("real activity powers chart views, lesson segments, and the interactive 3D 
     landscape.locator('[data-three-scene="timeline"]'),
   ).toHaveAttribute("data-three-state", "ready", { timeout: 20000 });
   await expect(landscape.locator(".landscape-copy > strong")).toContainText(
-    "1 Hour 50 Minutes",
+    "1h 50m",
   );
   await landscape.getByRole("button", { name: /45 Minutes$/ }).click();
   await expect(landscape.locator(".landscape-footer strong")).toHaveText(

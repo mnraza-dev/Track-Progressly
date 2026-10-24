@@ -37,7 +37,7 @@ export function LearningLandscape({
         <div className="landscape-copy">
           <span className="landscape-period">LAST 7 DAYS</span>
           <strong>
-            {metric === "minutes" ? learningTime(total) : total}
+            {metric === "minutes" ? learningTime(total, true) : total}
             <span>
               {metric === "minutes" ? "of focus" : "lessons completed"}
             </span>

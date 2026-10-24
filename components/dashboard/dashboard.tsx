@@ -1151,6 +1151,7 @@ export function Dashboard() {
                     period,
                   ).reduce((n, day) => n + day.minutes, 0),
                 ),
+                true,
               )}
               <span>of focus</span>
             </strong>
