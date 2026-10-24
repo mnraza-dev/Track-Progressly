@@ -238,7 +238,10 @@ export function VideoChapters({
                       type="button"
                       onClick={() => onSeek(chapter.start_seconds)}
                       aria-current={isActive ? "true" : undefined}
-                      aria-label={`Jump to ${chapter.title} ${isCompleted ? "(Completed)" : ""} at ${chapterTimestamp(chapter.start_seconds)}`}
+                      aria-label={`Jump to ${chapter.title} at ${chapterTimestamp(chapter.start_seconds)}`}
+                      aria-description={
+                        isCompleted ? "Completed chapter" : "Not completed"
+                      }
                       className="chapter-jump-btn"
                     >
                       <span

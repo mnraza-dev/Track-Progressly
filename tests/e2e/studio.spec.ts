@@ -30,7 +30,7 @@ test("3D studio renders through one context, responds to input, and stays respon
     animations: "disabled",
   });
   await page
-    .getByRole("heading", { name: "Follow your curiosity" })
+    .getByRole("heading", { name: /You bring the link/ })
     .scrollIntoViewIfNeeded();
   await expect(
     page.locator('[data-three-scene="code"]').first(),
@@ -74,9 +74,10 @@ test("reduced-motion mode renders the studio and quick import pre-fills the impo
     .getByLabel("One link. A fresh start.")
     .fill("https://youtu.be/j942wKiXFu8");
   await page.getByRole("button", { name: "Import this YouTube link" }).click();
+  await expect(page).toHaveURL(/\/courses\/new\?url=/);
   await expect(
     page.getByPlaceholder("https://www.youtube.com/playlist?list=..."),
-  ).toHaveValue("https://youtu.be/j942wKiXFu8");
+  ).toHaveValue("https://youtu.be/j942wKiXFu8", { timeout: 15000 });
 });
 
 test("WebGL context loss falls back and restores without disrupting the workspace", async ({

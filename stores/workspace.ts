@@ -46,7 +46,13 @@ export const useWorkspace = create<State>((set, get) => ({
           ? parseWorkspaceBackup(stored)
           : structuredClone(emptyWorkspace);
         data.rewards = reconcileRewards(data);
-        localStorage.setItem(storageKey, JSON.stringify(data));
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(data));
+        } catch {
+          get().notify(
+            "Workspace loaded, but browser storage is full or unavailable. Export a backup before making changes.",
+          );
+        }
         set({
           data,
           loaded: true,

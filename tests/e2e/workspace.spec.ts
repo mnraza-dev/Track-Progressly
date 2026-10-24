@@ -75,7 +75,10 @@ test("manual course, completion, notes, practice and reload persistence", async 
   ).toBeVisible();
   await page.goto("/analytics");
   await expect(
-    page.locator(".course-chart-links").getByText("50%", { exact: true }),
+    page
+      .locator(".course-diag-card")
+      .filter({ hasText: "My React learning path" })
+      .getByText("50%", { exact: true }),
   ).toBeVisible();
   await page.goto("/settings");
   await page.getByLabel("Display name").fill("Alex");
@@ -157,7 +160,7 @@ test("bookmarks, mastery flags, note revisions, theme and public homepage", asyn
   await page.getByRole("tab", { name: "Light", exact: true }).click();
   await page.goto("/welcome");
   await expect(
-    page.getByRole("heading", { name: /Stop collecting tutorials/ }),
+    page.getByRole("heading", { name: /Consistency meets/ }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Get started free" }).first().click();
   await expect(

@@ -4,7 +4,7 @@ import { RewardFeedback } from "@/components/gamification/reward-feedback";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
@@ -39,7 +39,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useTour } from "@/components/tour/tour-context";
-import { getGamificationStats } from "@/lib/gamification";
+import { useGamification } from "@/components/gamification/use-gamification";
 import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
 import { ShortcutsDialog } from "@/components/layout/shortcuts-dialog";
 const navigation = [
@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { startTour } = useTour();
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const stats = useMemo(() => getGamificationStats(data), [data]);
+  const stats = useGamification(data);
 
   useEffect(() => {
     void load();

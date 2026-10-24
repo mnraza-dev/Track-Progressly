@@ -242,11 +242,7 @@ test("manual videos load chapter metadata with retry and do not carry chapters i
     "",
   );
   await page.getByRole("button", { name: /^Chapters / }).click();
-  await expect(
-    page.getByText(
-      "No chapter timestamps were found in this video’s description.",
-    ),
-  ).toBeVisible();
+  await expect(page.getByText("No chapter timestamps found")).toBeVisible();
   await expect(page.getByRole("button", { name: /^Jump to/ })).toHaveCount(0);
   expect(requests).toBe(3);
   expect(duplicateKeys).toEqual([]);

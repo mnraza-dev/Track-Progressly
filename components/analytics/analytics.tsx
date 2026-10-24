@@ -31,7 +31,11 @@ import {
 import { format, subDays } from "date-fns";
 import { ActivityChart } from "./activity-chart";
 import { LearningLandscape } from "./learning-landscape";
-import { LearningMix, WeekdayRhythm } from "./progress-charts";
+import {
+  LearningMix,
+  WeekdayRhythm,
+  CourseComparison,
+} from "./progress-charts";
 import { weekdayData } from "@/lib/analytics";
 import {
   parseVideoChapters,
@@ -99,7 +103,9 @@ export function Analytics() {
   const reviewedNotes = allNotes.filter((n) => !n.is_revision_required).length;
 
   // 3. Active vs. Passive Learning Balance
-  const totalStudyMinutes = Math.round(total / 60);
+  const totalStudyMinutes = Math.round(
+    data.activity.reduce((sum, row) => sum + row.active_seconds, 0) / 60,
+  );
   const activeActionsCount = completedTasks + allNotes.length;
   // Healthy active balance benchmark: 1 active engagement action per 15-20 min of study
   const activeRatioScore =
@@ -284,7 +290,7 @@ Workspace: ${data.profile.display_name || "Learner"} (${data.profile.timezone})
 - Courses Completed: ${coursesDone}
 - Current Streak: ${streak(data.activity, data.profile.timezone, data.profile.weekend_rest)} days (Best: ${longestStreak(data.activity)} days)
 - Weekly Learning Velocity: ${weeklyLessonVelocity} lessons / week
-- Active Learning Retention Score: ${activeRatioScore}%
+- Active Participation Indicator: ${activeRatioScore}%
 
 ## 2. Category & Subject Mastery
 ${categoryStats
@@ -325,11 +331,8 @@ ${courseDiagnostics
       <div className="page-heading analytics-page-heading">
         <div>
           <span className="eyebrow">COMPREHENSIVE LEARNING INTELLIGENCE</span>
-          <h1>Analytics & Diagnostics Studio</h1>
-          <p>
-            Study velocity, cognitive retention ratios, category mastery, and
-            circadian learning rhythms.
-          </p>
+          <h1>Your learning, in perspective.</h1>
+          <p>Your study time, course progress, practice, and weekly rhythm.</p>
         </div>
         <div className="analytics-header-actions">
           <select
@@ -485,10 +488,11 @@ ${courseDiagnostics
         <section className="panel retention-balance-panel">
           <div className="panel-heading">
             <div>
-              <span className="section-index">COGNITIVE ENGAGEMENT</span>
+              <span className="section-index">LEARNING HABITS</span>
               <h2>Active vs. Passive Balance</h2>
               <p>
-                How effectively you convert watch time into long-term recall.
+                Notes and practice across your library. A habit indicator, not a
+                measure of recall.
               </p>
             </div>
             <Brain size={20} className="text-primary" />
@@ -497,7 +501,7 @@ ${courseDiagnostics
           <div className="retention-card-body">
             <div className="retention-score-strip">
               <div className="retention-score-label">
-                <span>Retention Balance Index</span>
+                <span>Active Participation Indicator</span>
                 <strong>{activeRatioScore}%</strong>
               </div>
               <div className="retention-progress-bar">
@@ -538,15 +542,15 @@ ${courseDiagnostics
               <p>
                 {activeRatioScore >= 70 ? (
                   <>
-                    <strong>Superb active recall balance!</strong> You regularly
+                    <strong>Making room for practice.</strong> You regularly
                     apply concepts through notes and practice exercises rather
                     than just passively observing.
                   </>
                 ) : (
                   <>
-                    <strong>Boost your active retention:</strong> Take 1
-                    timestamped note or complete a practice task every 15
-                    minutes of video to lock in deeper memory.
+                    <strong>Try one active step:</strong> Take 1 timestamped
+                    note or complete a practice task every 15 minutes of video,
+                    then try explaining the idea in your own words.
                   </>
                 )}
               </p>
@@ -705,6 +709,8 @@ ${courseDiagnostics
           timezone={data.profile.timezone}
         />
       </div>
+
+      <CourseComparison courses={data.courses} />
 
       {/* Row 7: Course-by-Course In-Depth Diagnostics Matrix */}
       <section className="panel course-diagnostics-panel">

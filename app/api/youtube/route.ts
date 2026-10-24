@@ -1,3 +1,4 @@
+import { readJsonBody, RequestBodyError } from "@/lib/http/body";
 import { importYouTube, YouTubeError } from "@/lib/youtube/service";
 import { serverSupabase } from "@/lib/supabase/server";
 import { z } from "zod";
@@ -41,6 +42,16 @@ export async function POST(request: Request) {
       // This per-process limit is best-effort across serverless instances.
       const ip =
         request.headers.get("x-forwarded-for")?.split(",")[0] || "local";
+      if (localLimits.size >= 10000) {
+        const now = Date.now();
+        for (const [key, value] of localLimits)
+          if (now - value.start >= 60000) localLimits.delete(key);
+        if (localLimits.size >= 10000 && !localLimits.has(ip))
+          return Response.json(
+            { error: "Import capacity reached. Try again in a minute." },
+            { status: 429 },
+          );
+      }
       const bucket = localLimits.get(ip);
       const current =
         bucket && Date.now() - bucket.start < 60000
@@ -56,7 +67,7 @@ export async function POST(request: Request) {
     }
     const { input } = z
       .object({ input: z.string().min(1).max(500) })
-      .parse(await request.json());
+      .parse(await readJsonBody(request, 4_000_000));
     const preview = await importYouTube(input);
     return Response.json(preview, {
       headers: { "Cache-Control": "private, no-store" },
@@ -66,11 +77,13 @@ export async function POST(request: Request) {
       { error: e instanceof Error ? e.message : "Import failed." },
       {
         status:
-          e instanceof YouTubeError
+          e instanceof RequestBodyError
             ? e.status
-            : e instanceof z.ZodError
-              ? 400
-              : 500,
+            : e instanceof YouTubeError
+              ? e.status
+              : e instanceof z.ZodError
+                ? 400
+                : 500,
       },
     );
   }

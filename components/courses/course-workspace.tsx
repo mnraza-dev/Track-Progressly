@@ -237,33 +237,27 @@ function CourseWorkspaceContent({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [upNextActive, setUpNextActive] = useState(false);
   const [countdown, setCountdown] = useState(5);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const triggerUpNext = () => {
     if (!next) return;
     setUpNextActive(true);
     setCountdown(5);
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    countdownRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(countdownRef.current!);
-          setUpNextActive(false);
-          router.push(`/courses/${course.id}/learn/${next.id}`);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
   };
-
   useEffect(() => {
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    return () => {
+    if (!upNextActive || !next) return;
+    if (countdown <= 0) {
+      router.push(`/courses/${course.id}/learn/${next.id}`);
+      return;
+    }
+    const timer = setTimeout(() => setCountdown((value) => value - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [upNextActive, countdown, next, course.id, router]);
+  useEffect(
+    () => () => {
       useFeedback.getState().setVideoPlaying(false);
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
-  }, [lesson?.id]);
+    },
+    [lesson?.id],
+  );
   return (
     <>
       <Link href="/courses" className="back-link">
@@ -675,9 +669,6 @@ function CourseWorkspaceContent({
                             ? "Lesson marked in progress."
                             : "One more step forward. Lesson completed!",
                         );
-                        if (!lesson.progress.is_completed && next) {
-                          triggerUpNext();
-                        }
                       })
                     }
                   >
@@ -821,9 +812,6 @@ function CourseWorkspaceContent({
                       <Button
                         size="sm"
                         onClick={() => {
-                          if (countdownRef.current) {
-                            clearInterval(countdownRef.current);
-                          }
                           setUpNextActive(false);
                           router.push(`/courses/${course.id}/learn/${next.id}`);
                         }}
@@ -835,9 +823,6 @@ function CourseWorkspaceContent({
                         size="sm"
                         variant="ghost"
                         onClick={() => {
-                          if (countdownRef.current) {
-                            clearInterval(countdownRef.current);
-                          }
                           setUpNextActive(false);
                         }}
                         aria-label="Cancel auto advance"

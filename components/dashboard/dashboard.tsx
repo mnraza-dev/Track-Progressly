@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useWorkspace } from "@/stores/workspace";
-import { getGamificationStats } from "@/lib/gamification";
+import { useGamification } from "@/components/gamification/use-gamification";
 import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
 import {
   completion,
@@ -64,7 +64,7 @@ export function Dashboard() {
   const [taskFilter, setTaskFilter] = useState<"pending" | "all">("pending");
   const [hero3dMode, setHero3dMode] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
-  const gamificationStats = useMemo(() => getGamificationStats(data), [data]);
+  const gamificationStats = useGamification(data);
 
   const { courses, activity, profile } = data;
 
@@ -1209,7 +1209,7 @@ export function Dashboard() {
             <ChartNoAxesCombined size={15} />
             <span>DEEP STUDY DIAGNOSTICS</span>
           </div>
-          <h3>Curious about your pace, retention, and topic mastery?</h3>
+          <h3>Curious about your pace, practice, and course progress?</h3>
           <p>
             Explore circadian rhythm analysis, active vs. passive learning
             ratios, course completion forecasts, and category breakdowns in your

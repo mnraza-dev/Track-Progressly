@@ -71,8 +71,7 @@ export function StudyFocusTimer({
   const todayBaseMinutes = Math.floor(
     (todayActivity?.active_seconds || 0) / 60,
   );
-  const totalTodayMinutes =
-    todayBaseMinutes + Math.floor(sessionFocusSeconds / 60);
+  const totalTodayMinutes = todayBaseMinutes;
   const dailyGoalMinutes =
     data.goals.find((g) => g.goal_type === "daily_minutes")?.target_value ||
     data.profile.daily_minutes;
@@ -99,7 +98,7 @@ export function StudyFocusTimer({
     setCompleted(true);
     fireConfetti();
     if (soundEnabled) {
-      playFeedbackSound("focus", true);
+      playFeedbackSound("focus");
     }
     notify(
       `🎉 Focus sprint completed! You logged a focused ${Math.round(targetSeconds / 60)}m study session!`,

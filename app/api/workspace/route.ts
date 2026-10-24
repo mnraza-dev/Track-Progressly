@@ -1,3 +1,4 @@
+import { readJsonBody, RequestBodyError } from "@/lib/http/body";
 import { serverSupabase } from "@/lib/supabase/server";
 import { mutationSchema } from "@/lib/validations";
 import { emptyProgress } from "@/types";
@@ -45,9 +46,11 @@ function failure(error: unknown) {
           ? 401
           : duplicate
             ? 409
-            : error instanceof z.ZodError
-              ? 400
-              : 500,
+            : error instanceof RequestBodyError
+              ? error.status
+              : error instanceof z.ZodError
+                ? 400
+                : 500,
       headers: { "Cache-Control": "private, no-store" },
     },
   );
@@ -123,7 +126,7 @@ export async function POST(request: Request) {
     );
   try {
     const { db, user } = await authenticated();
-    const m = mutationSchema.parse(await request.json());
+    const m = mutationSchema.parse(await readJsonBody(request, 4_000_000));
     const baselineRewards = await db.rpc("sync_learning_rewards");
     if (baselineRewards.error) throw baselineRewards.error;
     let result;

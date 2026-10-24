@@ -55,10 +55,12 @@ export function AchievementsDialog({ open, onOpenChange, stats }: Props) {
   );
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rewards-dialog">
+      <DialogContent className="rewards-dialog w-[calc(100vw-2rem)] sm:max-w-[1000px] gap-6 rounded-2xl p-4 sm:p-8">
         <DialogHeader>
           <span className="eyebrow">THE PROGRESSLY COLLECTION</span>
-          <DialogTitle>Your effort. Made visible.</DialogTitle>
+          <DialogTitle className="text-2xl font-medium tracking-tight sm:text-3xl">
+            Your effort. Made visible.
+          </DialogTitle>
           <DialogDescription>
             Eight ranks to grow through. Small wins worth keeping.
           </DialogDescription>
@@ -146,7 +148,7 @@ export function AchievementsDialog({ open, onOpenChange, stats }: Props) {
               aria-label="Level details"
               aria-live="polite"
             >
-              <LevelBadge level={level} locked={!earned} decorative />
+              <LevelBadge level={level} decorative />
               <div>
                 <span className="eyebrow">
                   {earned ? "IN YOUR COLLECTION" : "YOUR NEXT HORIZONS"} ·{" "}

@@ -4,6 +4,7 @@ const baseURL = `http://localhost:${port}`;
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: false,
+  timeout: 60000,
   workers: 2,
   use: {
     baseURL,

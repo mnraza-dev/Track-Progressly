@@ -48,6 +48,12 @@ The workspace starts in **Dark** mode. Choose **Light**, **Dark**, or **System**
 
 Drag a sculpture to explore it, or focus it and use the arrow keys. Press **Home** or choose **Reset 3D view** to return to the original angle. Reduced motion follows your device preference, and the workspace remains usable when 3D is unavailable.
 
+## A collection built from your effort
+
+Grow through eight levels with custom collectible badges, daily quests, and milestones for lessons, practice, notes, courses, focus, and consistency. Open **Achievements & Badges** on the dashboard or choose your level in the header to explore the collection and see exactly where your XP comes from.
+
+Earned rewards survive breaks, archived courses, and repeated completion. In **Settings → Sound effects**, opt into original milestone chimes, choose a volume, or keep learning quiet. Celebration effects respect reduced motion.
+
 ## Your knowledge, yours to keep
 
 Choose **Export** in the workspace header, or **Open export options** in Settings:
@@ -87,3 +93,5 @@ If your workspace supports accounts, sign in to save across devices. A local wor
 Building or running Progressly? See the separate [developer guide](docs/DEVELOPMENT.md).
 
 See [improvement priorities](docs/IMPROVEMENTS.md) for the next product and reliability improvements.
+
+For a hosted product launch, follow the [release guide](docs/RELEASE.md).
