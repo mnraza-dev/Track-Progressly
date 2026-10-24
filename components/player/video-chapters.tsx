@@ -102,7 +102,7 @@ export function VideoChapters({
           </p>
         </div>
         <div className="chapter-heading-progress">
-          <strong className="text-2xl font-bold blur-sm">{percent}%</strong>
+          <strong className="text-3xl font-extrabold opacity-75">{percent}%</strong>
         </div>
       </div>
       {chapters.length > 0 && !loading && !error && (

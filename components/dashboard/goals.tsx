@@ -164,7 +164,7 @@ export function Goals() {
                     : "An intention for today, and every day."}
                 </p>
                 <div className="goal-card-numbers">
-                  <strong className="text-2xl font-bold blur-sm">
+                  <strong className="text-3xl font-extrabold opacity-75">
                     {g.goal_type === "daily_videos"
                       ? actual
                       : learningTime(actual)}
@@ -311,7 +311,7 @@ export function Goals() {
                 </p>
               </div>
               <Progress value={completion(c)} />
-              <strong className="text-2xl font-bold blur-sm">{completion(c)}%</strong>
+              <strong className="text-3xl font-extrabold opacity-75">{completion(c)}%</strong>
               <ArrowUpRight size={18} />
             </Link>
           ))}
