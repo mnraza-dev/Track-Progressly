@@ -1,19 +1,14 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 export type TourStep = {
   id: string;
   target: string; // CSS selector
   title: string;
   description: string;
-  icon?: "play" | "sparkles" | "target" | "check" | "rotate" | "compass" | "book";
+  icon?:
+    "play" | "sparkles" | "target" | "check" | "rotate" | "compass" | "book";
   placement?: "top" | "bottom" | "left" | "right";
   badge?: string;
 };
@@ -112,21 +107,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const [currentStep, setCurrentStep] = useState(0);
   const steps = DEFAULT_TOUR_STEPS;
 
-  // Check if first-time user after brief delay
-  useEffect(() => {
-    try {
-      const seen = localStorage.getItem(STORAGE_KEY);
-      if (!seen) {
-        const timer = setTimeout(() => {
-          setIsOpen(true);
-        }, 1200);
-        return () => clearTimeout(timer);
-      }
-    } catch {
-      // Storage unavailable or disabled
-    }
-  }, []);
-
+  // Start on request so onboarding never interrupts a lesson or another dialog.
   const startTour = useCallback(() => {
     setCurrentStep(0);
     setIsOpen(true);
@@ -205,4 +186,3 @@ export function useTour() {
   }
   return ctx;
 }
-

@@ -100,6 +100,11 @@
     letter-spacing: 1px;
   }
   .product-stage {
+    --scene-foreground: var(--foreground);
+    --scene-muted: var(--muted-foreground);
+    --scene-primary: var(--foreground);
+    --scene-border: var(--border);
+    --scene-selected: var(--accent);
     background:
       radial-gradient(ellipse at 60% 20%, var(--brand-glow), transparent 75%),
       var(--card);

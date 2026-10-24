@@ -8,7 +8,6 @@ import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
   BookOpen,
-  Play,
   StickyNote,
   ChartNoAxesCombined,
   Target,
@@ -20,8 +19,7 @@ import {
   Menu,
   X,
   Sparkles,
-  Sun,
-  Moon,
+  SunMoon,
   LogOut,
   Command,
   CheckCircle2,
@@ -105,7 +103,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setSearch((v) => !v);
-      } else if (!isEditing && (e.key === "?" || (e.shiftKey && e.key === "/"))) {
+      } else if (
+        !isEditing &&
+        (e.key === "?" || (e.shiftKey && e.key === "/"))
+      ) {
         e.preventDefault();
         setShortcutsOpen((v) => !v);
       } else if (!isEditing && e.key === "[" && !e.metaKey && !e.ctrlKey) {
@@ -218,11 +219,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               onClick={toggleTheme}
               aria-label="Toggle color theme"
             >
-              {resolvedTheme === "dark" ? (
-                <Sun size={17} />
-              ) : (
-                <Moon size={17} />
-              )}
+              <SunMoon size={17} />
             </button>
             {isConnected && (
               <button
@@ -297,8 +294,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="level-badge-trophy">
                 <Trophy size={13} />
               </span>
-              <span className="level-badge-pill">Lv. {stats.levelInfo.level}</span>
-              <span className="level-badge-xp">{stats.levelInfo.totalXP} XP</span>
+              <span className="level-badge-pill">
+                Lv. {stats.levelInfo.level}
+              </span>
+              <span className="level-badge-xp">
+                {stats.levelInfo.totalXP} XP
+              </span>
             </button>
             <button
               className="tour-topbar-button"
@@ -462,10 +463,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         onOpenChange={setAchievementsOpen}
         stats={stats}
       />
-      <ShortcutsDialog
-        open={shortcutsOpen}
-        onOpenChange={setShortcutsOpen}
-      />
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </div>
   );
 }

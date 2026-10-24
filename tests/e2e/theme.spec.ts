@@ -78,7 +78,7 @@ test("light, dark, and system themes persist with readable text and larger typog
     '.theme-options [data-state="inactive"]',
     ".settings-help",
     ".connection-status",
-    ".secure-hint",
+    ".settings-panel .eyebrow",
   ];
   for (const theme of ["Dark", "Light"]) {
     await themes.getByRole("tab", { name: theme, exact: true }).click();

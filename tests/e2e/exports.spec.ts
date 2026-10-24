@@ -114,7 +114,9 @@ test("validates backups, confirms replacement, and preserves restored data after
     mimeType: "application/json",
     buffer: Buffer.from('{"courses":[]}'),
   });
-  await expect(page.getByRole("alert")).toContainText("incomplete or invalid");
+  await expect(page.locator(".export-error")).toContainText(
+    "incomplete or invalid",
+  );
   const data = fixture();
   data.profile.display_name = "Restored learner";
   await input.setInputFiles({
@@ -167,4 +169,37 @@ test("empty workspace offers backup and explains empty exports", async ({
   await expect(
     dialog.getByRole("button", { name: "Download export" }),
   ).toBeEnabled();
+});
+
+test("export options fit a small phone and landscape with reduced motion", async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/dashboard");
+  await page
+    .getByRole("button", { name: "Export workspace", exact: true })
+    .click();
+  for (const viewport of [
+    { width: 375, height: 812 },
+    { width: 667, height: 375 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("radio", { name: /Workspace backup/ }).check();
+    await dialog
+      .getByRole("button", { name: "Download export" })
+      .scrollIntoViewIfNeeded();
+    await expect(
+      dialog.getByRole("button", { name: "Download export" }),
+    ).toBeInViewport();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth > innerWidth,
+      ),
+    ).toBe(false);
+    await page.screenshot({
+      path: `test-results/export-${viewport.width}-${testInfo.project.name}.png`,
+      animations: "disabled",
+    });
+  }
 });

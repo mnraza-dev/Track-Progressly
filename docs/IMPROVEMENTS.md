@@ -17,3 +17,11 @@
 6. **Add resilient sync status.** Show when the last save completed and provide actionable retry feedback when connectivity or browser storage fails.
 
 The Next.js dev server also reports a security advisory for the installed framework version. Review and apply the framework security upgrade in a separate change, then run the app's regression checks.
+
+## Validation
+
+- Production build and TypeScript check pass.
+- 92 unit tests pass when excluding the database suite, which cannot initialize because the SQL migration referenced by that suite is missing.
+- All 16 targeted browser checks pass across desktop/mobile: actual downloads, course selection, printable reports, invalid-file rejection, confirmed restore and persistence after reload, empty states, keyboard focus, theme persistence/contrast, the landing page, and small-phone/landscape layouts with reduced motion.
+- ESLint passes for changed source and test files. Repository-wide lint still reports existing issues outside this work.
+- Set `PLAYWRIGHT_PORT=3100` when another local app occupies the default port.

@@ -6,6 +6,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 
 export function WorkspaceDialog({
@@ -14,15 +15,18 @@ export function WorkspaceDialog({
   title,
   description,
   children,
+  trigger,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   description?: string;
   children: React.ReactNode;
+  trigger?: React.ReactNode;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="workspace-dialog">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

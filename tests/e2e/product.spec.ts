@@ -82,11 +82,12 @@ test("product tour uses isolated data and keeps both themes readable", async ({
   await expect(
     page.getByRole("heading", { name: "Welcome back, Alex" }),
   ).toBeVisible();
-  await expect(page.locator('[data-three-scene="hero"]')).toHaveAttribute(
-    "data-three-state",
-    "ready",
-    { timeout: 20000 },
-  );
+  await page
+    .getByRole("button", { name: "Show 3D interactive stage", exact: true })
+    .click();
+  await expect(
+    page.locator('.resume-3d-stage [data-three-scene="code"]'),
+  ).toHaveAttribute("data-three-state", "ready", { timeout: 20000 });
   if (
     testInfo.project.name === "desktop" &&
     process.env.UPDATE_PRODUCT_SHOTS === "1"
@@ -119,11 +120,12 @@ test("product tour uses isolated data and keeps both themes readable", async ({
     content: "nextjs-portal { visibility: hidden !important; }",
   });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(page.locator('[data-three-scene="hero"]')).toHaveAttribute(
-    "data-three-state",
-    "ready",
-    { timeout: 20000 },
-  );
+  await page
+    .getByRole("button", { name: "Show 3D interactive stage", exact: true })
+    .click();
+  await expect(
+    page.locator('.resume-3d-stage [data-three-scene="code"]'),
+  ).toHaveAttribute("data-three-state", "ready", { timeout: 20000 });
   await page.screenshot({
     path: `test-results/product-dark-${testInfo.project.name}.png`,
     animations: "disabled",

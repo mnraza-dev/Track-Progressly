@@ -74,17 +74,18 @@ export function ExportDialog({ compact = false }: { compact?: boolean }) {
   }
   return (
     <>
-      <Button
-        variant="outline"
-        className={compact ? "workspace-export-trigger" : undefined}
-        disabled={!loaded}
-        onClick={() => setOpen(true)}
-        aria-label="Export workspace"
-      >
-        <Download size={16} aria-hidden="true" />
-        <span>{compact ? "Export" : "Open export options"}</span>
-      </Button>
       <WorkspaceDialog
+        trigger={
+          <Button
+            variant="outline"
+            className={compact ? "workspace-export-trigger" : undefined}
+            disabled={!loaded}
+            aria-label="Export workspace"
+          >
+            <Download size={16} aria-hidden="true" />
+            <span>{compact ? "Export" : "Open export options"}</span>
+          </Button>
+        }
         open={open}
         onOpenChange={setOpen}
         title="Your learning. To go."

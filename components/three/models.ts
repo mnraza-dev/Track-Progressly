@@ -95,7 +95,7 @@ function browserTexture(kind: "video" | "code") {
     43,
   );
   if (kind === "video") {
-    c.fillStyle = "#237e70";
+    c.fillStyle = "#b5672e";
     c.beginPath();
     c.roundRect(288, 165, 182, 142, 25);
     c.fill();
@@ -111,7 +111,7 @@ function browserTexture(kind: "video" | "code") {
     c.fillText("WATCH. THINK. MAKE.", 272, 368);
     c.fillStyle = "#ddd8cc";
     c.fillRect(51, 449, 658, 5);
-    c.fillStyle = "#409685";
+    c.fillStyle = "#d2884e";
     c.fillRect(51, 449, 255, 5);
   } else {
     const lines = [
@@ -178,7 +178,7 @@ export function buildModel(
     portal.rotation.set(0.18, 0.27, -0.34);
     portal.position.set(0.12, 0.17, -0.18);
     root.add(portal);
-    const orbit = orbitLine(1.98, "#7da99b");
+    const orbit = orbitLine(1.98, "#b29478");
     orbit.rotation.set(0.22, -0.25, 0.35);
     orbit.position.z = -0.6;
     root.add(orbit);
@@ -426,7 +426,11 @@ export function buildModel(
       arc.position.z = 0.03;
       root.add(arc);
     }
-    const cap = sphere(0.11, progress >= 1 ? palette.copper : palette.teal, 0.3);
+    const cap = sphere(
+      0.11,
+      progress >= 1 ? palette.copper : palette.teal,
+      0.3,
+    );
     cap.position.set(0, 1.05, 0.05);
     root.add(cap);
 
@@ -446,7 +450,7 @@ export function buildModel(
       material(palette.teal, 0.6, 0.24),
     );
     root.add(knot);
-    const orbit = orbitLine(1.5, "#7da99b");
+    const orbit = orbitLine(1.5, "#b29478");
     orbit.rotation.x = 0.6;
     root.add(orbit);
     const dot = sphere(0.15, palette.sage);
