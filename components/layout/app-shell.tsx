@@ -50,6 +50,7 @@ import { useTour } from "@/components/tour/tour-context";
 import { useGamification } from "@/components/gamification/use-gamification";
 import { AchievementsDialog } from "@/components/gamification/achievements-dialog";
 import { ShortcutsDialog } from "@/components/layout/shortcuts-dialog";
+import { WorkspaceSyncReminder } from "@/components/layout/workspace-sync-reminder";
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My courses", href: "/courses", icon: BookOpen },
@@ -85,6 +86,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     loaded,
     error,
     syncError,
+    dirty,
+    syncing,
+    syncConflict,
   } = useWorkspace();
   const accountReady = !isConnected || accountId === userId;
   const data = accountReady ? storedData : emptyWorkspace;
@@ -159,6 +163,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const name = data.profile.display_name || "Your workspace";
   function toggleTheme() {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  }
+  async function syncBeforeClosing() {
+    await sync();
+    const current = useWorkspace.getState();
+    if (
+      current.accountId === userId &&
+      !current.dirty &&
+      !current.syncing &&
+      !current.syncError
+    )
+      current.notify("Cloud sync complete. You can close this tab.");
   }
   return (
     <div className={cn("app-shell", desktopCollapsed && "sidebar-collapsed")}>
@@ -366,13 +381,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <AppLoader message="Opening your learning studio..." />
           ) : (
             <>
-              {syncError && (
-                <div role="status" className="connection-status">
-                  <span>
-                    Changes are saved locally. Cloud sync needs attention.{" "}
-                    <Link href="/settings">Open sync settings</Link>
-                  </span>
-                </div>
+              {isConnected && !!userId && (
+                <WorkspaceSyncReminder
+                  dirty={dirty}
+                  syncing={syncing}
+                  syncError={syncError}
+                  syncConflict={syncConflict}
+                  onSync={syncBeforeClosing}
+                  onOpenSettings={() => router.push("/settings")}
+                  shouldWarnOnClose={() => {
+                    const current = useWorkspace.getState();
+                    return (
+                      current.accountId === userId &&
+                      (current.dirty || current.syncing)
+                    );
+                  }}
+                />
               )}
               {children}
             </>

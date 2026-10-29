@@ -76,6 +76,8 @@ In a browser workspace, your courses, notes, goals, and preferences stay in the 
 
 Account workspaces save edits immediately to account-specific browser storage (localStorage, with IndexedDB for workspaces that exceed its quota) and sync a private cloud snapshot once every 24 hours while the app is open, or on return after a sync is due. Settings shows pending changes, the last sync time, and **Sync now**. A device with no local cache downloads its account data first. Conflicting device changes are reported without overwriting local work. Apply `007_daily_workspace_sync.sql` to enable this mode. A browser-only workspace is not automatically moved into an account.
 
+When account changes are waiting to sync, a reminder on every workspace page offers **Sync now**. Closing, reloading, or leaving the tab triggers the browser's standard warning while changes are pending or a sync is running. Choose to stay, finish syncing, then close the tab. The warning clears after a successful sync; failed uploads and newer edits keep it active. Browsers control the warning text and may suppress it without prior interaction or when closing a mobile browser, so uploads are completed while the page is open.
+
 ## A few things to know
 
 **Can I use private videos?** Public, embeddable YouTube videos work. Private, deleted, or restricted videos may be unavailable. Videos play through YouTube’s embedded player.
