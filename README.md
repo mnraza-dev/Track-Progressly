@@ -74,7 +74,7 @@ To restore a workspace, open **Settings → Restore from file**, select a Progre
 
 In a browser workspace, your courses, notes, goals, and preferences stay in the browser where you created them. Return on the same device and browser to continue. Clearing browser storage removes that local workspace, so keep a complete JSON backup somewhere safe.
 
-Account workspaces save edits immediately to account-specific localStorage and sync a private cloud snapshot once every 24 hours while the app is open, or on return after a sync is due. Settings shows pending changes, the last sync time, and **Sync now**. A device with no local cache downloads its account data first. Conflicting device changes are reported without overwriting local work. Apply `007_daily_workspace_sync.sql` to enable this mode. A browser-only workspace is not automatically moved into an account.
+Account workspaces save edits immediately to account-specific browser storage (localStorage, with IndexedDB for workspaces that exceed its quota) and sync a private cloud snapshot once every 24 hours while the app is open, or on return after a sync is due. Settings shows pending changes, the last sync time, and **Sync now**. A device with no local cache downloads its account data first. Conflicting device changes are reported without overwriting local work. Apply `007_daily_workspace_sync.sql` to enable this mode. A browser-only workspace is not automatically moved into an account.
 
 ## A few things to know
 

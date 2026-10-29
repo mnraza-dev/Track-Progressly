@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useWorkspace, resetWorkspaceSession } from "@/stores/workspace";
 import { emptyWorkspace } from "@/types";
+import * as workspaceStorage from "@/lib/workspace-storage";
 import {
   readAccountCache,
   writeAccountCache,
@@ -15,8 +16,8 @@ const storage = new Map<string, string>();
 const owner = "user_alice";
 const revision = "11111111-1111-4111-8111-111111111111";
 const nextRevision = "22222222-2222-4222-8222-222222222222";
-function seed(account = owner, overrides: Partial<CachedWorkspace> = {}) {
-  writeAccountCache({
+async function seed(account = owner, overrides: Partial<CachedWorkspace> = {}) {
+  await writeAccountCache({
     version: 2,
     owner: account,
     workspace: structuredClone(emptyWorkspace),
@@ -54,13 +55,14 @@ beforeEach(async () => {
     setItem: (key: string, value: string) => storage.set(key, value),
     removeItem: (key: string) => storage.delete(key),
   });
-  seed();
+  await seed();
   await useWorkspace.getState().load(owner);
   await useWorkspace.getState().sync(false);
   fetch.mockClear();
 });
 afterEach(() => {
   resetWorkspaceSession();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
@@ -71,9 +73,9 @@ describe("local-first daily account sync", () => {
       await useWorkspace.getState().mutate(profile(`Edit ${i}`));
     await useWorkspace.getState().sync(false);
     expect(fetch).not.toHaveBeenCalled();
-    expect(readAccountCache(owner)?.workspace.profile.display_name).toBe(
-      "Edit 24",
-    );
+    expect(
+      (await readAccountCache(owner))?.workspace.profile.display_name,
+    ).toBe("Edit 24");
     expect(useWorkspace.getState().dirty).toBe(true);
   });
   it("uses the persisted account cache across reloads without reading the cloud", async () => {
@@ -90,9 +92,9 @@ describe("local-first daily account sync", () => {
     const backup = structuredClone(emptyWorkspace);
     backup.profile.display_name = "Restored";
     await useWorkspace.getState().restore(backup);
-    expect(readAccountCache(owner)?.workspace.profile.display_name).toBe(
-      "Restored",
-    );
+    expect(
+      (await readAccountCache(owner))?.workspace.profile.display_name,
+    ).toBe("Restored");
     expect(useWorkspace.getState().dirty).toBe(true);
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -107,7 +109,7 @@ describe("local-first daily account sync", () => {
     const body = JSON.parse(fetch.mock.calls[0][1].body);
     expect(body.workspace.profile.display_name).toBe("Upload");
     expect(body.revision).toBe(revision);
-    expect(readAccountCache(owner)?.revision).toBe(body.requestId);
+    expect((await readAccountCache(owner))?.revision).toBe(body.requestId);
     expect(useWorkspace.getState().dirty).toBe(false);
   });
   it("waits 24 hours for automatic sync and does not upload on every timer check", async () => {
@@ -145,9 +147,9 @@ describe("local-first daily account sync", () => {
       dirty: true,
       syncConflict: true,
     });
-    expect(readAccountCache(owner)?.workspace.profile.display_name).toBe(
-      "Keep local",
-    );
+    expect(
+      (await readAccountCache(owner))?.workspace.profile.display_name,
+    ).toBe("Keep local");
     vi.setSystemTime(Date.now() + SYNC_INTERVAL);
     await useWorkspace.getState().sync(false);
     expect(fetch).toHaveBeenCalledTimes(1);
@@ -160,10 +162,10 @@ describe("local-first daily account sync", () => {
     await useWorkspace.getState().sync(false);
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(useWorkspace.getState().dirty).toBe(true);
-    expect(readAccountCache(owner)?.workspace.profile.display_name).toBe(
-      "Offline",
-    );
-    expect(readAccountCache(owner)?.pendingUpload).toBeDefined();
+    expect(
+      (await readAccountCache(owner))?.workspace.profile.display_name,
+    ).toBe("Offline");
+    expect((await readAccountCache(owner))?.pendingUpload).toBeDefined();
   });
   it("recovers a lost upload acknowledgement without writing the same snapshot again", async () => {
     await useWorkspace.getState().mutate(profile("Uploaded"));
@@ -172,14 +174,14 @@ describe("local-first daily account sync", () => {
     const sent = JSON.parse(fetch.mock.calls[0][1].body);
     fetch.mockResolvedValueOnce(
       Response.json({
-        workspace: readAccountCache(owner)?.workspace,
+        workspace: (await readAccountCache(owner))?.workspace,
         revision: sent.requestId,
       }),
     );
     await useWorkspace.getState().sync();
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(useWorkspace.getState().dirty).toBe(false);
-    expect(readAccountCache(owner)?.pendingUpload).toBeUndefined();
+    expect((await readAccountCache(owner))?.pendingUpload).toBeUndefined();
   });
   it("retains edits made during an upload for a later sync", async () => {
     await useWorkspace.getState().mutate(profile("Sent version"));
@@ -196,10 +198,10 @@ describe("local-first daily account sync", () => {
     finish(Response.json({ revision: sent.requestId }));
     await upload;
     expect(useWorkspace.getState().dirty).toBe(true);
-    expect(readAccountCache(owner)?.workspace.profile.display_name).toBe(
-      "Newer local version",
-    );
-    expect(readAccountCache(owner)?.revision).toBe(sent.requestId);
+    expect(
+      (await readAccountCache(owner))?.workspace.profile.display_name,
+    ).toBe("Newer local version");
+    expect((await readAccountCache(owner))?.revision).toBe(sent.requestId);
   });
   it("does not apply a previous account's in-flight response after switching users", async () => {
     await useWorkspace.getState().mutate(profile("Alice"));
@@ -211,21 +213,47 @@ describe("local-first daily account sync", () => {
     );
     const upload = useWorkspace.getState().sync();
     await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    seed("user_bob");
+    await seed("user_bob");
     await useWorkspace.getState().load("user_bob");
     finish(Response.json({ revision: nextRevision }));
     await upload;
     expect(useWorkspace.getState().accountId).toBe("user_bob");
     expect(useWorkspace.getState().data.profile.display_name).toBe("");
-    expect(readAccountCache(owner)?.workspace.profile.display_name).toBe(
-      "Alice",
-    );
+    expect(
+      (await readAccountCache(owner))?.workspace.profile.display_name,
+    ).toBe("Alice");
+  });
+  it("does not display a previous account's asynchronous save after switching users", async () => {
+    await seed("user_bob");
+    const write = workspaceStorage.writeWorkspaceStorage;
+    let finish!: () => void;
+    const paused = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const saved = vi
+      .spyOn(workspaceStorage, "writeWorkspaceStorage")
+      .mockImplementationOnce(async (key, value) => {
+        await paused;
+        await write(key, value);
+      });
+    const mutation = useWorkspace
+      .getState()
+      .mutate(profile("Alice's saved edit"));
+    await vi.waitFor(() => expect(saved).toHaveBeenCalledTimes(1));
+    await useWorkspace.getState().load("user_bob");
+    finish();
+    await mutation;
+    expect(useWorkspace.getState().accountId).toBe("user_bob");
+    expect(useWorkspace.getState().data.profile.display_name).toBe("");
+    expect(
+      (await readAccountCache(owner))?.workspace.profile.display_name,
+    ).toBe("Alice's saved edit");
   });
   it("keeps accounts separate and never automatically imports an unscoped browser workspace", async () => {
     const local = structuredClone(emptyWorkspace);
     local.profile.display_name = "Private browser data";
     storage.set(browserWorkspaceKey, JSON.stringify(local));
-    seed("user_bob");
+    await seed("user_bob");
     await useWorkspace.getState().load("user_bob");
     expect(useWorkspace.getState().data.profile.display_name).toBe("");
     expect(storage.has(accountWorkspaceKey(owner))).toBe(true);
@@ -272,16 +300,16 @@ describe("local-first daily account sync", () => {
     });
     await expect(
       useWorkspace.getState().mutate(profile("Not persisted")),
-    ).rejects.toThrow("Storage full");
+    ).rejects.toThrow("browser storage is full or unavailable");
     expect(useWorkspace.getState().data).toBe(before);
     expect(fetch).not.toHaveBeenCalled();
   });
   it("reads the newest local cache before editing so another tab's completed changes survive", async () => {
-    const other = readAccountCache(owner)!;
+    const other = (await readAccountCache(owner))!;
     other.workspace.profile.timezone = "UTC";
     other.editId = nextRevision;
     other.dirty = true;
-    writeAccountCache(other);
+    await writeAccountCache(other);
     await useWorkspace.getState().mutate({
       op: "goal",
       id: nextRevision,
@@ -336,24 +364,20 @@ describe("local-first daily account sync", () => {
     });
     const course = useWorkspace.getState().data.courses[0];
     const videoId = course.videos[0].id;
-    await useWorkspace
-      .getState()
-      .mutate({
-        op: "save_note",
-        id: nextRevision,
-        video_id: videoId,
-        content: "Keep these notes",
-        timestamp_seconds: 0,
-        is_revision_required: false,
-      });
-    await useWorkspace
-      .getState()
-      .mutate({
-        op: "progress",
-        video_id: videoId,
-        status: "completed",
-        active_seconds: 0,
-      });
+    await useWorkspace.getState().mutate({
+      op: "save_note",
+      id: nextRevision,
+      video_id: videoId,
+      content: "Keep these notes",
+      timestamp_seconds: 0,
+      is_revision_required: false,
+    });
+    await useWorkspace.getState().mutate({
+      op: "progress",
+      video_id: videoId,
+      status: "completed",
+      active_seconds: 0,
+    });
     fetch.mockResolvedValueOnce(
       Response.json({
         title: "Playlist",
@@ -388,6 +412,6 @@ describe("local-first daily account sync", () => {
     expect(updated.videos[0].notes[0].content).toBe("Keep these notes");
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch.mock.calls[0][0]).toBe("/api/youtube");
-    expect(readAccountCache(owner)?.dirty).toBe(true);
+    expect((await readAccountCache(owner))?.dirty).toBe(true);
   });
 });

@@ -263,7 +263,7 @@ test("an enabled milestone chime plays once and repeat completion stays silent",
   ).toBe(5);
 });
 
-test("browser storage failure keeps existing courses readable and exportable", async ({
+test("localStorage quota falls back to IndexedDB and keeps courses exportable after reload", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -281,9 +281,11 @@ test("browser storage failure keeps existing courses readable and exportable", a
   await expect(
     page.getByRole("heading", { name: "Welcome back, Alex" }),
   ).toBeVisible();
-  await expect(page.locator(".toast")).toContainText(
-    "browser storage is full or unavailable",
-  );
+  await expect(page.locator(".toast")).toHaveCount(0);
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Welcome back, Alex" }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Export workspace", exact: true })
     .click();

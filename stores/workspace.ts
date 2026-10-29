@@ -17,6 +17,11 @@ import {
   type CachedWorkspace,
 } from "@/lib/workspace-cache";
 
+import {
+  readWorkspaceStorage,
+  writeWorkspaceStorage,
+} from "@/lib/workspace-storage";
+
 let pending: Promise<unknown> = Promise.resolve();
 let epoch = 0;
 let loading: { owner: string | null; promise: Promise<void> } | null = null;
@@ -97,7 +102,7 @@ type State = {
   load: (accountId?: string, defaultName?: string) => Promise<void>;
   sync: (force?: boolean) => Promise<void>;
   pullCloud: () => Promise<void>;
-  refreshCache: () => void;
+  refreshCache: () => Promise<void>;
   mutate: (mutation: Mutation) => Promise<void>;
   restore: (data: Workspace) => Promise<void>;
   notify: (message: string) => void;
@@ -144,18 +149,38 @@ export const useWorkspace = create<State>((set, get) => ({
     const run = (async () => {
       try {
         if (!owner) {
-          const stored = localStorage.getItem(browserWorkspaceKey);
-          const data = stored
-            ? parseWorkspaceBackup(stored)
-            : structuredClone(emptyWorkspace);
-          if (!data.profile.display_name)
-            data.profile.display_name = defaultName;
-          data.rewards = reconcileRewards(data);
-          localStorage.setItem(browserWorkspaceKey, JSON.stringify(data));
-          if (valid()) set({ data, loaded: true, error: null });
+          await edit(owner, async () => {
+            if (!valid()) return;
+            const stored = await readWorkspaceStorage(browserWorkspaceKey);
+            const data = stored
+              ? parseWorkspaceBackup(stored)
+              : structuredClone(emptyWorkspace);
+            if (!data.profile.display_name)
+              data.profile.display_name = defaultName;
+            data.rewards = reconcileRewards(data);
+            try {
+              await writeWorkspaceStorage(
+                browserWorkspaceKey,
+                JSON.stringify(data),
+              );
+            } catch (error) {
+              // A failed metadata refresh must not hide an existing local backup.
+              if (!stored) throw error;
+              if (valid()) {
+                set({ data, loaded: true, error: null });
+                get().notify(
+                  error instanceof Error
+                    ? error.message
+                    : "Could not save locally.",
+                );
+              }
+              return;
+            }
+            if (valid()) set({ data, loaded: true, error: null });
+          });
           return;
         }
-        let cache = readAccountCache(owner);
+        let cache = await readAccountCache(owner);
         if (!cache) {
           let workspace = structuredClone(emptyWorkspace);
           workspace.profile.display_name = defaultName;
@@ -192,22 +217,22 @@ export const useWorkspace = create<State>((set, get) => ({
           // A second tab may have initialized or edited while the network request ran.
           await edit(owner, async () => {
             if (!valid()) return;
-            cache = readAccountCache(owner) || cache;
-            writeAccountCache(cache!);
-            set({ ...cachedState(cache!), syncError });
+            cache = (await readAccountCache(owner)) || cache;
+            await writeAccountCache(cache!);
+            if (valid()) set({ ...cachedState(cache!), syncError });
           });
         } else if (valid()) {
           if (!cache.workspace.profile.display_name && defaultName) {
             await edit(owner, async () => {
               if (!valid()) return;
-              const latest = readAccountCache(owner)!;
+              const latest = (await readAccountCache(owner))!;
               if (!latest.workspace.profile.display_name) {
                 latest.workspace.profile.display_name = defaultName;
                 latest.dirty = true;
                 latest.editId = createId();
-                writeAccountCache(latest);
+                await writeAccountCache(latest);
               }
-              set(cachedState(latest));
+              if (valid()) set(cachedState(latest));
             });
           } else set(cachedState(cache));
           void get().sync(false);
@@ -230,38 +255,47 @@ export const useWorkspace = create<State>((set, get) => ({
       if (loading?.promise === run) loading = null;
     }
   },
-  refreshCache: () => {
+  refreshCache: async () => {
+    const version = epoch;
     const owner = get().accountId;
     if (!owner) return;
     try {
-      const cache = readAccountCache(owner);
-      if (cache) set(cachedState(cache));
-    } catch (error) {
-      set({
-        syncError:
-          error instanceof Error
-            ? error.message
-            : "Could not read local changes.",
+      await edit(owner, async () => {
+        const cache = await readAccountCache(owner);
+        if (cache && version === epoch && get().accountId === owner)
+          set(cachedState(cache));
       });
+    } catch (error) {
+      if (version === epoch && get().accountId === owner)
+        set({
+          syncError:
+            error instanceof Error
+              ? error.message
+              : "Could not read local changes.",
+        });
     }
   },
   sync: async (force = true) => {
     const owner = get().accountId;
     if (!isConnected || !owner || !get().loaded) return;
+    const version = epoch;
+    const valid = () => version === epoch && get().accountId === owner;
     if (!force) {
       try {
-        const cached = readAccountCache(owner);
+        const cached = await readAccountCache(owner);
         if (!cached || !syncDue(cached)) return;
       } catch (error) {
-        set({
-          syncError:
-            error instanceof Error
-              ? error.message
-              : "Could not read the local workspace.",
-        });
+        if (valid())
+          set({
+            syncError:
+              error instanceof Error
+                ? error.message
+                : "Could not read the local workspace.",
+          });
         return;
       }
     }
+    if (!valid()) return;
     if (syncing?.owner === owner) return syncing.promise;
     if (
       !force &&
@@ -269,18 +303,16 @@ export const useWorkspace = create<State>((set, get) => ({
         (typeof navigator !== "undefined" && navigator.onLine === false))
     )
       return;
-    const version = epoch;
-    const valid = () => version === epoch && get().accountId === owner;
     const run = withLock(`progressly-sync:${owner}`, async () => {
-      let source = readAccountCache(owner);
+      let source = await readAccountCache(owner);
       if (!source || (!force && !syncDue(source))) return;
       if (!valid()) return;
       set({ syncing: true, syncError: null });
       try {
         await edit(owner, async () => {
-          source = readAccountCache(owner)!;
+          source = (await readAccountCache(owner))!;
           source.lastAttemptAt = Date.now();
-          writeAccountCache(source);
+          await writeAccountCache(source);
         });
         if (!source) return;
         // Reconcile an upload whose response was lost before sending any newer edits.
@@ -289,13 +321,13 @@ export const useWorkspace = create<State>((set, get) => ({
           if (!valid()) return;
           if (remote.revision === source.pendingUpload.id) {
             await edit(owner, async () => {
-              const latest = readAccountCache(owner)!;
+              const latest = (await readAccountCache(owner))!;
               latest.revision = remote.revision;
               latest.baseKnown = true;
               latest.lastSyncedAt = Date.now();
               latest.dirty = latest.editId !== source!.pendingUpload!.editId;
               delete latest.pendingUpload;
-              writeAccountCache(latest);
+              await writeAccountCache(latest);
               source = latest;
               if (valid()) set(cachedState(latest));
             });
@@ -320,7 +352,7 @@ export const useWorkspace = create<State>((set, get) => ({
               { conflict: true },
             );
           await edit(owner, async () => {
-            const latest = readAccountCache(owner)!;
+            const latest = (await readAccountCache(owner))!;
             if (latest.editId !== source!.editId)
               throw Object.assign(
                 new Error(
@@ -336,7 +368,7 @@ export const useWorkspace = create<State>((set, get) => ({
               dirty: remote.revision === null,
               lastSyncedAt: Date.now(),
             };
-            writeAccountCache(next);
+            await writeAccountCache(next);
             source = next;
             if (valid()) set(cachedState(next));
           });
@@ -345,7 +377,7 @@ export const useWorkspace = create<State>((set, get) => ({
           const remote = await request("/api/workspace/sync");
           if (!valid()) return;
           await edit(owner, async () => {
-            const latest = readAccountCache(owner)!;
+            const latest = (await readAccountCache(owner))!;
             // Edits made during a download are never replaced by that download.
             if (latest.editId !== source!.editId || latest.dirty) return;
             if (remote.workspace) {
@@ -361,7 +393,7 @@ export const useWorkspace = create<State>((set, get) => ({
                 { conflict: true },
               );
             latest.lastSyncedAt = Date.now();
-            writeAccountCache(latest);
+            await writeAccountCache(latest);
             if (valid()) set({ ...cachedState(latest), syncConflict: false });
           });
           return;
@@ -375,9 +407,9 @@ export const useWorkspace = create<State>((set, get) => ({
         };
         const sent = source;
         await edit(owner, async () => {
-          const latest = readAccountCache(owner)!;
+          const latest = (await readAccountCache(owner))!;
           latest.pendingUpload = upload;
-          writeAccountCache(latest);
+          await writeAccountCache(latest);
         });
         const result = await request("/api/workspace/sync", {
           method: "POST",
@@ -390,13 +422,13 @@ export const useWorkspace = create<State>((set, get) => ({
         });
         if (!valid()) return;
         await edit(owner, async () => {
-          const latest = readAccountCache(owner)!;
+          const latest = (await readAccountCache(owner))!;
           latest.revision = result.revision;
           latest.lastSyncedAt = Date.now();
           latest.baseKnown = true;
           latest.dirty = latest.editId !== upload.editId;
           delete latest.pendingUpload;
-          writeAccountCache(latest);
+          await writeAccountCache(latest);
           if (valid())
             set({
               ...cachedState(latest),
@@ -453,7 +485,8 @@ export const useWorkspace = create<State>((set, get) => ({
           lastSyncedAt: Date.now(),
           lastAttemptAt: Date.now(),
         };
-        writeAccountCache(next);
+        await writeAccountCache(next);
+        if (version !== epoch || get().accountId !== owner) return;
         set({
           ...cachedState(next),
           syncError: null,
@@ -476,16 +509,18 @@ export const useWorkspace = create<State>((set, get) => ({
   restore: async (data) => {
     const validated = parseWorkspaceBackup(JSON.stringify(data));
     const owner = get().accountId;
+    const version = epoch;
+    const valid = () => version === epoch && get().accountId === owner;
     if (isConnected && !owner)
       throw new Error(
         "Wait for your signed-in workspace to load before restoring.",
       );
     await edit(owner, async () => {
-      if (get().accountId !== owner)
+      if (!valid())
         throw new Error("Your signed-in account changed. Please try again.");
       validated.rewards = reconcileRewards(validated);
       if (owner) {
-        const cache = readAccountCache(owner);
+        const cache = await readAccountCache(owner);
         if (!cache)
           throw new Error("Load your workspace before restoring a backup.");
         const next = {
@@ -494,17 +529,28 @@ export const useWorkspace = create<State>((set, get) => ({
           editId: createId(),
           dirty: true,
         };
-        writeAccountCache(next);
-        set({ ...cachedState(next), celebration: null });
+        await writeAccountCache(next);
+        if (valid()) set({ ...cachedState(next), celebration: null });
       } else {
-        localStorage.setItem(browserWorkspaceKey, JSON.stringify(validated));
-        set({ data: validated, loaded: true, error: null, celebration: null });
+        await writeWorkspaceStorage(
+          browserWorkspaceKey,
+          JSON.stringify(validated),
+        );
+        if (valid())
+          set({
+            data: validated,
+            loaded: true,
+            error: null,
+            celebration: null,
+          });
       }
     });
   },
   mutate: async (input) => {
     const parsed = mutationSchema.parse(input);
     const owner = get().accountId;
+    const version = epoch;
+    const valid = () => version === epoch && get().accountId === owner;
     if (isConnected && !owner)
       throw new Error(
         "Wait for your signed-in workspace to load before editing.",
@@ -524,9 +570,9 @@ export const useWorkspace = create<State>((set, get) => ({
         });
       }
       await edit(owner, async () => {
-        if (get().accountId !== owner)
+        if (!valid())
           throw new Error("Your signed-in account changed. Please try again.");
-        const cache = owner ? readAccountCache(owner) : null;
+        const cache = owner ? await readAccountCache(owner) : null;
         if (owner && !cache)
           throw new Error("Load your workspace before editing.");
         const before = cache?.workspace || get().data;
@@ -584,23 +630,29 @@ export const useWorkspace = create<State>((set, get) => ({
             editId: createId(),
             dirty: true,
           };
-          writeAccountCache(next);
-          set({
-            ...cachedState(next),
-            celebration: earnedCelebration(before, data),
-          });
+          await writeAccountCache(next);
+          if (valid())
+            set({
+              ...cachedState(next),
+              celebration: earnedCelebration(before, data),
+            });
         } else {
-          localStorage.setItem(browserWorkspaceKey, JSON.stringify(data));
-          set({ data, celebration: earnedCelebration(before, data) });
+          await writeWorkspaceStorage(
+            browserWorkspaceKey,
+            JSON.stringify(data),
+          );
+          if (valid())
+            set({ data, celebration: earnedCelebration(before, data) });
         }
       });
-      void get().sync(false);
+      if (valid()) void get().sync(false);
     } catch (error) {
-      get().notify(
-        error instanceof Error
-          ? error.message
-          : "Could not save your change locally.",
-      );
+      if (valid())
+        get().notify(
+          error instanceof Error
+            ? error.message
+            : "Could not save your change locally.",
+        );
       throw error;
     }
   },

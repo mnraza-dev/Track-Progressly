@@ -1,5 +1,6 @@
 "use client";
 
+import { subscribeWorkspaceStorage } from "@/lib/workspace-storage";
 import { ExportDialog } from "@/components/exports/export-dialog";
 import { RewardFeedback } from "@/components/gamification/reward-feedback";
 import { AppLoader } from "@/components/ui/app-loader";
@@ -112,18 +113,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     const tick = () => {
       if (!document.hidden) void sync(false);
     };
-    const changed = (event: StorageEvent) => {
-      if (event.key === currentWorkspaceCacheKey()) refreshCache();
-    };
+    const unsubscribe = subscribeWorkspaceStorage((key) => {
+      if (key === currentWorkspaceCacheKey()) void refreshCache();
+    });
     const timer = window.setInterval(tick, 60_000);
     document.addEventListener("visibilitychange", tick);
     window.addEventListener("online", tick);
-    window.addEventListener("storage", changed);
     return () => {
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", tick);
       window.removeEventListener("online", tick);
-      window.removeEventListener("storage", changed);
+      unsubscribe();
     };
   }, [authLoaded, userId, sync, refreshCache]);
 
