@@ -275,12 +275,6 @@ export function Settings() {
               Download a complete JSON snapshot of all your courses, lessons,
               notes, and activity, or restore from a previous backup file.
             </p>
-            {isConnected && (
-              <p className="settings-help">
-                Restore is available in browser workspaces. Account backups can
-                be exported; restoring account data is not supported yet.
-              </p>
-            )}
             {restoreError && (
               <p role="alert" className="export-error">
                 {restoreError}
@@ -289,7 +283,7 @@ export function Settings() {
             <div className="backup-actions-row">
               <Button
                 variant="outline"
-                disabled={isConnected}
+                disabled={restoreBusy}
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload size={15} />
@@ -330,7 +324,7 @@ export function Settings() {
           if (!open && !restoreBusy) setPendingRestore(null);
         }}
         title="Restore this workspace?"
-        description="Restoring replaces the data saved in this browser. Export your current workspace first if you want to keep it."
+        description={`Restoring replaces the data ${isConnected ? "saved to your signed-in account" : "saved in this browser"}. Export your current workspace first if you want to keep it.`}
       >
         <p>
           {pendingRestore?.courses.length ?? 0} courses ·{" "}
@@ -357,14 +351,14 @@ export function Settings() {
               setRestoreBusy(true);
               try {
                 await restore(pendingRestore);
-                setName(pendingRestore.profile.display_name);
+                setName(useWorkspace.getState().data.profile.display_name);
                 setTimezone(pendingRestore.profile.timezone);
                 setMinutes(pendingRestore.profile.daily_minutes);
                 setAuto(pendingRestore.profile.auto_complete);
                 setWeekendRest(pendingRestore.profile.weekend_rest ?? false);
                 setPendingRestore(null);
                 fireConfetti();
-                notify("Workspace restored and saved in this browser.");
+                notify(isConnected ? "Workspace restored and saved to your account." : "Workspace restored and saved in this browser.");
               } catch (err) {
                 setRestoreError(
                   err instanceof Error

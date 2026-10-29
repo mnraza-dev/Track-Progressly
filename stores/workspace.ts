@@ -68,13 +68,25 @@ export const useWorkspace = create<State>((set, get) => ({
     }
   },
   restore: async (data) => {
-    if (isConnected)
-      throw new Error("Restore is available in browser workspaces only.");
+    const validated = parseWorkspaceBackup(JSON.stringify(data));
     const job = pending
       .catch(() => {})
-      .then(() => {
-        localStorage.setItem(storageKey, JSON.stringify(data));
-        set({ data, error: null, loaded: true });
+      .then(async () => {
+        if (isConnected) {
+          const response = await fetch("/api/workspace/restore", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(validated),
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Could not restore workspace.");
+          await get().load();
+          if (get().error) throw new Error(`Backup restored, but the workspace could not reload: ${get().error}`);
+        } else {
+          validated.rewards = reconcileRewards(validated);
+          localStorage.setItem(storageKey, JSON.stringify(validated));
+          set({ data: validated, error: null, loaded: true });
+        }
       });
     pending = job;
     await job;

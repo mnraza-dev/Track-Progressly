@@ -9,6 +9,8 @@ import { importYouTube } from "@/lib/youtube/service";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { hasAllowedOrigin } from "@/lib/http/origin";
+import { currentUser } from "@clerk/nextjs/server";
+import { profileName } from "@/lib/profile-name";
 async function allRows(db: SupabaseClient, table: string, order = "id") {
   const rows: Record<string, unknown>[] = [];
   for (let from = 0; ; from += 1000) {
@@ -93,6 +95,18 @@ export async function GET() {
     if (profile.error) throw profile.error;
     if (activity.error) throw activity.error;
     if (rewards.error) throw rewards.error;
+    if (!profile.data.display_name?.trim()) {
+      const name = profileName(await currentUser());
+      if (name) {
+        const saved = await db.from("profiles")
+          .update({ display_name: name, updated_at: new Date().toISOString() })
+          .eq("id", user.id).eq("display_name", "")
+          .select("display_name, timezone, daily_minutes, auto_complete, weekend_rest")
+          .maybeSingle();
+        if (saved.error) throw saved.error;
+        if (saved.data) profile.data = saved.data;
+      }
+    }
     return Response.json(
       {
         courses: courses
