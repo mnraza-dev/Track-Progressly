@@ -98,10 +98,14 @@ export async function GET() {
     if (!profile.data.display_name?.trim()) {
       const name = profileName(await currentUser());
       if (name) {
-        const saved = await db.from("profiles")
+        const saved = await db
+          .from("profiles")
           .update({ display_name: name, updated_at: new Date().toISOString() })
-          .eq("id", user.id).eq("display_name", "")
-          .select("display_name, timezone, daily_minutes, auto_complete, weekend_rest")
+          .eq("id", user.id)
+          .eq("display_name", "")
+          .select(
+            "display_name, timezone, daily_minutes, auto_complete, weekend_rest",
+          )
           .maybeSingle();
         if (saved.error) throw saved.error;
         if (saved.data) profile.data = saved.data;

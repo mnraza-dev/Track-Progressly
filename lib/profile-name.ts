@@ -1,10 +1,15 @@
-export function profileName(user: {
-  fullName?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  username?: string | null;
-  primaryEmailAddress?: { emailAddress: string } | null;
-} | null): string {
+export function profileName(
+  user:
+    | {
+        fullName?: string | null;
+        firstName?: string | null;
+        lastName?: string | null;
+        username?: string | null;
+        primaryEmailAddress?: { emailAddress: string } | null;
+      }
+    | null
+    | undefined,
+): string {
   if (!user) return "";
   return (
     user.fullName?.trim() ||

@@ -79,13 +79,23 @@ export const useWorkspace = create<State>((set, get) => ({
             body: JSON.stringify(validated),
           });
           const result = await response.json();
-          if (!response.ok) throw new Error(result.error || "Could not restore workspace.");
+          if (!response.ok)
+            throw new Error(result.error || "Could not restore workspace.");
           await get().load();
-          if (get().error) throw new Error(`Backup restored, but the workspace could not reload: ${get().error}`);
+          if (get().error)
+            throw new Error(
+              `Backup restored, but the workspace could not reload: ${get().error}`,
+            );
+          set({ celebration: null });
         } else {
           validated.rewards = reconcileRewards(validated);
           localStorage.setItem(storageKey, JSON.stringify(validated));
-          set({ data: validated, error: null, loaded: true });
+          set({
+            data: validated,
+            error: null,
+            loaded: true,
+            celebration: null,
+          });
         }
       });
     pending = job;

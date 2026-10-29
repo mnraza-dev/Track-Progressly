@@ -49,7 +49,7 @@ The daily-goal ring uses actual saved learning progress. Learning data and playb
 All database migrations are included and exercised by the PostgreSQL integration tests. Clerk authentication and the hosted Clerk/Supabase integration also require verification against your configured project.
 
 1. Create a free Supabase project.
-2. Apply every migration in `supabase/migrations/` in numeric order: `001_learntrack.sql`, `002_learning_rewards.sql`, `003_push_subscriptions.sql`, `004_lesson_quizzes.sql`, then `005_clerk_workspaces.sql`. Use the Supabase SQL editor or `supabase db push` after linking your project. Apply each migration once; existing installations should apply only migrations they have not already run. If an older installation already applied the former `003_lesson_quizzes.sql`, skip `004_lesson_quizzes.sql` because it restores the same quiz tables and RPCs.
+2. Apply every migration in `supabase/migrations/` in numeric order: `001_learntrack.sql`, `002_learning_rewards.sql`, `003_push_subscriptions.sql`, `004_lesson_quizzes.sql`, `005_clerk_workspaces.sql`, then `006_workspace_restore.sql`. Use the Supabase SQL editor or `supabase db push` after linking your project. Apply each migration once; existing installations should apply only migrations they have not already run. If an older installation already applied the former `003_lesson_quizzes.sql`, skip `004_lesson_quizzes.sql` because it restores the same quiz tables and RPCs.
 3. Copy the project URL and **publishable key** from the project's Connect dialog into `.env.local`:
 
 ```dotenv

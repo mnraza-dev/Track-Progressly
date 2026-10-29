@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
   },
   allowedDevOrigins: ["192.168.1.9"],
   experimental: {
+    proxyClientMaxBodySize: 25_000_000,
     agentFeedback: true,
   },
   cacheComponents: true,

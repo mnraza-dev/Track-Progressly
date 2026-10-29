@@ -70,7 +70,7 @@ Choose **Export** in the workspace header, or **Open export options** in Setting
 
 Choose all courses or a single course for notes, lesson progress, and reports. Activity and backups always include the full workspace. My notes also retains its filtered Markdown export.
 
-To restore a browser workspace, open **Settings → Restore from file**, select a Progressly JSON backup, review the course/goal counts, and confirm replacement. Export your current workspace first if you want to keep it. Account workspaces support export; account restore is not yet supported.
+To restore a workspace, open **Settings → Restore from file**, select a Progressly JSON backup, review the counts, and confirm replacement. Export your current workspace first if you want to keep it. Both browser and signed-in account workspaces support restore. Account restore requires `006_workspace_restore.sql`, replaces only your own data in one transaction, preserves daily activity, and recalculates rewards. Blank signed-in profile names default to your Clerk name or username.
 
 In a browser workspace, your courses, notes, goals, and preferences stay in the browser where you created them. Return on the same device and browser to continue. Clearing browser storage removes that local workspace, so keep a complete JSON backup somewhere safe.
 

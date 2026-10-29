@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/workspace/route";
+import { currentUser } from "@clerk/nextjs/server";
+vi.mock("@clerk/nextjs/server", () => ({ currentUser: vi.fn() }));
 import {
   authenticatedWorkspace,
   WorkspaceAccessError,
@@ -21,6 +23,9 @@ const rewards = { version: 1, events: {} };
 const select = vi.fn();
 const eq = vi.fn();
 const upsert = vi.fn();
+const single = vi.fn();
+const update = vi.fn();
+const maybeSingle = vi.fn();
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -28,13 +33,24 @@ beforeEach(() => {
     select,
     eq,
     upsert,
+    update,
+    maybeSingle,
     order: vi.fn().mockReturnThis(),
     range: vi.fn().mockResolvedValue({ data: [], error: null }),
-    single: vi.fn().mockResolvedValue({ data: profile, error: null }),
+    single,
   };
   select.mockReturnValue(query);
   eq.mockReturnValue(query);
   upsert.mockResolvedValue({ error: null });
+  single.mockResolvedValue({ data: { ...profile }, error: null });
+  update.mockReturnValue(query);
+  maybeSingle.mockResolvedValue({
+    data: { ...profile, display_name: "Clerk Name" },
+    error: null,
+  });
+  vi.mocked(currentUser).mockResolvedValue({
+    fullName: "Clerk Name",
+  } as Awaited<ReturnType<typeof currentUser>>);
   vi.mocked(authenticatedWorkspace).mockResolvedValue({
     user: { id: account },
     db: {
@@ -63,6 +79,20 @@ describe("workspace API", () => {
       "display_name, timezone, daily_minutes, auto_complete, weekend_rest",
     );
     expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(currentUser).not.toHaveBeenCalled();
+  });
+  it("persists the Clerk name for a blank profile without overwriting a custom name", async () => {
+    single.mockResolvedValue({
+      data: { ...profile, display_name: "" },
+      error: null,
+    });
+    const response = await GET();
+    expect(response.status).toBe(200);
+    expect((await response.json()).profile.display_name).toBe("Clerk Name");
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ display_name: "Clerk Name" }),
+    );
+    expect(eq).toHaveBeenCalledWith("display_name", "");
   });
   it("saves records with the UUID instead of the Clerk subject", async () => {
     const response = await POST(

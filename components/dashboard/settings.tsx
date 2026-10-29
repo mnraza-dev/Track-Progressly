@@ -31,14 +31,18 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { fireConfetti } from "@/lib/confetti";
+import { useUser } from "@clerk/nextjs";
+import { profileName } from "@/lib/profile-name";
 
 export function Settings() {
+  const { user } = useUser();
   const { signOut, signingOut, isSignedIn } = useWorkspaceSignOut();
   const { data, mutate, notify, restore } = useWorkspace();
   const [pendingRestore, setPendingRestore] = useState<Workspace | null>(null);
   const [restoreBusy, setRestoreBusy] = useState(false);
   const [restoreError, setRestoreError] = useState("");
-  const [name, setName] = useState(data.profile.display_name);
+  const [editedName, setName] = useState<string | null>(null);
+  const name = editedName ?? (data.profile.display_name || profileName(user));
   const [timezone, setTimezone] = useState(data.profile.timezone);
   const [minutes, setMinutes] = useState(data.profile.daily_minutes);
   const [auto, setAuto] = useState(data.profile.auto_complete);
@@ -275,6 +279,12 @@ export function Settings() {
               Download a complete JSON snapshot of all your courses, lessons,
               notes, and activity, or restore from a previous backup file.
             </p>
+            {isConnected && (
+              <p className="settings-help">
+                Account restore replaces your saved workspace and recalculates
+                rewards from the restored learning data.
+              </p>
+            )}
             {restoreError && (
               <p role="alert" className="export-error">
                 {restoreError}
@@ -358,7 +368,11 @@ export function Settings() {
                 setWeekendRest(pendingRestore.profile.weekend_rest ?? false);
                 setPendingRestore(null);
                 fireConfetti();
-                notify(isConnected ? "Workspace restored and saved to your account." : "Workspace restored and saved in this browser.");
+                notify(
+                  isConnected
+                    ? "Workspace restored and saved to your account."
+                    : "Workspace restored and saved in this browser.",
+                );
               } catch (err) {
                 setRestoreError(
                   err instanceof Error
