@@ -5,12 +5,13 @@ import { emptyProgress } from "@/types";
 import { importYouTube } from "@/lib/youtube/service";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { auth } from "@clerk/nextjs/server";
 import { hasAllowedOrigin } from "@/lib/http/origin";
 async function authenticated() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("UNAUTHORIZED");
   const db = await serverSupabase();
-  const { data, error } = await db.auth.getUser();
-  if (error || !data.user) throw new Error("UNAUTHORIZED");
-  return { db, user: data.user };
+  return { db, user: { id: userId } };
 }
 async function allRows(db: SupabaseClient, table: string, order = "id") {
   const rows: Record<string, unknown>[] = [];

@@ -2,6 +2,7 @@ import { readJsonBody, RequestBodyError } from "@/lib/http/body";
 import { importYouTube, YouTubeError } from "@/lib/youtube/service";
 import { serverSupabase } from "@/lib/supabase/server";
 import { z } from "zod";
+import { auth } from "@clerk/nextjs/server";
 import { hasAllowedOrigin } from "@/lib/http/origin";
 const localLimits = new Map<string, { start: number; count: number }>();
 export async function POST(request: Request) {
@@ -16,17 +17,17 @@ export async function POST(request: Request) {
       { status: 413 },
     );
   try {
+    const { userId } = await auth();
+    if (!userId)
+      return Response.json(
+        { error: "Please sign in to import a course." },
+        { status: 401 },
+      );
     if (
       process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
     ) {
       const db = await serverSupabase();
-      const { data } = await db.auth.getUser();
-      if (!data.user)
-        return Response.json(
-          { error: "Please sign in to import a course." },
-          { status: 401 },
-        );
       const limit = await db.rpc("consume_import_quota");
       if (limit.error) throw new Error("Import rate check failed.");
       if (!limit.data)

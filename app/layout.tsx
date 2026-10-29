@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { DM_Sans, Space_Grotesk, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -34,24 +35,26 @@ export const metadata: Metadata = {
     "Stop collecting tutorials. Start completing them. A calmer home for your YouTube courses, notes, practice, and learning goals.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      data-scroll-behavior="smooth"
-      suppressHydrationWarning
-      className={`${bodyFont.variable} ${displayFont.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <SceneProvider>
-            <TourProvider>
-              {children}
-              <ProductTour />
-            </TourProvider>
-          </SceneProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        data-scroll-behavior="smooth"
+        suppressHydrationWarning
+        className={`${bodyFont.variable} ${displayFont.variable} ${geistMono.variable} h-full antialiased`}
+      >
+        <body className="min-h-full flex flex-col">
+          <ThemeProvider>
+            <SceneProvider>
+              <TourProvider>
+                {children}
+                <ProductTour />
+              </TourProvider>
+            </SceneProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
