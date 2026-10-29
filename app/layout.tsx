@@ -1,6 +1,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { DM_Sans, Space_Grotesk, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import "./studio.css";
 import "./charts.css";
@@ -33,6 +34,8 @@ export const metadata: Metadata = {
   title: "Progressly — Small steps. Extraordinary progress.",
   description:
     "Stop collecting tutorials. Start completing them. A calmer home for your YouTube courses, notes, practice, and learning goals.",
+  manifest: "/manifest.json",
+  themeColor: "#1a1a1a",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -48,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider>
             <SceneProvider>
               <TourProvider>
+                <Script src="/sw-register.js" strategy="afterInteractive" />
                 {children}
                 <ProductTour />
               </TourProvider>
