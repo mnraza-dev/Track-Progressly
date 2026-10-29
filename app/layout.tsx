@@ -38,7 +38,11 @@ export const metadata: Metadata = {
   themeColor: "#1a1a1a",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <ClerkProvider>
       <html
@@ -51,7 +55,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider>
             <SceneProvider>
               <TourProvider>
-                <Script src="/sw-register.js" strategy="afterInteractive" />
+                <Script
+                  src="/sw-register.js"
+                  strategy="afterInteractive"
+                  data-enabled={
+                    process.env.NODE_ENV === "production" ? "true" : "false"
+                  }
+                />
                 {children}
                 <ProductTour />
               </TourProvider>

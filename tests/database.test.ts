@@ -13,7 +13,7 @@ async function asUser(id: string) {
 }
 beforeAll(async () => {
   await db.exec(
-    "create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,raw_user_meta_data jsonb not null default '{}');create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;",
+    "create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,raw_user_meta_data jsonb not null default '{}');create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub',nullif(current_setting('request.jwt.claim.sub',true),'')) $$;grant usage on schema auth to authenticated;grant execute on function auth.uid(),auth.jwt() to authenticated;",
   );
   const migration = readFileSync(
     new URL("../supabase/migrations/001_learntrack.sql", import.meta.url),
@@ -31,10 +31,17 @@ beforeAll(async () => {
   );
   await db.exec(
     readFileSync(
-      new URL("../supabase/migrations/003_lesson_quizzes.sql", import.meta.url),
+      new URL("../supabase/migrations/004_lesson_quizzes.sql", import.meta.url),
       "utf8",
     ),
   );
+  for (const name of ["003_push_subscriptions.sql"])
+    await db.exec(
+      readFileSync(
+        new URL(`../supabase/migrations/${name}`, import.meta.url),
+        "utf8",
+      ),
+    );
   await db.query("insert into auth.users(id) values ($1),($2)", [alice, bob]);
   await asUser(alice);
   const result = await db.query<{ id: string }>(
@@ -64,15 +71,102 @@ beforeAll(async () => {
   course = result.rows[0].id;
   const videos = await db.query<{ id: string }>("select id from course_videos");
   video = videos.rows[0].id;
+  // Apply the Clerk migration over existing profiles and course data, as hosted upgrades do.
+  await db.exec("reset role");
+  await db.exec(
+    readFileSync(
+      new URL(
+        "../supabase/migrations/005_clerk_workspaces.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
 }, 30000);
 afterAll(async () => {
   await db.close();
+});
+
+describe("Clerk workspace identity and isolation", () => {
+  let account: string;
+  it("initializes a UUID profile for a Clerk subject without a Supabase Auth user", async () => {
+    await asUser("user_clerk_alice");
+    const result = await db.query<{ id: string }>(
+      "select ensure_workspace_profile() id",
+    );
+    account = result.rows[0].id;
+    expect(account).toMatch(/^[0-9a-f-]{36}$/);
+    expect(
+      (await db.query<{ id: string }>("select ensure_workspace_profile() id"))
+        .rows[0].id,
+    ).toBe(account);
+    expect((await db.query("select * from profiles")).rows).toHaveLength(1);
+    expect((await db.query("select * from courses")).rows).toHaveLength(0);
+    expect(
+      (await db.query<{ id: string }>("select id from profiles")).rows[0].id,
+    ).toBe(account);
+    await db.query(
+      "insert into learning_goals(user_id,goal_type,target_value) values($1,'daily_minutes',30)",
+      [account],
+    );
+    await db.query("select consume_import_quota()");
+    await db.query("select sync_learning_rewards()");
+  });
+  it("rejects cross-account reads and writes for Clerk sessions", async () => {
+    await asUser("user_clerk_bob");
+    await db.query("select ensure_workspace_profile()");
+    expect((await db.query("select * from learning_goals")).rows).toHaveLength(
+      0,
+    );
+    await expect(
+      db.query(
+        "insert into learning_goals(user_id,goal_type,target_value) values($1,'weekly_minutes',30)",
+        [account],
+      ),
+    ).rejects.toThrow(/row-level security/);
+    await expect(
+      db.query("select save_video_progress($1,'completed',0,0)", [video]),
+    ).rejects.toThrow(/Lesson not found/);
+    await db.query("update profiles set display_name='Bob'");
+    await expect(
+      db.query("update profiles set clerk_user_id='user_clerk_alice'"),
+    ).rejects.toThrow(/permission denied/);
+    await asUser("user_clerk_alice");
+    expect(
+      (
+        await db.query<{ display_name: string }>(
+          "select display_name from profiles",
+        )
+      ).rows[0].display_name,
+    ).toBe("");
+  });
+  it("does not let callers claim a different account or use an anonymous subject", async () => {
+    await asUser("");
+    await expect(db.query("select ensure_workspace_profile()")).rejects.toThrow(
+      /UNAUTHORIZED/,
+    );
+    await asUser("not-a-clerk-user");
+    await expect(db.query("select ensure_workspace_profile()")).rejects.toThrow(
+      /UNAUTHORIZED/,
+    );
+    await db.exec("reset role; set role anon");
+    await expect(db.query("select ensure_workspace_profile()")).rejects.toThrow(
+      /permission denied/,
+    );
+  });
 });
 describe("PostgreSQL migrations, atomic mutations, and RLS isolation", () => {
   it("creates a private profile for new accounts", async () => {
     await asUser(alice);
     const result = await db.query<{ id: string }>("select id from profiles");
     expect(result.rows.map((r) => r.id)).toEqual([alice]);
+    expect(
+      (
+        await db.query<{ supabase_user_id: string }>(
+          "select supabase_user_id from profiles",
+        )
+      ).rows[0].supabase_user_id,
+    ).toBe(alice);
   });
   it("prevents another user reading courses and related lessons", async () => {
     await asUser(bob);

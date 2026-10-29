@@ -1,6 +1,9 @@
 import { readJsonBody, RequestBodyError } from "@/lib/http/body";
 import { importYouTube, YouTubeError } from "@/lib/youtube/service";
-import { serverSupabase } from "@/lib/supabase/server";
+import {
+  authenticatedWorkspace,
+  WorkspaceAccessError,
+} from "@/lib/supabase/workspace";
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { hasAllowedOrigin } from "@/lib/http/origin";
@@ -27,7 +30,7 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
     ) {
-      const db = await serverSupabase();
+      const { db } = await authenticatedWorkspace();
       const limit = await db.rpc("consume_import_quota");
       if (limit.error) throw new Error("Import rate check failed.");
       if (!limit.data)
@@ -78,13 +81,15 @@ export async function POST(request: Request) {
       { error: e instanceof Error ? e.message : "Import failed." },
       {
         status:
-          e instanceof RequestBodyError
+          e instanceof WorkspaceAccessError
             ? e.status
-            : e instanceof YouTubeError
+            : e instanceof RequestBodyError
               ? e.status
-              : e instanceof z.ZodError
-                ? 400
-                : 500,
+              : e instanceof YouTubeError
+                ? e.status
+                : e instanceof z.ZodError
+                  ? 400
+                  : 500,
       },
     );
   }

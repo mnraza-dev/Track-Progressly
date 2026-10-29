@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
-import { signOut } from "@/features/auth/sign-out";
+import { useWorkspaceSignOut } from "@/features/auth/sign-out";
 import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -63,6 +63,7 @@ export function Logo() {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { signOut, signingOut, isSignedIn } = useWorkspaceSignOut();
   const { data, load, toast, loaded, error } = useWorkspace();
   const [mobile, setMobile] = useState(false);
   const [search, setSearch] = useState(false);
@@ -189,15 +190,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <SunMoon size={17} />
             </button>
-            {isConnected && (
+            {isSignedIn && (
               <button
                 className="icon-button"
                 title="Sign out"
-                onClick={async () => {
-                  await signOut();
-                  router.push("/login");
-                  router.refresh();
-                }}
+                aria-label="Sign out"
+                disabled={signingOut}
+                onClick={() => void signOut()}
               >
                 <LogOut size={17} />
               </button>
@@ -300,7 +299,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="error-card">
               <h2>Your workspace couldn’t load</h2>
               <p>{error}</p>
-              <Button onClick={() => void load()}>Try again</Button>
+              <Button disabled={signingOut} onClick={() => void load()}>
+                Try again
+              </Button>
+              {isSignedIn && (
+                <Button
+                  variant="outline"
+                  disabled={signingOut}
+                  onClick={() => void signOut()}
+                >
+                  {signingOut ? "Signing out…" : "Sign out"}
+                </Button>
+              )}
             </div>
           ) : !loaded ? (
             <AppLoader message="Opening your learning studio..." />

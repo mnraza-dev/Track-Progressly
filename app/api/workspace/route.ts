@@ -1,18 +1,14 @@
 import { readJsonBody, RequestBodyError } from "@/lib/http/body";
-import { serverSupabase } from "@/lib/supabase/server";
+import {
+  authenticatedWorkspace,
+  WorkspaceAccessError,
+} from "@/lib/supabase/workspace";
 import { mutationSchema } from "@/lib/validations";
 import { emptyProgress } from "@/types";
 import { importYouTube } from "@/lib/youtube/service";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { auth } from "@clerk/nextjs/server";
 import { hasAllowedOrigin } from "@/lib/http/origin";
-async function authenticated() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("UNAUTHORIZED");
-  const db = await serverSupabase();
-  return { db, user: { id: userId } };
-}
 async function allRows(db: SupabaseClient, table: string, order = "id") {
   const rows: Record<string, unknown>[] = [];
   for (let from = 0; ; from += 1000) {
@@ -43,22 +39,24 @@ function failure(error: unknown) {
     },
     {
       status:
-        message === "UNAUTHORIZED"
-          ? 401
-          : duplicate
-            ? 409
-            : error instanceof RequestBodyError
-              ? error.status
-              : error instanceof z.ZodError
-                ? 400
-                : 500,
+        error instanceof WorkspaceAccessError
+          ? error.status
+          : message === "UNAUTHORIZED"
+            ? 401
+            : duplicate
+              ? 409
+              : error instanceof RequestBodyError
+                ? error.status
+                : error instanceof z.ZodError
+                  ? 400
+                  : 500,
       headers: { "Cache-Control": "private, no-store" },
     },
   );
 }
 export async function GET() {
   try {
-    const { db, user } = await authenticated();
+    const { db, user } = await authenticatedWorkspace();
     const [
       courses,
       videos,
@@ -80,7 +78,13 @@ export async function GET() {
       allRows(db, "practice_tasks"),
       allRows(db, "video_bookmarks"),
       allRows(db, "learning_goals"),
-      db.from("profiles").select("*").eq("id", user.id).single(),
+      db
+        .from("profiles")
+        .select(
+          "display_name, timezone, daily_minutes, auto_complete, weekend_rest",
+        )
+        .eq("id", user.id)
+        .single(),
       db.rpc("learning_analytics"),
       db.rpc("sync_learning_rewards"),
       allRows(db, "lesson_quizzes"),
@@ -139,7 +143,7 @@ export async function POST(request: Request) {
       { status: 413 },
     );
   try {
-    const { db, user } = await authenticated();
+    const { db, user } = await authenticatedWorkspace();
     const m = mutationSchema.parse(await readJsonBody(request, 4_000_000));
     const baselineRewards = await db.rpc("sync_learning_rewards");
     if (baselineRewards.error) throw baselineRewards.error;

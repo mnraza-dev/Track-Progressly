@@ -46,26 +46,34 @@ The daily-goal ring uses actual saved learning progress. Learning data and playb
 
 ## Connect Supabase
 
-All three database migrations are included and exercised by the PostgreSQL integration tests. Hosted authentication, email, OAuth, and real service credentials require verification against your configured Supabase project.
+All database migrations are included and exercised by the PostgreSQL integration tests. Clerk authentication and the hosted Clerk/Supabase integration also require verification against your configured project.
 
 1. Create a free Supabase project.
-2. Apply every migration in `supabase/migrations/` in numeric order: `001_learntrack.sql`, `002_learning_rewards.sql`, then `003_lesson_quizzes.sql`. Use the Supabase SQL editor or `supabase db push` after linking your project. Apply each migration once; existing installations should apply only migrations they have not already run.
+2. Apply every migration in `supabase/migrations/` in numeric order: `001_learntrack.sql`, `002_learning_rewards.sql`, `003_push_subscriptions.sql`, `004_lesson_quizzes.sql`, then `005_clerk_workspaces.sql`. Use the Supabase SQL editor or `supabase db push` after linking your project. Apply each migration once; existing installations should apply only migrations they have not already run. If an older installation already applied the former `003_lesson_quizzes.sql`, skip `004_lesson_quizzes.sql` because it restores the same quiz tables and RPCs.
 3. Copy the project URL and **publishable key** from the project's Connect dialog into `.env.local`:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
 YOUTUBE_API_KEY=YOUR_SERVER_ONLY_YOUTUBE_KEY
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=YOUR_CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY=YOUR_CLERK_SECRET_KEY
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/signup
 ```
 
-4. Under Authentication → URL Configuration, set the site URL to `http://localhost:3000` and allow these redirect URLs:
-   - `http://localhost:3000/auth/callback`
-   - `http://localhost:3000/auth/callback?next=/reset-password`
-5. Enable email/password authentication. Keep email confirmation enabled for production. Configure an SMTP provider if the built-in test email limits are insufficient.
-6. For Google sign-in, enable the Google provider in Supabase and enter your Google OAuth client ID and secret. Register Supabase's displayed callback URL in the Google Cloud OAuth console. OAuth secrets belong in Supabase, never in this application's client bundle.
+4. Activate the [Supabase integration in Clerk](https://clerk.com/docs/guides/development/integrations/databases/supabase) and copy the Clerk domain it displays. This adds the `authenticated` role to Clerk session tokens.
+5. In Supabase Authentication → Sign In / Providers, add Clerk as a third-party provider with that domain. See [Supabase's Clerk guide](https://supabase.com/docs/guides/auth/third-party/clerk). Use native session tokens; the old Supabase JWT template integration is deprecated.
+6. Configure email/password and any social sign-in providers in Clerk. Sign out and back in after enabling the integration so your session has the updated claims.
 7. Restart `bun run dev` after changing environment variables.
 
-The application never uses or requires a Supabase service-role key. Server endpoints verify the signed-in user, use the user's session, and remain subject to RLS. Next.js `proxy.ts` refreshes Supabase sessions and protects the application routes.
+The application never uses or requires a Supabase service-role key. Server endpoints verify the signed-in Clerk user, pass the Clerk session token to Supabase, and remain subject to RLS. `ensure_workspace_profile()` creates a UUID profile keyed by the verified token's Clerk subject; policies and RPCs resolve that mapping with `workspace_user_id()`. Existing Supabase accounts retain their profiles and UUIDs. Linking an existing account to a Clerk user requires an explicit trusted database update to `profiles.clerk_user_id`; the application never merges accounts by email. Next.js `proxy.ts` handles Clerk sessions and protects application routes.
+
+### First access with an empty database
+
+No sample data or pre-created Supabase Auth user is required. Apply the database migrations and configure Supabase to trust the Clerk instance first. On the first authenticated workspace request, `ensure_workspace_profile()` creates only that user's profile with default preferences. Courses, goals, quizzes, activity, and rewards start empty; the user can then save their first course. Repeated requests reuse the same profile.
+
+An empty database still needs its tables, policies, and functions installed. A rejected Clerk token (`PGRST301`/`PGRST303`) occurs before any table data is read or created; inserting data cannot repair provider configuration. The server logs the gateway error code and reason with JWTs redacted. Expired tokens return 401; a provider configuration rejection returns 503 and identifies the verified Clerk issuer domain to configure in Supabase.
 
 ## Connect YouTube
 

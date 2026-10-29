@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { useState, useRef } from "react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   User,
   Globe,
@@ -26,7 +25,7 @@ import {
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
-import { signOut } from "@/features/auth/sign-out";
+import { useWorkspaceSignOut } from "@/features/auth/sign-out";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,7 +33,7 @@ import { Card } from "@/components/ui/card";
 import { fireConfetti } from "@/lib/confetti";
 
 export function Settings() {
-  const router = useRouter();
+  const { signOut, signingOut, isSignedIn } = useWorkspaceSignOut();
   const { data, mutate, notify, restore } = useWorkspace();
   const [pendingRestore, setPendingRestore] = useState<Workspace | null>(null);
   const [restoreBusy, setRestoreBusy] = useState(false);
@@ -222,17 +221,14 @@ export function Settings() {
                 ? "Your courses, progress, and notes are private and saved to your account."
                 : "Your courses, notes, and goals are saved in this browser. Return on this device to pick up where you left off. Use export options below to keep a backup."}
             </p>
-            {isConnected ? (
+            {isSignedIn ? (
               <Button
                 variant="outline"
-                onClick={async () => {
-                  await signOut();
-                  router.push("/login");
-                  router.refresh();
-                }}
+                disabled={signingOut}
+                onClick={() => void signOut()}
               >
                 <LogOut size={16} />
-                Sign out
+                {signingOut ? "Signing out…" : "Sign out"}
               </Button>
             ) : (
               <Button variant="outline" asChild>

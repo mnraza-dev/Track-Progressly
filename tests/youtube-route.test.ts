@@ -1,13 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/youtube/route";
 import { importYouTube, YouTubeError } from "@/lib/youtube/service";
-import { serverSupabase } from "@/lib/supabase/server";
+import { authenticatedWorkspace } from "@/lib/supabase/workspace";
+import { auth } from "@clerk/nextjs/server";
 
 vi.mock("@/lib/youtube/service", async (original) => ({
   ...(await original<typeof import("@/lib/youtube/service")>()),
   importYouTube: vi.fn(),
 }));
-vi.mock("@/lib/supabase/server", () => ({ serverSupabase: vi.fn() }));
+vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
+vi.mock("@/lib/supabase/workspace", async (original) => ({
+  ...(await original<typeof import("@/lib/supabase/workspace")>()),
+  authenticatedWorkspace: vi.fn(),
+}));
 
 const preview = {
   title: "A public lesson",
@@ -45,10 +50,13 @@ function request(
 }
 function cloud(user: { id: string } | null, allowed = true) {
   const rpc = vi.fn().mockResolvedValue({ data: allowed, error: null });
-  vi.mocked(serverSupabase).mockResolvedValue({
-    auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) },
-    rpc,
-  } as unknown as Awaited<ReturnType<typeof serverSupabase>>);
+  vi.mocked(auth).mockResolvedValue({ userId: user?.id ?? null } as Awaited<
+    ReturnType<typeof auth>
+  >);
+  vi.mocked(authenticatedWorkspace).mockResolvedValue({
+    user,
+    db: { rpc },
+  } as unknown as Awaited<ReturnType<typeof authenticatedWorkspace>>);
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "test-publishable-key");
   return rpc;
@@ -56,6 +64,9 @@ function cloud(user: { id: string } | null, allowed = true) {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(auth).mockResolvedValue({ userId: "user_test" } as Awaited<
+    ReturnType<typeof auth>
+  >);
   vi.stubEnv("NODE_ENV", "production");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
@@ -74,7 +85,7 @@ describe("deployed YouTube imports", () => {
     expect(await response.json()).toEqual(preview);
     expect(response.headers.get("Cache-Control")).toBe("private, no-store");
     expect(importYouTube).toHaveBeenCalledWith("j942wKiXFu8");
-    expect(serverSupabase).not.toHaveBeenCalled();
+    expect(authenticatedWorkspace).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -86,7 +97,7 @@ describe("deployed YouTube imports", () => {
       vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", url);
       vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", key);
       expect((await POST(request())).status).toBe(200);
-      expect(serverSupabase).not.toHaveBeenCalled();
+      expect(authenticatedWorkspace).not.toHaveBeenCalled();
     },
   );
 
@@ -101,7 +112,7 @@ describe("deployed YouTube imports", () => {
     });
   });
 
-  it("limits anonymous imports per client and permits retries after a minute", async () => {
+  it("limits browser workspace imports per client and permits retries after a minute", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-15T10:00:00Z"));
     for (let i = 0; i < 10; i++)
