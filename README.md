@@ -70,11 +70,11 @@ Choose **Export** in the workspace header, or **Open export options** in Setting
 
 Choose all courses or a single course for notes, lesson progress, and reports. Activity and backups always include the full workspace. My notes also retains its filtered Markdown export.
 
-To restore a workspace, open **Settings → Restore from file**, select a Progressly JSON backup, review the counts, and confirm replacement. Export your current workspace first if you want to keep it. Both browser and signed-in account workspaces support restore. Account restore requires `006_workspace_restore.sql`, replaces only your own data in one transaction, preserves daily activity, and recalculates rewards. Blank signed-in profile names default to your Clerk name or username.
+To restore a workspace, open **Settings → Restore from file**, select a Progressly JSON backup, review the counts, and confirm replacement. Export your current workspace first if you want to keep it. Both browser and signed-in account workspaces support restore. Restores save locally immediately and join the next account sync. Choose **Sync now** in Settings to upload sooner. Blank signed-in profile names default to your Clerk name or username.
 
 In a browser workspace, your courses, notes, goals, and preferences stay in the browser where you created them. Return on the same device and browser to continue. Clearing browser storage removes that local workspace, so keep a complete JSON backup somewhere safe.
 
-If your workspace supports accounts, sign in to save across devices. A local workspace is not automatically moved into an account.
+Account workspaces save edits immediately to account-specific localStorage and sync a private cloud snapshot once every 24 hours while the app is open, or on return after a sync is due. Settings shows pending changes, the last sync time, and **Sync now**. A device with no local cache downloads its account data first. Conflicting device changes are reported without overwriting local work. Apply `007_daily_workspace_sync.sql` to enable this mode. A browser-only workspace is not automatically moved into an account.
 
 ## A few things to know
 

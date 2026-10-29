@@ -237,6 +237,7 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
     if (course.status === "completed" && course.completed_at)
       activity(course.completed_at).courses_completed++;
     course.videos.forEach((video) => {
+      if (video.availability_status !== "available") return;
       if (video.progress.is_completed && video.progress.completed_at)
         activity(video.progress.completed_at).videos_completed++;
       video.tasks.forEach((task) => {

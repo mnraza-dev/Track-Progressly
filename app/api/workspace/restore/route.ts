@@ -24,8 +24,34 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    const { error } = await db.rpc("restore_workspace", { payload: workspace });
+    const snapshot = await db.rpc("get_workspace_snapshot");
+    if (snapshot.error && snapshot.error.code !== "PGRST202")
+      return Response.json(
+        {
+          error:
+            "The current cloud workspace could not be checked. No restore was started; please try again when cloud storage is available.",
+        },
+        { status: 503 },
+      );
+    // Compatibility for older clients: a cloud restore must update the current
+    // snapshot once the account has migrated, rather than its bootstrap tables.
+    const result = snapshot.data?.revision
+      ? await db.rpc("sync_workspace_snapshot", {
+          payload: workspace,
+          expected_revision: snapshot.data.revision,
+          request_id: crypto.randomUUID(),
+        })
+      : await db.rpc("restore_workspace", { payload: workspace });
+    const { error } = result;
     if (error) {
+      if (error.code === "PT409")
+        return Response.json(
+          {
+            error:
+              "The cloud workspace changed during restore. Reload it before retrying.",
+          },
+          { status: 409 },
+        );
       if (error.code === "PGRST202")
         return Response.json(
           {

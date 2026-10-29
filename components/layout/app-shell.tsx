@@ -31,7 +31,14 @@ import {
   Trophy,
   Keyboard,
 } from "lucide-react";
-import { useWorkspace } from "@/stores/workspace";
+import {
+  useWorkspace,
+  currentWorkspaceCacheKey,
+  resetWorkspaceSession,
+} from "@/stores/workspace";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { profileName } from "@/lib/profile-name";
+import { emptyWorkspace } from "@/types";
 import { isConnected } from "@/lib/supabase/client";
 import { useWorkspaceSignOut } from "@/features/auth/sign-out";
 import { WorkspaceDialog as Dialog } from "@/components/ui/workspace-dialog";
@@ -64,7 +71,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut, signingOut, isSignedIn } = useWorkspaceSignOut();
-  const { data, load, toast, loaded, error } = useWorkspace();
+  const { isLoaded: authLoaded, userId } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
+  const defaultName = profileName(user);
+  const {
+    data: storedData,
+    accountId,
+    load,
+    sync,
+    refreshCache,
+    toast,
+    loaded,
+    error,
+    syncError,
+  } = useWorkspace();
+  const accountReady = !isConnected || accountId === userId;
+  const data = accountReady ? storedData : emptyWorkspace;
   const [mobile, setMobile] = useState(false);
   const [search, setSearch] = useState(false);
   const [query, setQuery] = useState("");
@@ -77,7 +99,35 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const stats = useGamification(data);
 
   useEffect(() => {
-    void load();
+    if (isConnected && (!authLoaded || !userLoaded)) return;
+    if (isConnected && !userId) {
+      resetWorkspaceSession();
+      return;
+    }
+    void load(userId || undefined, defaultName);
+  }, [load, userId, authLoaded, userLoaded, defaultName]);
+
+  useEffect(() => {
+    if (!isConnected || !authLoaded || !userId) return;
+    const tick = () => {
+      if (!document.hidden) void sync(false);
+    };
+    const changed = (event: StorageEvent) => {
+      if (event.key === currentWorkspaceCacheKey()) refreshCache();
+    };
+    const timer = window.setInterval(tick, 60_000);
+    document.addEventListener("visibilitychange", tick);
+    window.addEventListener("online", tick);
+    window.addEventListener("storage", changed);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", tick);
+      window.removeEventListener("online", tick);
+      window.removeEventListener("storage", changed);
+    };
+  }, [authLoaded, userId, sync, refreshCache]);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const isEditing = ["INPUT", "TEXTAREA", "SELECT"].includes(
         (e.target as HTMLElement)?.tagName || "",
@@ -98,7 +148,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [load]);
+  }, []);
   const title =
     navigation.find((n) => pathname.startsWith(n.href))?.label ||
     (pathname === "/"
@@ -181,7 +231,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="sidebar-footer">
             <span className="free-plan">
               <span />
-              {isConnected ? "Connected workspace" : "Browser workspace"}
+              {isConnected ? "Local · daily cloud sync" : "Browser workspace"}
             </span>
             <button
               className="icon-button"
@@ -312,10 +362,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Button>
               )}
             </div>
-          ) : !loaded ? (
+          ) : !loaded || !accountReady ? (
             <AppLoader message="Opening your learning studio..." />
           ) : (
-            children
+            <>
+              {syncError && (
+                <div role="status" className="connection-status">
+                  <span>
+                    Changes are saved locally. Cloud sync needs attention.{" "}
+                    <Link href="/settings">Open sync settings</Link>
+                  </span>
+                </div>
+              )}
+              {children}
+            </>
           )}
         </main>
         <footer className="page-footer">

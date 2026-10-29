@@ -79,9 +79,38 @@ describe("account JSON restore API", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
   it("does not claim a network interruption rolled back a potentially completed restore", async () => {
-    rpc.mockResolvedValue({ error: { code: "", message: "Failed to fetch" } });
+    rpc
+      .mockResolvedValueOnce({ data: { revision: null }, error: null })
+      .mockResolvedValueOnce({
+        error: { code: "", message: "Failed to fetch" },
+      });
     const response = await POST(request());
     expect(response.status).toBe(503);
     expect((await response.json()).error).toContain("could not be confirmed");
+  });
+  it("does not start a restore if the current cloud state could not be checked", async () => {
+    rpc.mockResolvedValueOnce({
+      error: { code: "", message: "Network unavailable" },
+    });
+    const response = await POST(request());
+    expect(response.status).toBe(503);
+    expect((await response.json()).error).toContain("No restore was started");
+    expect(rpc.mock.calls).toEqual([["get_workspace_snapshot"]]);
+  });
+  it("updates the current snapshot for an older restore client instead of stale relational data", async () => {
+    const revision = "11111111-1111-4111-8111-111111111111";
+    rpc
+      .mockResolvedValueOnce({ data: { revision }, error: null })
+      .mockResolvedValueOnce({ data: {}, error: null });
+    expect((await POST(request())).status).toBe(200);
+    expect(rpc).toHaveBeenCalledWith("sync_workspace_snapshot", {
+      payload: emptyWorkspace,
+      expected_revision: revision,
+      request_id: expect.any(String),
+    });
+    expect(rpc).not.toHaveBeenCalledWith(
+      "restore_workspace",
+      expect.anything(),
+    );
   });
 });

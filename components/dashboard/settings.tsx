@@ -22,6 +22,7 @@ import {
   LogOut,
   Play,
   Upload,
+  RefreshCw,
 } from "lucide-react";
 import { useWorkspace } from "@/stores/workspace";
 import { isConnected } from "@/lib/supabase/client";
@@ -37,7 +38,19 @@ import { profileName } from "@/lib/profile-name";
 export function Settings() {
   const { user } = useUser();
   const { signOut, signingOut, isSignedIn } = useWorkspaceSignOut();
-  const { data, mutate, notify, restore } = useWorkspace();
+  const {
+    data,
+    mutate,
+    notify,
+    restore,
+    sync,
+    pullCloud,
+    syncing,
+    syncError,
+    syncConflict,
+    dirty,
+    lastSyncedAt,
+  } = useWorkspace();
   const [pendingRestore, setPendingRestore] = useState<Workspace | null>(null);
   const [restoreBusy, setRestoreBusy] = useState(false);
   const [restoreError, setRestoreError] = useState("");
@@ -209,7 +222,7 @@ export function Settings() {
                 <h2>Your workspace</h2>
                 <p>
                   {isConnected
-                    ? "Securely connected"
+                    ? "Local first · daily cloud sync"
                     : "Local, and ready to explore"}
                 </p>
               </div>
@@ -218,13 +231,54 @@ export function Settings() {
               className={`connection-status ${isConnected ? "connected" : ""}`}
             >
               {isConnected ? <CheckCircle2 size={17} /> : <Monitor size={17} />}{" "}
-              {isConnected ? "Saved to your account" : "Saved in this browser"}
+              {isConnected
+                ? dirty
+                  ? "Saved locally · cloud sync pending"
+                  : "Local copy up to date"
+                : "Saved in this browser"}
             </div>
             <p className="settings-help">
               {isConnected
-                ? "Your courses, progress, and notes are private and saved to your account."
+                ? "Changes save immediately in this browser. Your private cloud snapshot syncs every 24 hours while the app is open, or when you return after a sync is due."
                 : "Your courses, notes, and goals are saved in this browser. Return on this device to pick up where you left off. Use export options below to keep a backup."}
             </p>
+            {isConnected && (
+              <>
+                <p className="settings-help">
+                  {lastSyncedAt
+                    ? `Last cloud sync: ${new Date(lastSyncedAt).toLocaleString()}`
+                    : "Not synced to the cloud yet."}
+                </p>
+                <Button
+                  variant="outline"
+                  disabled={syncing}
+                  onClick={() => void sync()}
+                >
+                  <RefreshCw size={16} /> {syncing ? "Syncing…" : "Sync now"}
+                </Button>
+                {syncError && (
+                  <p role="alert" className="export-error">
+                    {syncError}
+                  </p>
+                )}
+                {syncConflict && (
+                  <Button
+                    variant="outline"
+                    disabled={syncing}
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Replace this device's unsynced changes with the cloud version? Export a JSON backup first if you want to keep your local changes.",
+                        )
+                      )
+                        void pullCloud();
+                    }}
+                  >
+                    Load cloud version
+                  </Button>
+                )}
+              </>
+            )}
             {isSignedIn ? (
               <Button
                 variant="outline"
@@ -281,8 +335,8 @@ export function Settings() {
             </p>
             {isConnected && (
               <p className="settings-help">
-                Account restore replaces your saved workspace and recalculates
-                rewards from the restored learning data.
+                Restoring replaces this device’s local workspace. It will upload
+                at the next daily sync, or when you choose Sync now.
               </p>
             )}
             {restoreError && (
@@ -334,7 +388,7 @@ export function Settings() {
           if (!open && !restoreBusy) setPendingRestore(null);
         }}
         title="Restore this workspace?"
-        description={`Restoring replaces the data ${isConnected ? "saved to your signed-in account" : "saved in this browser"}. Export your current workspace first if you want to keep it.`}
+        description={`Restoring replaces this device’s saved workspace${isConnected ? " and marks it for cloud sync" : ""}. Export your current workspace first if you want to keep it.`}
       >
         <p>
           {pendingRestore?.courses.length ?? 0} courses ·{" "}
@@ -370,7 +424,7 @@ export function Settings() {
                 fireConfetti();
                 notify(
                   isConnected
-                    ? "Workspace restored and saved to your account."
+                    ? "Workspace restored locally. Use Sync now to save it to your account."
                     : "Workspace restored and saved in this browser.",
                 );
               } catch (err) {

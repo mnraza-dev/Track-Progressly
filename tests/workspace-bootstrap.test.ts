@@ -2,6 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { readFileSync, readdirSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { emptyWorkspace, emptyProgress, type Workspace } from "@/types";
+import { parseWorkspaceBackup } from "@/lib/workspace-backup";
 
 const db = new PGlite();
 let account: string;
@@ -392,6 +393,118 @@ describe("atomic account backup restore", () => {
     await expect(
       db.query("select restore_workspace($1::jsonb)", [
         JSON.stringify(emptyWorkspace),
+      ]),
+    ).rejects.toThrow(/permission denied/);
+  });
+});
+
+describe("versioned daily cloud snapshots", () => {
+  const firstRevision = "11111111-1111-4111-8111-111111111111";
+  const secondRevision = "22222222-2222-4222-8222-222222222222";
+  let payload: Workspace;
+  it("exports existing relational data as one complete workspace before the first snapshot", async () => {
+    await asUser("user_first_account");
+    const result = (
+      await db.query<{ result: { workspace: Workspace; revision: null } }>(
+        "select get_workspace_snapshot() result",
+      )
+    ).rows[0].result;
+    expect(result.revision).toBeNull();
+    payload = parseWorkspaceBackup(JSON.stringify(result.workspace));
+    expect(payload.courses).toHaveLength(1);
+    expect(payload.courses[0].videos[0].progress.is_completed).toBe(true);
+  });
+  it("stores the full workspace with ownership taken only from the authenticated account", async () => {
+    payload.profile.display_name = "Snapshot name";
+    const result = (
+      await db.query<{ result: { revision: string } }>(
+        "select sync_workspace_snapshot($1::jsonb,null,$2) result",
+        [JSON.stringify(payload), firstRevision],
+      )
+    ).rows[0].result;
+    expect(result.revision).toBe(firstRevision);
+    const cloud = (
+      await db.query<{ result: { workspace: Workspace; revision: string } }>(
+        "select get_workspace_snapshot() result",
+      )
+    ).rows[0].result;
+    expect(cloud.workspace).toEqual(payload);
+    expect(cloud.revision).toBe(firstRevision);
+    expect(
+      (await db.query("select * from workspace_snapshots")).rows,
+    ).toHaveLength(1);
+  });
+  it("acknowledges an identical request ID without a second write", async () => {
+    const changed = {
+      ...payload,
+      profile: { ...payload.profile, display_name: "Should not replace" },
+    };
+    await db.query("select sync_workspace_snapshot($1::jsonb,null,$2)", [
+      JSON.stringify(changed),
+      firstRevision,
+    ]);
+    const cloud = (
+      await db.query<{ result: { workspace: Workspace } }>(
+        "select get_workspace_snapshot() result",
+      )
+    ).rows[0].result;
+    expect(cloud.workspace.profile.display_name).toBe("Snapshot name");
+  });
+  it("rejects stale revisions and permits a compare-and-swap update", async () => {
+    await expect(
+      db.query("select sync_workspace_snapshot($1::jsonb,null,$2)", [
+        JSON.stringify(payload),
+        secondRevision,
+      ]),
+    ).rejects.toMatchObject({ code: "PT409" });
+    await db.query("select sync_workspace_snapshot($1::jsonb,$2,$3)", [
+      JSON.stringify(payload),
+      firstRevision,
+      secondRevision,
+    ]);
+    const cloud = (
+      await db.query<{ result: { revision: string } }>(
+        "select get_workspace_snapshot() result",
+      )
+    ).rows[0].result;
+    expect(cloud.revision).toBe(secondRevision);
+  });
+  it("isolates another account and rejects direct client snapshot writes", async () => {
+    await asUser("user_snapshot_bob");
+    await db.query("select ensure_workspace_profile()");
+    expect((await db.query("select * from workspace_snapshots")).rows).toEqual(
+      [],
+    );
+    const cloud = (
+      await db.query<{ result: { workspace: Workspace; revision: null } }>(
+        "select get_workspace_snapshot() result",
+      )
+    ).rows[0].result;
+    expect(cloud.workspace.courses).toEqual([]);
+    expect(cloud.revision).toBeNull();
+    await expect(
+      db.query("select sync_workspace_snapshot($1::jsonb,$2,$3)", [
+        JSON.stringify(payload),
+        secondRevision,
+        firstRevision,
+      ]),
+    ).rejects.toMatchObject({ code: "PT409" });
+    await expect(
+      db.query(
+        "insert into workspace_snapshots(user_id,workspace,revision) values(workspace_user_id(),$1::jsonb,$2)",
+        [JSON.stringify(payload), firstRevision],
+      ),
+    ).rejects.toThrow(/permission denied/);
+  });
+  it("denies anonymous snapshot access", async () => {
+    await db.exec("reset role; set role anon");
+    await expect(db.query("select get_workspace_snapshot()")).rejects.toThrow(
+      /permission denied/,
+    );
+    await expect(
+      db.query("select sync_workspace_snapshot($1::jsonb,null,$2)", [
+        JSON.stringify(payload),
+        firstRevision,
       ]),
     ).rejects.toThrow(/permission denied/);
   });

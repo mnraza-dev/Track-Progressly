@@ -1,19 +1,12 @@
 "use client";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { useState } from "react";
-import { useWorkspace } from "@/stores/workspace";
-import { emptyWorkspace } from "@/types";
+import { useWorkspace, resetWorkspaceSession } from "@/stores/workspace";
 export async function signOut(
   clerkSignOut: ReturnType<typeof useClerk>["signOut"],
 ) {
   await clerkSignOut(() => {
-    useWorkspace.setState({
-      data: structuredClone(emptyWorkspace),
-      loaded: false,
-      error: null,
-      toast: null,
-      celebration: null,
-    });
+    resetWorkspaceSession();
     // Leave the protected router tree after Clerk clears the session.
     window.location.replace("/login");
   });

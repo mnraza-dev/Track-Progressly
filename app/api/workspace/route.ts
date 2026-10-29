@@ -59,6 +59,13 @@ function failure(error: unknown) {
 export async function GET() {
   try {
     const { db, user } = await authenticatedWorkspace();
+    const snapshot = await db.rpc("get_workspace_snapshot");
+    if (snapshot.error && snapshot.error.code !== "PGRST202")
+      throw snapshot.error;
+    if (snapshot.data?.workspace)
+      return Response.json(snapshot.data.workspace, {
+        headers: { "Cache-Control": "private, no-store" },
+      });
     const [
       courses,
       videos,
@@ -163,6 +170,17 @@ export async function POST(request: Request) {
   try {
     const { db, user } = await authenticatedWorkspace();
     const m = mutationSchema.parse(await readJsonBody(request, 4_000_000));
+    const activeSnapshot = await db.rpc("get_workspace_snapshot");
+    if (activeSnapshot.error && activeSnapshot.error.code !== "PGRST202")
+      throw activeSnapshot.error;
+    if (activeSnapshot.data?.revision)
+      return Response.json(
+        {
+          error:
+            "This account uses daily cloud sync. Reload the app to save changes locally and sync the current workspace.",
+        },
+        { status: 409, headers: { "Cache-Control": "private, no-store" } },
+      );
     const baselineRewards = await db.rpc("sync_learning_rewards");
     if (baselineRewards.error) throw baselineRewards.error;
     let result;
