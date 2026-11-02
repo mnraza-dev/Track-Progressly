@@ -1,3 +1,4 @@
+import { lessonKey } from "@/lib/media";
 import { gradeQuiz } from "@/lib/quiz";
 import { reconcileRewards } from "@/lib/rewards";
 import type { Workspace, Course } from "@/types";
@@ -56,6 +57,14 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
     }
     case "create_course": {
       if (
+        mutation.course.telegram_channel &&
+        next.courses.some(
+          (course) =>
+            course.telegram_channel === mutation.course.telegram_channel,
+        )
+      )
+        throw new Error("This Telegram channel is already in your library.");
+      if (
         mutation.course.youtube_playlist_id &&
         next.courses.some(
           (c) => c.youtube_playlist_id === mutation.course.youtube_playlist_id,
@@ -69,8 +78,7 @@ export function applyMutation(state: Workspace, mutation: Mutation): Workspace {
           (c) =>
             !c.youtube_playlist_id &&
             c.videos.length === 1 &&
-            c.videos[0].youtube_video_id ===
-              mutation.course.videos[0].youtube_video_id,
+            lessonKey(c.videos[0]) === lessonKey(mutation.course.videos[0]),
         )
       )
         throw new Error("This video is already in your library.");

@@ -1,4 +1,6 @@
 "use client";
+import { importTelegramChannel } from "@/lib/telegram/client";
+import { lessonKey } from "@/lib/media";
 import { reconcileRewards } from "@/lib/rewards";
 import { parseWorkspaceBackup } from "@/lib/workspace-backup";
 import { earnedCelebration, type Celebration } from "@/lib/celebrations";
@@ -561,13 +563,17 @@ export const useWorkspace = create<State>((set, get) => ({
         const course = get().data.courses.find(
           (course) => course.id === parsed.id,
         );
-        if (!course?.youtube_playlist_id)
-          throw new Error("Only imported playlists can be refreshed.");
-        refresh = await request("/api/youtube", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input: course.youtube_playlist_id }),
-        });
+        if (!course?.youtube_playlist_id && !course?.telegram_channel)
+          throw new Error(
+            "Only imported playlists or Telegram channels can be refreshed.",
+          );
+        refresh = course.telegram_channel
+          ? await importTelegramChannel(course.telegram_channel)
+          : await request("/api/youtube", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ input: course.youtube_playlist_id }),
+            });
       }
       await edit(owner, async () => {
         if (!valid())
@@ -583,12 +589,14 @@ export const useWorkspace = create<State>((set, get) => ({
             (course) => course.id === parsed.id,
           )!;
           const { videos } = courseSchema.parse(refresh);
-          course.videos.forEach((video) => {
-            video.availability_status = "unavailable";
-          });
+          // A public Telegram preview is not proof of deletion. Preserve older posts.
+          if (!course.telegram_channel)
+            course.videos.forEach((video) => {
+              video.availability_status = "unavailable";
+            });
           for (const metadata of videos) {
             const existing = course.videos.find(
-              (video) => video.youtube_video_id === metadata.youtube_video_id,
+              (video) => lessonKey(video) === lessonKey(metadata),
             );
             if (existing) Object.assign(existing, metadata);
             else

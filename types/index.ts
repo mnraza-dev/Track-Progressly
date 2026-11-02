@@ -18,6 +18,8 @@ export type PracticeTask = {
 export type Bookmark = { id: string; timestamp_seconds: number; label: string };
 export type Lesson = {
   id: string;
+  source?: "youtube" | "telegram";
+  telegram_post?: string;
   youtube_video_id: string;
   title: string;
   description: string;
@@ -47,6 +49,7 @@ export type Course = {
   channel_name: string;
   thumbnail_url: string;
   youtube_playlist_id: string | null;
+  telegram_channel?: string;
   status: "not_started" | "in_progress" | "completed" | "paused" | "archived";
   is_favorite: boolean;
   target_completion_date: string | null;
@@ -89,8 +92,11 @@ export type ImportPreview = {
   channel_name: string;
   thumbnail_url: string;
   youtube_playlist_id: string | null;
+  telegram_channel?: string;
   videos: Pick<
     Lesson,
+    | "source"
+    | "telegram_post"
     | "youtube_video_id"
     | "title"
     | "description"

@@ -1,26 +1,65 @@
+import {
+  mediaFields,
+  validateMediaSource,
+  telegramChannelSchema,
+} from "@/lib/media-schema";
 import { z } from "zod";
 import { lessonQuizSchema } from "@/lib/quiz";
-export const importVideoSchema = z.object({
-  youtube_video_id: z.string().regex(/^[\w-]{11}$/),
-  title: z.string().min(1).max(500),
-  description: z.string().max(10000).default(""),
-  thumbnail_url: z.string().max(2000).default(""),
-  duration_seconds: z.number().int().min(0).max(604800).default(0),
-  position: z.number().int().min(0),
-  availability_status: z
-    .enum(["available", "unavailable"])
-    .default("available"),
-});
-export const courseSchema = z.object({
-  title: z.string().trim().min(1).max(250),
-  description: z.string().max(10000).default(""),
-  category: z.string().max(80).default("Development"),
-  channel_name: z.string().max(250).default(""),
-  thumbnail_url: z.string().max(2000).default(""),
-  youtube_playlist_id: z.string().max(120).nullable().default(null),
-  target_completion_date: z.string().date().nullable().default(null),
-  videos: z.array(importVideoSchema).min(1).max(5000),
-});
+export const importVideoSchema = z
+  .object({
+    ...mediaFields,
+    title: z.string().min(1).max(500),
+    description: z.string().max(10000).default(""),
+    thumbnail_url: z.string().max(2000).default(""),
+    duration_seconds: z
+      .preprocess((val) => {
+        if (val === null || val === undefined) return 0;
+        const n =
+          typeof val === "number"
+            ? val
+            : typeof val === "string" && val.trim() !== ""
+              ? Number(val)
+              : NaN;
+        if (Number.isFinite(n)) {
+          return Math.max(0, Math.min(Math.round(n), 604800));
+        }
+        return val;
+      }, z.number().int().min(0).max(604800))
+      .default(0),
+    position: z.number().int().min(0),
+    availability_status: z
+      .enum(["available", "unavailable"])
+      .default("available"),
+  })
+  .superRefine(validateMediaSource);
+export const courseSchema = z
+  .object({
+    title: z.string().trim().min(1).max(250),
+    description: z.string().max(10000).default(""),
+    category: z.string().max(80).default("Development"),
+    channel_name: z.string().max(250).default(""),
+    thumbnail_url: z.string().max(2000).default(""),
+    telegram_channel: telegramChannelSchema,
+    youtube_playlist_id: z.string().max(120).nullable().default(null),
+    target_completion_date: z.string().date().nullable().default(null),
+    videos: z.array(importVideoSchema).min(1).max(5000),
+  })
+  .superRefine((course, context) => {
+    if (
+      course.telegram_channel &&
+      (course.youtube_playlist_id ||
+        course.videos.some(
+          (video) =>
+            video.source !== "telegram" ||
+            !video.telegram_post?.startsWith(`${course.telegram_channel}/`),
+        ))
+    )
+      context.addIssue({
+        code: "custom",
+        message:
+          "Channel lessons must belong to the imported Telegram channel.",
+      });
+  });
 export const mutationSchema = z.discriminatedUnion("op", [
   z.object({
     op: z.literal("save_quiz"),

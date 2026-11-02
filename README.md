@@ -101,3 +101,9 @@ Building or running Progressly? See the separate [developer guide](docs/DEVELOPM
 See [improvement priorities](docs/IMPROVEMENTS.md) for the next product and reliability improvements.
 
 For a hosted product launch, follow the [release guide](docs/DEVELOPMENT.md#production-release).
+
+## Telegram lessons
+
+Choose **Add course → Import from Telegram**, paste a public channel link (for example `https://t.me/telusko_courses`), and choose **Preview channel**. Progressly scans the public web history automatically and orders video posts oldest first. Review the course and save it; no individual video links, downloads, Telegram credentials, or video hosting are needed. **Refresh channel videos** checks for additional posts and preserves your notes and completed lessons.
+
+Playback uses Telegram’s official public-post widget. Some large attachments, restricted posts, or channels without a public preview may require opening Telegram instead. Public-page discovery is best effort and depends on Telegram’s web markup; it cannot access private or app-only history. Watch time, automatic completion, resume position, timestamp seeking, and Progressly’s speed controls are unavailable for these embeds. Notes, practice, quizzes, and manual completion remain available.

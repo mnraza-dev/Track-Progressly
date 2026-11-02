@@ -1,4 +1,6 @@
 "use client";
+import { TelegramPlayer } from "@/components/player/telegram-player";
+import { lessonUrl } from "@/lib/media";
 import { LessonQuiz } from "@/components/quizzes/lesson-quiz";
 import { latestQuizPass } from "@/lib/quiz";
 import type { Course } from "@/types";
@@ -140,6 +142,7 @@ function CourseWorkspaceContent({
           !v.progress.is_completed && v.availability_status === "available",
       ) ||
       course?.videos[0];
+  const isTelegram = lesson?.source === "telegram";
   const {
     chapters,
     loading: chaptersLoading,
@@ -209,6 +212,7 @@ function CourseWorkspaceContent({
     ? chapterPercent
     : completion(course);
   const showChapters =
+    !isTelegram &&
     lesson?.availability_status === "available" &&
     (sidebarView === "chapters" ||
       (sidebarView === "auto" && chapters.length > 0));
@@ -381,16 +385,20 @@ function CourseWorkspaceContent({
           >
             <Archive size={18} />
           </button>
-          {course.youtube_playlist_id && (
+          {(course.youtube_playlist_id || course.telegram_channel) && (
             <button
               className="icon-button"
-              aria-label="Refresh playlist metadata"
+              aria-label={
+                course.telegram_channel
+                  ? "Refresh channel videos"
+                  : "Refresh playlist metadata"
+              }
               disabled={refreshing}
               onClick={() => {
                 setRefreshing(true);
                 void mutate({ op: "refresh_course", id: course.id })
                   .then(() =>
-                    notify("Playlist refreshed. Your progress is preserved."),
+                    notify("Course refreshed. Your progress is preserved."),
                   )
                   .catch(() => {})
                   .finally(() => setRefreshing(false));
@@ -420,7 +428,7 @@ function CourseWorkspaceContent({
         {sidebarOpen && (
           <aside className="panel lesson-sidebar">
             <div className="sidebar-top-bar">
-              {lesson?.availability_status === "available" ? (
+              {!isTelegram && lesson?.availability_status === "available" ? (
                 <div
                   className="sidebar-view-switch"
                   aria-label="Lesson navigation"
@@ -473,7 +481,9 @@ function CourseWorkspaceContent({
                 <div className="lesson-sidebar-header">
                   <div>
                     <h3>Your learning path</h3>
-                    <strong className="text-3xl font-extrabold opacity-75">{percent}%</strong>
+                    <strong className="text-3xl font-extrabold opacity-75">
+                      {percent}%
+                    </strong>
                   </div>
                   <Progress value={percent} />
                   <p>
@@ -555,7 +565,9 @@ function CourseWorkspaceContent({
                               ? `${completedChapters} of ${chapters.length} chapters completed (${percent}%)`
                               : v.duration_seconds
                                 ? duration(v.duration_seconds)
-                                : "YouTube video"}
+                                : v.source === "telegram"
+                                  ? "Telegram video"
+                                  : "YouTube video"}
                           {v.progress.last_position_seconds > 0 &&
                             !v.progress.is_completed &&
                             !isSingleLessonWithChapters && (
@@ -622,24 +634,32 @@ function CourseWorkspaceContent({
           {lesson ? (
             <>
               {lesson.availability_status === "available" ? (
-                <YouTubePlayer
-                  key={`player:${lesson.id}`}
-                  ref={player}
-                  lesson={lesson}
-                  onEnded={triggerUpNext}
-                  onPlayStateChange={(playing) => {
-                    setIsVideoPlaying(playing);
-                    useFeedback.getState().setVideoPlaying(playing);
-                  }}
-                  onPositionChange={(seconds) =>
-                    setPlayback((current) =>
-                      current?.lessonId === lesson.id &&
-                      Math.floor(current.seconds) === Math.floor(seconds)
-                        ? current
-                        : { lessonId: lesson.id, seconds },
-                    )
-                  }
-                />
+                isTelegram ? (
+                  <TelegramPlayer
+                    key={`telegram:${lesson.id}`}
+                    post={lesson.telegram_post || ""}
+                    title={lesson.title}
+                  />
+                ) : (
+                  <YouTubePlayer
+                    key={`player:${lesson.id}`}
+                    ref={player}
+                    lesson={lesson}
+                    onEnded={triggerUpNext}
+                    onPlayStateChange={(playing) => {
+                      setIsVideoPlaying(playing);
+                      useFeedback.getState().setVideoPlaying(playing);
+                    }}
+                    onPositionChange={(seconds) =>
+                      setPlayback((current) =>
+                        current?.lessonId === lesson.id &&
+                        Math.floor(current.seconds) === Math.floor(seconds)
+                          ? current
+                          : { lessonId: lesson.id, seconds },
+                      )
+                    }
+                  />
+                )
               ) : (
                 <div className="unavailable-player">
                   <Circle size={30} />
@@ -694,37 +714,41 @@ function CourseWorkspaceContent({
                       ? "Completed · Undo"
                       : "Mark as completed"}
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => player.current?.save()}
-                  >
-                    <Save size={15} />
-                    Save progress
-                  </Button>
+                  {!isTelegram && (
+                    <Button
+                      variant="outline"
+                      onClick={() => player.current?.save()}
+                    >
+                      <Save size={15} />
+                      Save progress
+                    </Button>
+                  )}
                   <Button variant="outline" onClick={openQuiz}>
                     Lesson quiz
                   </Button>
-                  <div
-                    className="playback-speed-control"
-                    title="Playback speed"
-                  >
-                    <Gauge size={14} />
-                    <select
-                      className="playback-speed-select"
-                      aria-label="Playback speed"
-                      value={speed}
-                      onChange={(e) =>
-                        handleSpeedChange(parseFloat(e.target.value))
-                      }
+                  {!isTelegram && (
+                    <div
+                      className="playback-speed-control"
+                      title="Playback speed"
                     >
-                      <option value="0.75">0.75x</option>
-                      <option value="1">1.0x</option>
-                      <option value="1.25">1.25x</option>
-                      <option value="1.5">1.5x</option>
-                      <option value="1.75">1.75x</option>
-                      <option value="2">2.0x</option>
-                    </select>
-                  </div>
+                      <Gauge size={14} />
+                      <select
+                        className="playback-speed-select"
+                        aria-label="Playback speed"
+                        value={speed}
+                        onChange={(e) =>
+                          handleSpeedChange(parseFloat(e.target.value))
+                        }
+                      >
+                        <option value="0.75">0.75x</option>
+                        <option value="1">1.0x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="1.75">1.75x</option>
+                        <option value="2">2.0x</option>
+                      </select>
+                    </div>
+                  )}
                   <select
                     className="lesson-status-select"
                     aria-label="Lesson status"
@@ -754,19 +778,23 @@ function CourseWorkspaceContent({
                   </select>
                   <a
                     className="icon-button"
-                    href={`https://www.youtube.com/watch?v=${lesson.youtube_video_id}`}
+                    href={lessonUrl(lesson)}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label="Open on YouTube"
+                    aria-label={
+                      isTelegram ? "Open on Telegram" : "Open on YouTube"
+                    }
                   >
                     <ExternalLink size={17} />
                   </a>
                 </div>
               </div>
-              <StudyFocusTimer
-                isVideoPlaying={isVideoPlaying}
-                playerRef={player}
-              />
+              {!isTelegram && (
+                <StudyFocusTimer
+                  isVideoPlaying={isVideoPlaying}
+                  playerRef={player}
+                />
+              )}
               {lesson.availability_status === "available" && (
                 <LessonQuiz
                   key={`quiz:${lesson.id}`}
@@ -823,7 +851,9 @@ function CourseWorkspaceContent({
               <div className="lesson-navigation">
                 <span>
                   <Clock size={14} />
-                  Progress saves while you play. Learning at your pace.
+                  {isTelegram
+                    ? "Mark lessons complete to save your progress."
+                    : "Progress saves while you play. Learning at your pace."}
                 </span>
                 {next && (
                   <Link href={`/courses/${course.id}/learn/${next.id}`}>

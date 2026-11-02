@@ -30,12 +30,44 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
+    resolveAlias: {
+      fs: "./empty.js",
+      "graceful-fs": "./empty.js",
+      net: "./empty.js",
+      tls: "./empty.js",
+      os: "./empty.js",
+      path: "./empty.js",
+      socks: "./empty.js",
+      stream: "./empty.js",
+      http: "./empty.js",
+      https: "./empty.js",
+      zlib: "./empty.js",
+    },
     rules: {
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },
     },
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        "graceful-fs": false,
+        net: false,
+        tls: false,
+        os: false,
+        path: false,
+        socks: false,
+        stream: false,
+        http: false,
+        https: false,
+        zlib: false,
+      };
+    }
+    return config;
   },
 };
 

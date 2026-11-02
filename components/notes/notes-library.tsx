@@ -111,7 +111,9 @@ export function NotesLibrary() {
               <div className="note-card-footer">
                 <Link href={`/courses/${course.id}/learn/${lesson.id}`}>
                   <Clock size={13} />
-                  {timestamp(note.timestamp_seconds)}
+                  {lesson.source === "telegram"
+                    ? "Lesson note"
+                    : timestamp(note.timestamp_seconds)}
                 </Link>
                 <Link href={`/courses/${course.id}/learn/${lesson.id}`}>
                   Open lesson

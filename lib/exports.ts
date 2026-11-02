@@ -1,3 +1,4 @@
+import { lessonUrl } from "@/lib/media";
 import type { Workspace } from "@/types";
 import { completion, localDay, timestamp } from "@/lib/utils";
 
@@ -205,7 +206,7 @@ export function createExport(
               v.bookmarks.length,
               v.progress.last_watched_at || "",
               v.progress.completed_at || "",
-              `https://www.youtube.com/watch?v=${encodeURIComponent(v.youtube_video_id)}`,
+              lessonUrl(v),
             ]),
         ),
       ]),
@@ -223,7 +224,7 @@ export function createExport(
               .sort((a, b) => a.timestamp_seconds - b.timestamp_seconds)
               .map(
                 (n) =>
-                  `#### [${timestamp(n.timestamp_seconds)}](https://www.youtube.com/watch?v=${encodeURIComponent(v.youtube_video_id)}&t=${Math.floor(n.timestamp_seconds)}s)${n.is_revision_required ? " · Needs revision" : ""}\n\n${n.content}`,
+                  `#### [${v.source === "telegram" ? "Lesson note" : timestamp(n.timestamp_seconds)}](${lessonUrl(v, n.timestamp_seconds)})${n.is_revision_required ? " · Needs revision" : ""}\n\n${n.content}`,
               )
               .join("\n\n")}`,
         );

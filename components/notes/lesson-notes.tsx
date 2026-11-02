@@ -32,6 +32,7 @@ export function LessonNotes({
   player: React.RefObject<PlayerHandle | null>;
 }) {
   const { mutate, notify } = useWorkspace();
+  const canSeek = lesson.source !== "telegram";
   const [tab, setTab] = useState("notes");
   const [editing, setEditing] = useState<Note | null>(lesson.notes[0] || null);
   const [draft, setDraft] = useState(lesson.notes[0]?.content || "");
@@ -138,23 +139,25 @@ export function LessonNotes({
           { key: "notes", label: "My notes", icon: Pencil },
           { key: "practice", label: "Practice", icon: Code2 },
           { key: "bookmarks", label: "Bookmarks", icon: Bookmark },
-        ].map((t) => (
-          <button
-            key={t.key}
-            className={tab === t.key ? "selected" : ""}
-            onClick={() => setTab(t.key)}
-          >
-            <t.icon size={15} />
-            {t.label}
-            <span className="tab-count">
-              {t.key === "notes"
-                ? lesson.notes.length
-                : t.key === "practice"
-                  ? lesson.tasks.length
-                  : lesson.bookmarks.length}
-            </span>
-          </button>
-        ))}
+        ]
+          .filter((t) => canSeek || t.key !== "bookmarks")
+          .map((t) => (
+            <button
+              key={t.key}
+              className={tab === t.key ? "selected" : ""}
+              onClick={() => setTab(t.key)}
+            >
+              <t.icon size={15} />
+              {t.label}
+              <span className="tab-count">
+                {t.key === "notes"
+                  ? lesson.notes.length
+                  : t.key === "practice"
+                    ? lesson.tasks.length
+                    : lesson.bookmarks.length}
+              </span>
+            </button>
+          ))}
       </div>
       {tab === "notes" && (
         <div className="note-editor-area">
@@ -196,7 +199,9 @@ export function LessonNotes({
               </button>
               <button
                 className="icon-button"
-                aria-label="New timestamped note"
+                aria-label={
+                  canSeek ? "New timestamped note" : "New lesson note"
+                }
                 onClick={() => edit(null)}
               >
                 <Plus size={17} />
@@ -204,10 +209,16 @@ export function LessonNotes({
             </div>
           </div>
           <div className="note-context">
-            <Clock size={13} />
-            <button onClick={() => player.current?.seek(context.timestamp)}>
-              {timestamp(context.timestamp)}
-            </button>
+            {canSeek ? (
+              <>
+                <Clock size={13} />
+                <button onClick={() => player.current?.seek(context.timestamp)}>
+                  {timestamp(context.timestamp)}
+                </button>
+              </>
+            ) : (
+              <span>Lesson note</span>
+            )}
             <span>Markdown supported</span>
           </div>
           {preview ? (
@@ -281,7 +292,9 @@ export function LessonNotes({
                   className={context.id === n.id ? "selected-note" : ""}
                 >
                   <button onClick={() => edit(n)}>
-                    <span>{timestamp(n.timestamp_seconds)}</span>
+                    <span>
+                      {canSeek ? timestamp(n.timestamp_seconds) : "Note"}
+                    </span>
                     <strong>{n.content.slice(0, 100) || "Empty note"}</strong>
                     {n.is_revision_required && <RotateCcw size={12} />}
                   </button>

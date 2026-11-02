@@ -1,8 +1,17 @@
 "use client";
+import { importTelegramChannel } from "@/lib/telegram/client";
+import { parseTelegram } from "@/lib/telegram/parse";
+import { lessonKey } from "@/lib/media";
+import { TelegramAuthModal } from "@/components/telegram/telegram-auth-modal";
+import { TelegramChannelPicker } from "@/components/telegram/telegram-channel-picker";
+import {
+  getTelegramAuthStatus,
+  type TelegramUserInfo,
+} from "@/lib/telegram/mtproto";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { SceneArtwork } from "@/components/three/scene-provider";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +19,7 @@ import { z } from "zod";
 import Link from "next/link";
 import {
   SquarePlay as Youtube,
+  Send,
   Link2,
   ArrowLeft,
   ArrowRight,
@@ -48,6 +58,53 @@ export function ImportForm() {
   const params = useSearchParams();
   const { mutate, notify, data } = useWorkspace();
   const [tab, setTab] = useState("youtube");
+  const [tgUser, setTgUser] = useState<TelegramUserInfo | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    getTelegramAuthStatus().then((user) => {
+      if (user) setTgUser(user);
+    });
+  }, []);
+  const [telegramInput, setTelegramInput] = useState(
+    "https://t.me/telusko_courses",
+  );
+  const [scan, setScan] = useState({ videos: 0, pages: 0, message: "" });
+  const importController = useRef<AbortController | null>(null);
+  useEffect(() => () => importController.current?.abort(), []);
+  async function getTelegramPreview() {
+    setError("");
+    try {
+      parseTelegram(telegramInput);
+    } catch (e) {
+      setError((e as Error).message);
+      return;
+    }
+    const controller = new AbortController();
+    importController.current = controller;
+    setBusy(true);
+    setScan({ videos: 0, pages: 0, message: "" });
+    try {
+      const result = await importTelegramChannel(telegramInput, {
+        signal: controller.signal,
+        onProgress: (videos, pages, message = "") =>
+          setScan({ videos, pages, message }),
+      });
+      setPreview(result);
+      setTitle(result.title);
+      setDescription(result.description);
+    } catch (e) {
+      if (!controller.signal.aborted)
+        setError(
+          e instanceof Error ? e.message : "Could not import this channel.",
+        );
+    } finally {
+      if (importController.current === controller) {
+        importController.current = null;
+        setBusy(false);
+      }
+    }
+  }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<ImportPreview | null>(null);
@@ -133,6 +190,13 @@ export function ImportForm() {
           description,
           category,
           target_completion_date: deadline || null,
+          videos: source.videos.map((v) => ({
+            ...v,
+            duration_seconds: Math.max(
+              0,
+              Math.min(Math.round(Number(v.duration_seconds) || 0), 604800),
+            ),
+          })),
         },
       });
       const added = useWorkspace
@@ -167,7 +231,7 @@ export function ImportForm() {
           <div className="eyebrow">YOUR NEXT CHAPTER</div>
           <h1>Bring your curiosity.</h1>
           <p>
-            Turn a YouTube playlist into a learning path you’ll actually finish.
+            Turn a YouTube playlist or Telegram channel into your learning path.
           </p>
         </div>
       </div>
@@ -175,9 +239,11 @@ export function ImportForm() {
         <section className="panel import-panel">
           <div className="tabs">
             <button
+              disabled={busy}
               className={tab === "youtube" ? "selected" : ""}
               onClick={() => {
                 setTab("youtube");
+                setPreview(null);
                 setError("");
               }}
             >
@@ -185,9 +251,22 @@ export function ImportForm() {
               Import from YouTube
             </button>
             <button
+              disabled={busy}
+              className={tab === "telegram" ? "selected" : ""}
+              onClick={() => {
+                setTab("telegram");
+                setPreview(null);
+                setError("");
+              }}
+            >
+              <Send size={17} /> Import from Telegram
+            </button>
+            <button
+              disabled={busy}
               className={tab === "manual" ? "selected" : ""}
               onClick={() => {
                 setTab("manual");
+                setPreview(null);
                 setError("");
               }}
             >
@@ -195,7 +274,116 @@ export function ImportForm() {
               Create manually
             </button>
           </div>
-          {tab === "youtube" && !preview ? (
+          {tab === "telegram" && !preview ? (
+            <div className="space-y-6">
+              {tgUser ? (
+                <TelegramChannelPicker
+                  user={tgUser}
+                  onSelectCourse={(imported) => {
+                    setPreview(imported);
+                    setTitle(imported.title);
+                    setDescription(imported.description);
+                  }}
+                  onDisconnected={() => setTgUser(null)}
+                />
+              ) : (
+                <div className="rounded-xl border bg-muted/20 p-5 text-center">
+                  <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Send size={22} />
+                  </div>
+                  <h3 className="text-base font-semibold">Connect as Telegram User</h3>
+                  <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground">
+                    Log in with your phone number to access private channels, study groups, and select courses directly from your chat list.
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="mt-4 gap-2"
+                    onClick={() => setAuthModalOpen(true)}
+                  >
+                    <Send size={15} />
+                    Connect Telegram Account
+                  </Button>
+                </div>
+              )}
+
+              <TelegramAuthModal
+                open={authModalOpen}
+                onOpenChange={setAuthModalOpen}
+                onAuthenticated={(u) => setTgUser(u)}
+              />
+
+              <div className="relative my-2 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <span className="relative bg-background px-3 text-xs uppercase tracking-wider text-muted-foreground">
+                  Or import public channel link
+                </span>
+              </div>
+
+              <form
+                className="form-stack"
+                aria-busy={busy}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void getTelegramPreview();
+                }}
+              >
+                <h2>Your channel. One learning path.</h2>
+                <p className="muted">
+                  We’ll discover video posts through the channel’s public web
+                  history, oldest first. Videos stay on Telegram.
+                </p>
+                <label>
+                  Telegram channel link or username
+                  <Input
+                    value={telegramInput}
+                    onChange={(e) => setTelegramInput(e.target.value)}
+                    disabled={busy}
+                    placeholder="https://t.me/telusko_courses"
+                    maxLength={500}
+                    required
+                  />
+                </label>
+                <Button type="submit" disabled={busy}>
+                  {busy ? (
+                    <LoaderCircle size={17} className="spin" />
+                  ) : (
+                    <ListVideo size={17} />
+                  )}
+                  {busy ? "Finding channel videos…" : "Preview channel"}
+                </Button>
+                {busy && (
+                  <>
+                    <p role="status">
+                      {scan.message || (
+                        <>
+                          {scan.videos} video posts found · {scan.pages} history
+                          pages checked. Large channels can take several minutes.
+                        </>
+                      )}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => importController.current?.abort()}
+                    >
+                      Cancel import
+                    </Button>
+                  </>
+                )}
+                <span className="secure-hint">
+                  <ShieldCheck size={14} />
+                  Public channels only. No downloads or video hosting.
+                </span>
+                <p className="muted">
+                  Some attachments only play inside Telegram. Embedded lessons use
+                  manual completion; automatic playback tracking isn’t available.
+                </p>
+              </form>
+            </div>
+          ) : tab === "youtube" && !preview ? (
             <form
               onSubmit={form.handleSubmit(getPreview)}
               className="form-stack"
@@ -240,7 +428,7 @@ export function ImportForm() {
             </form>
           ) : (
             <div className="form-stack">
-              {preview && tab === "youtube" && (
+              {preview && tab !== "manual" && (
                 <div className="import-preview-heading">
                   <CourseArtwork
                     category={category}
@@ -371,10 +559,10 @@ export function ImportForm() {
                   </Button>
                 </div>
               )}
-              {preview && tab === "youtube" && (
+              {preview && tab !== "manual" && (
                 <div className="preview-lessons">
                   {preview.videos.slice(0, 8).map((v, i) => (
-                    <div key={v.youtube_video_id}>
+                    <div key={lessonKey(v)}>
                       <span>{String(i + 1).padStart(2, "0")}</span>
                       <span>
                         {v.title}
@@ -387,14 +575,14 @@ export function ImportForm() {
                   ))}
                   {preview.videos.length > 8 && (
                     <p className="muted">
-                      And {preview.videos.length - 8} more lessons, in playlist
+                      And {preview.videos.length - 8} more lessons, in source
                       order.
                     </p>
                   )}
                 </div>
               )}
               <div className="form-actions">
-                {preview && tab === "youtube" && (
+                {preview && tab !== "manual" && (
                   <Button variant="ghost" onClick={() => setPreview(null)}>
                     Change link
                   </Button>
@@ -425,6 +613,12 @@ export function ImportForm() {
                   >
                     Create a course manually <ArrowRight size={13} />
                   </button>
+                )}
+                {tab === "telegram" && (
+                  <p className="mt-1 text-xs opacity-80">
+                    If Telegram is blocked on your network or ISP, try enabling a
+                    VPN or setting your DNS to 1.1.1.1.
+                  </p>
                 )}
               </div>
             </div>

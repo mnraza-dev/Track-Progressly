@@ -76,7 +76,9 @@ function writeCustom(key: string, text: string) {
 export function useVideoChapters(lesson?: Lesson) {
   const videoId = lesson?.youtube_video_id || "";
   const description = lesson?.description || "";
-  const available = lesson?.availability_status === "available";
+  const available =
+    lesson?.availability_status === "available" &&
+    lesson?.source !== "telegram";
   const [attempt, setAttempt] = useState(0);
   const [remote, setRemote] = useState<{
     videoId: string;

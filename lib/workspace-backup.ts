@@ -1,3 +1,8 @@
+import {
+  mediaFields,
+  validateMediaSource,
+  telegramChannelSchema,
+} from "@/lib/media-schema";
 import { z } from "zod";
 import { lessonQuizSchema, quizAttemptSchema } from "@/lib/quiz";
 import type { Workspace } from "@/types";
@@ -51,6 +56,7 @@ const workspaceSchema = z.object({
         category: text,
         channel_name: text,
         thumbnail_url: text,
+        telegram_channel: telegramChannelSchema,
         youtube_playlist_id: z.string().nullable(),
         status: z.enum([
           "not_started",
@@ -66,51 +72,53 @@ const workspaceSchema = z.object({
         updated_at: timestamp,
         videos: z
           .array(
-            z.object({
-              id,
-              youtube_video_id: z.string().regex(/^[\w-]{11}$/),
-              title: text,
-              description: text,
-              thumbnail_url: text,
-              duration_seconds: seconds,
-              position: z.number().int().min(0),
-              availability_status: z.enum(["available", "unavailable"]),
-              progress: z.object({
-                status: z.enum([
-                  "not_started",
-                  "in_progress",
-                  "completed",
-                  "needs_revision",
-                ]),
-                last_position_seconds: seconds,
-                watched_seconds: seconds,
-                is_completed: z.boolean(),
-                last_watched_at: nullableTimestamp,
-                completed_at: nullableTimestamp,
-              }),
-              quiz: lessonQuizSchema.optional(),
-              quiz_attempts: z.array(quizAttemptSchema).max(100).optional(),
-              notes: z.array(
-                z.object({
-                  id,
-                  content: text,
-                  timestamp_seconds: seconds,
-                  is_revision_required: z.boolean(),
-                  updated_at: timestamp,
-                }),
-              ),
-              tasks: z.array(
-                z.object({
-                  id,
-                  title: text,
+            z
+              .object({
+                id,
+                ...mediaFields,
+                title: text,
+                description: text,
+                thumbnail_url: text,
+                duration_seconds: seconds,
+                position: z.number().int().min(0),
+                availability_status: z.enum(["available", "unavailable"]),
+                progress: z.object({
+                  status: z.enum([
+                    "not_started",
+                    "in_progress",
+                    "completed",
+                    "needs_revision",
+                  ]),
+                  last_position_seconds: seconds,
+                  watched_seconds: seconds,
                   is_completed: z.boolean(),
+                  last_watched_at: nullableTimestamp,
                   completed_at: nullableTimestamp,
                 }),
-              ),
-              bookmarks: z.array(
-                z.object({ id, timestamp_seconds: seconds, label: text }),
-              ),
-            }),
+                quiz: lessonQuizSchema.optional(),
+                quiz_attempts: z.array(quizAttemptSchema).max(100).optional(),
+                notes: z.array(
+                  z.object({
+                    id,
+                    content: text,
+                    timestamp_seconds: seconds,
+                    is_revision_required: z.boolean(),
+                    updated_at: timestamp,
+                  }),
+                ),
+                tasks: z.array(
+                  z.object({
+                    id,
+                    title: text,
+                    is_completed: z.boolean(),
+                    completed_at: nullableTimestamp,
+                  }),
+                ),
+                bookmarks: z.array(
+                  z.object({ id, timestamp_seconds: seconds, label: text }),
+                ),
+              })
+              .superRefine(validateMediaSource),
           )
           .max(5000),
       }),

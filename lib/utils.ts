@@ -14,7 +14,7 @@ export function completion(course: Course) {
     (v) => v.availability_status === "available",
   );
   if (!available.length) return 0;
-  if (available.length === 1) {
+  if (available.length === 1 && available[0].source !== "telegram") {
     const single = available[0];
     if (single.progress.is_completed) return 100;
     const chapters = parseVideoChapters(
