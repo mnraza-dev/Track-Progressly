@@ -38,22 +38,34 @@ function edit<T>(owner: string | null, job: () => Promise<T>): Promise<T> {
   pending = run;
   return run;
 }
-async function request(path: string, options?: RequestInit) {
+type RequestResult = {
+  error?: string;
+  setupRequired?: boolean;
+  workspace?: unknown;
+  revision: string | null;
+  syncedAt?: string | null;
+  [key: string]: unknown;
+};
+
+async function request<T = RequestResult>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> {
   const response = await fetch(path, {
     cache: "no-store",
     signal: AbortSignal.timeout(20_000),
     ...options,
   });
   const text = await response.text();
-  let result: any = null;
+  let result: RequestResult | null = null;
   try {
-    result = text ? JSON.parse(text) : null;
+    result = text ? (JSON.parse(text) as RequestResult) : null;
   } catch {
     // Non-JSON response (e.g. 413 Request Entity Too Large, 502/504 Bad Gateway)
   }
 
   if (!response.ok) {
-    let message = result?.error;
+    let message = typeof result?.error === "string" ? result.error : undefined;
     if (!message) {
       if (response.status === 413) {
         message =
@@ -75,7 +87,7 @@ async function request(path: string, options?: RequestInit) {
     error.setupRequired = result?.setupRequired === true;
     throw error;
   }
-  return result ?? {};
+  return (result ?? { revision: null }) as T;
 }
 async function cloudWorkspace() {
   let warning: string | undefined;

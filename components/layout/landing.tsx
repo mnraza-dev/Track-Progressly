@@ -32,9 +32,9 @@ export function Landing() {
           <Link href="/login">Sign in</Link>
           <ThemeToggle />
           <Button asChild>
-            <a href="/signup">
+            <Link href="/signup">
               Get started free <ArrowUpRight size={16} />
-            </a>
+            </Link>
           </Button>
         </nav>
       </header>
@@ -348,9 +348,9 @@ export function Landing() {
               Something you’ll be glad you started.
             </p>
             <Button asChild>
-              <a href="/signup">
+              <Link href="/signup">
                 Get started free <ArrowUpRight size={18} />
-              </a>
+              </Link>
             </Button>
           </div>
           <span className="product-final-note">
