@@ -7,7 +7,6 @@ import { readJsonBody, RequestBodyError } from "@/lib/http/body";
 import { hasAllowedOrigin } from "@/lib/http/origin";
 import { parseWorkspaceBackup } from "@/lib/workspace-backup";
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const headers = { "Cache-Control": "private, no-store" };
