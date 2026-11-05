@@ -11,11 +11,34 @@ export async function readJsonBody(
   request: Request,
   limit: number,
 ): Promise<unknown> {
-  if (Number(request.headers.get("content-length") || 0) > limit)
+  const lengthHeader = Number(request.headers.get("content-length") || 0);
+  if (lengthHeader > limit)
     throw new RequestBodyError("This request is too large.", 413);
   if (!request.body)
     throw new RequestBodyError("A JSON request body is required.", 400);
-  const reader = request.body.getReader();
+
+  const encoding = (
+    request.headers.get("x-content-encoding") ||
+    request.headers.get("content-encoding") ||
+    ""
+  ).toLowerCase();
+
+  let stream: ReadableStream<Uint8Array> = request.body;
+  if (encoding.includes("gzip")) {
+    try {
+      stream = request.body.pipeThrough(new DecompressionStream("gzip"));
+    } catch {
+      throw new RequestBodyError("Send a valid compressed request body.", 400);
+    }
+  } else if (encoding.includes("deflate")) {
+    try {
+      stream = request.body.pipeThrough(new DecompressionStream("deflate"));
+    } catch {
+      throw new RequestBodyError("Send a valid compressed request body.", 400);
+    }
+  }
+
+  const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
   try {
@@ -29,6 +52,9 @@ export async function readJsonBody(
       }
       chunks.push(value);
     }
+  } catch (error) {
+    if (error instanceof RequestBodyError) throw error;
+    throw new RequestBodyError("Send a valid request body.", 400);
   } finally {
     reader.releaseLock();
   }

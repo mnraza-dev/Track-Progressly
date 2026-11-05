@@ -47,6 +47,40 @@ type RequestResult = {
   [key: string]: unknown;
 };
 
+async function prepareRequestBody(payload: string): Promise<{
+  body: BodyInit;
+  headers: Record<string, string>;
+}> {
+  if (typeof CompressionStream !== "undefined" && payload.length > 50_000) {
+    try {
+      const stream = new Response(payload).body?.pipeThrough(
+        new CompressionStream("gzip"),
+      );
+      if (stream) {
+        const compressed = await new Response(stream).arrayBuffer();
+        if (compressed.byteLength < payload.length) {
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+            "x-content-encoding": "gzip",
+          };
+          try {
+            headers["Content-Encoding"] = "gzip";
+          } catch {
+            // Some environments restrict setting Content-Encoding
+          }
+          return { body: compressed, headers };
+        }
+      }
+    } catch {
+      // Fallback to uncompressed
+    }
+  }
+  return {
+    body: payload,
+    headers: { "Content-Type": "application/json" },
+  };
+}
+
 async function request<T = RequestResult>(
   path: string,
   options?: RequestInit,
@@ -445,14 +479,16 @@ export const useWorkspace = create<State>((set, get) => ({
           latest.pendingUpload = upload;
           await writeAccountCache(latest);
         });
+        const rawPayload = JSON.stringify({
+          workspace: sent.workspace,
+          revision: sent.revision,
+          requestId: upload.id,
+        });
+        const prepared = await prepareRequestBody(rawPayload);
         const result = await request("/api/workspace/sync", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            workspace: sent.workspace,
-            revision: sent.revision,
-            requestId: upload.id,
-          }),
+          headers: prepared.headers,
+          body: prepared.body,
         });
         if (!valid()) return;
         await edit(owner, async () => {
