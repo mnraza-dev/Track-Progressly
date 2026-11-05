@@ -24,7 +24,10 @@ const nextConfig: NextConfig = {
   },
   allowedDevOrigins: ["192.168.1.9"],
   experimental: {
-    proxyClientMaxBodySize: 25_000_000,
+    proxyClientMaxBodySize: "25mb",
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
     agentFeedback: true,
   },
   cacheComponents: true,

@@ -44,16 +44,38 @@ async function request(path: string, options?: RequestInit) {
     signal: AbortSignal.timeout(20_000),
     ...options,
   });
-  const result = await response.json();
+  const text = await response.text();
+  let result: any = null;
+  try {
+    result = text ? JSON.parse(text) : null;
+  } catch {
+    // Non-JSON response (e.g. 413 Request Entity Too Large, 502/504 Bad Gateway)
+  }
+
   if (!response.ok) {
-    const error = new Error(
-      result.error || "Cloud sync failed. Your local changes are saved.",
-    ) as Error & { conflict?: boolean; setupRequired?: boolean };
+    let message = result?.error;
+    if (!message) {
+      if (response.status === 413) {
+        message =
+          "The workspace data is too large for cloud sync (413 Request Entity Too Large). Your local changes are saved on this device; you can export a backup from Settings.";
+      } else if (response.status === 502 || response.status === 504) {
+        message =
+          "The cloud sync server is temporarily unavailable. Your changes are saved locally.";
+      } else {
+        message =
+          (text && text.length < 150 ? text : null) ||
+          "Cloud sync failed. Your local changes are saved.";
+      }
+    }
+    const error = new Error(message) as Error & {
+      conflict?: boolean;
+      setupRequired?: boolean;
+    };
     error.conflict = response.status === 409;
-    error.setupRequired = result.setupRequired === true;
+    error.setupRequired = result?.setupRequired === true;
     throw error;
   }
-  return result;
+  return result ?? {};
 }
 async function cloudWorkspace() {
   let warning: string | undefined;
